@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<WorldWindEarth x="100" y="100" width="1024" height="768">
+    <!-- Default configuration when started for the first time -->
+    <Main factory="org.tinyrcp.tabs.JTabsFactory">
+        <Tab factory="org.worldwindearth.earth.JEarthFactory">
+            <WorldWindLayer factory="gov.nasa.stars.JStarsWWEFactory" active="true" name="Stars"/>
+            <WorldWindLayer factory="gov.nasa.skygradient.JSkyGradientWWEFactory" active="true" name="Atmosphere"/>
+            <WorldWindLayer factory="gov.nasa.bmng.JBMNGWWEFactory" active="true" name="Blue Marble (2004)"/>
+            <WorldWindLayer factory="gov.nasa.bing.JBingWWEFactory" active="true" name="Bing aerial tile"/>
+            <!--
+            <Layer factory="gov.nasa.landsat.JLandsatWWEFactory"/>
+            <Layer factory="gov.nasa.viewcontrols.JViewControlsWWEFactory"/>
+            -->
+        </Tab>
+    </Main>
+
+</WorldWindEarth>

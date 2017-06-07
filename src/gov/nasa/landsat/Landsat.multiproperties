@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<MultiProperties xmlns="hu.skzs.multiproperties">
+    <Version>1.2</Version>
+    <Name>ML</Name>
+    <Description>Landsat</Description>
+    <Handler>Java Properties Handler</Handler>
+    <Columns>
+        <Key>
+            <Width>147</Width>
+        </Key>
+        <Column>
+            <Width>304</Width>
+            <Name>en</Name>
+            <Description/>
+            <HandlerConfiguration>./Landsat.properties|false|true|true|false</HandlerConfiguration>
+        </Column>
+        <Column>
+            <Width>325</Width>
+            <Name>fr</Name>
+            <Description/>
+            <HandlerConfiguration>./Landsat_fr.properties|false|true|true|false</HandlerConfiguration>
+        </Column>
+    </Columns>
+    <Records>
+        <Property>
+            <Name>factory_name</Name>
+            <Description/>
+            <Disabled>false</Disabled>
+            <MultiLine>true</MultiLine>
+            <DefaultValue>Landsat i-cubed</DefaultValue>
+            <Value disabled="true" final="false">Landsat i-cubed</Value>
+            <Value disabled="true" final="false">Landsat i-cubed</Value>
+        </Property>
+    </Records>
+</MultiProperties>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Layer className="org.osmbuildings.OSMBuildingsLayer">
+    <Property name="Name" value="OSM Buildings 3D"/>
+    <Property name="MaxActiveAltitude" value="8000"/>
+    <Property name="MinActiveAltitude" value="1"/>
+    <Property name="NetworkRetrievalEnabled" value="true"/>
+    <Property name="DefaultBuildingHeight" value="10"/>
+    <Property name="MaxTiles" value="30"/>
+    <Property name="DrawOutline" value="false"/>
+    <Property name="DrawProcessingBox" value="true"/>
+    <Property name="ApplyTextures" value="false"/>
+</Layer>

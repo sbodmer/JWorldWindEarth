@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<MultiProperties xmlns="hu.skzs.multiproperties">
+    <Version>1.2</Version>
+    <Name>ML</Name>
+    <Description/>
+    <Handler>Java Properties Handler</Handler>
+    <Columns>
+        <Key>
+            <Width>150</Width>
+        </Key>
+        <Column>
+            <Width>255</Width>
+            <Name>(en)</Name>
+            <Description/>
+            <HandlerConfiguration>./Placenames.properties|false|true|true|false</HandlerConfiguration>
+        </Column>
+        <Column>
+            <Width>303</Width>
+            <Name>fr</Name>
+            <Description/>
+            <HandlerConfiguration>./Placenames_fr.properties|false|true|true|false</HandlerConfiguration>
+        </Column>
+    </Columns>
+    <Records>
+        <Property>
+            <Name>factory_names</Name>
+            <Description/>
+            <Disabled>false</Disabled>
+            <MultiLine>true</MultiLine>
+            <DefaultValue>Place names</DefaultValue>
+            <Value disabled="true" final="false">Place names</Value>
+            <Value disabled="false" final="false">Nom de lieux</Value>
+        </Property>
+    </Records>
+</MultiProperties>

@@ -1,0 +1,46 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package org.worldwindearth;
+
+import gov.nasa.worldwind.layers.Layer;
+import javax.swing.JToggleButton;
+import org.tinyrcp.TinyPlugin;
+
+/**
+ * The prepare will be called with the main component which will host this plugin
+ * as last argument (JComponent)
+ * 
+ * @author sbodmer
+ */
+public interface WWEPlugin extends TinyPlugin {
+    /**
+     * The key to store the plugin instance which produced a layer
+     */
+    public static final String AVKEY_WORLDWIND_LAYER_PLUGIN = "org.worldwindearth.WWEPlugin";
+    
+    
+    
+    /**
+     * When the viewport should be fetched again if needed<p>
+     *
+     * No argument
+     */
+    public static final String DO_ACTION_VIEWPORT = "viewport";
+    
+    /**
+     * Return the ww layer
+     * 
+     * @return 
+     */
+    public Layer getLayer();
+    
+    /**
+     * Returns the layer button (null if no button)<p>
+     *
+     * @return
+     */
+    public JToggleButton getLayerButton();
+}

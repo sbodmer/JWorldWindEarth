@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<MultiProperties xmlns="hu.skzs.multiproperties">
+    <Version>1.3</Version>
+    <Name>ML</Name>
+    <Description/>
+    <Handler>Java Properties Handler</Handler>
+    <Columns>
+        <Key>
+            <Width>150</Width>
+        </Key>
+        <Column>
+            <Width>75</Width>
+            <Name>en</Name>
+            <Description/>
+            <HandlerConfiguration>./FlatEarth.properties|false|true|true|false</HandlerConfiguration>
+        </Column>
+        <Column>
+            <Width>75</Width>
+            <Name>fr</Name>
+            <Description/>
+            <HandlerConfiguration>./FlatEarth_fr.properties|false|true|true|false</HandlerConfiguration>
+        </Column>
+    </Columns>
+    <Records>
+        <Property>
+            <Name>factory_name</Name>
+            <Description/>
+            <Disabled>false</Disabled>
+            <MultiLine>true</MultiLine>
+            <DefaultValue>Earth (2D)</DefaultValue>
+            <Value disabled="true" final="false">Earth (2D)</Value>
+            <Value disabled="false" final="false">Terre (2D)</Value>
+        </Property>
+    </Records>
+</MultiProperties>

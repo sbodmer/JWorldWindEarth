@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<MultiProperties xmlns="hu.skzs.multiproperties">
+    <Version>1.2</Version>
+    <Name>ML</Name>
+    <Description/>
+    <Handler>Java Properties Handler</Handler>
+    <Columns>
+        <Key>
+            <Width>150</Width>
+        </Key>
+        <Column>
+            <Width>241</Width>
+            <Name>en</Name>
+            <Description/>
+            <HandlerConfiguration>./OSM.properties|false|true|true|false</HandlerConfiguration>
+        </Column>
+        <Column>
+            <Width>256</Width>
+            <Name>fr</Name>
+            <Description/>
+            <HandlerConfiguration>./OSM_fr.properties|false|true|true|false</HandlerConfiguration>
+        </Column>
+    </Columns>
+    <Records>
+        <Property>
+            <Name>factory_name</Name>
+            <Description/>
+            <Disabled>false</Disabled>
+            <MultiLine>true</MultiLine>
+            <DefaultValue>OSM (OpenStreetMap)</DefaultValue>
+            <Value disabled="true" final="false">OSM (OpenStreetMap)</Value>
+            <Value disabled="true" final="false">OSM (OpenStreetMap)</Value>
+        </Property>
+    </Records>
+</MultiProperties>

@@ -1,0 +1,4 @@
+Manifest-Version: 1.0
+Tiny-Main-Class: org.worldwindearth.JWorldWindEarth
+Tiny-Factory: org.worldwindearth.earth.JEarthFactory
+  org.worldwindearth.flatearth.JFlatEarthFactory

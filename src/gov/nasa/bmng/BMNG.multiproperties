@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<MultiProperties xmlns="hu.skzs.multiproperties">
+    <Version>1.2</Version>
+    <Name>ML</Name>
+    <Description>Blue marble next generation (2004)</Description>
+    <Handler>Java Properties Handler</Handler>
+    <Columns>
+        <Key>
+            <Width>75</Width>
+        </Key>
+        <Column>
+            <Width>75</Width>
+            <Name>(en)</Name>
+            <Description/>
+            <HandlerConfiguration>./BMNG.properties|false|true|true|false</HandlerConfiguration>
+        </Column>
+        <Column>
+            <Width>75</Width>
+            <Name>fr</Name>
+            <Description/>
+            <HandlerConfiguration>./BMNG_fr.properties|false|true|true|false</HandlerConfiguration>
+        </Column>
+    </Columns>
+    <Records>
+        <Property>
+            <Name>factory_name</Name>
+            <Description/>
+            <Disabled>false</Disabled>
+            <MultiLine>false</MultiLine>
+            <DefaultValue>Blue Marble (2004)</DefaultValue>
+            <Value disabled="true" final="false">Blue Marble (2004)</Value>
+            <Value disabled="true" final="false">Blue Marble (2004)</Value>
+        </Property>
+    </Records>
+</MultiProperties>

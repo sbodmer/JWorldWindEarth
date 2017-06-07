@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- You may freely edit this file. See commented blocks below for -->
+<!-- some examples of how to customize the build. -->
+<!-- (If you delete it and reopen the project it will be recreated.) -->
+<!-- By default, only the Clean and Build commands use this build script. -->
+<!-- Commands such as Run, Debug, and Test only use this build script if -->
+<!-- the Compile on Save feature is turned off for the project. -->
+<!-- You can turn off the Compile on Save (or Deploy on Save) setting -->
+<!-- in the project's Project Properties dialog box.-->
+<project name="WorldWindEarth" default="default" basedir=".">
+    <description>Builds, tests, and runs the project WorldWindEarth.</description>
+    <import file="nbproject/build-impl.xml"/>
+    <!--
+
+    There exist several targets which are by default empty and which can be 
+    used for execution of your tasks. These targets are usually executed 
+    before and after some main targets. They are: 
+
+      -pre-init:                 called before initialization of project properties
+      -post-init:                called after initialization of project properties
+      -pre-compile:              called before javac compilation
+      -post-compile:             called after javac compilation
+      -pre-compile-single:       called before javac compilation of single file
+      -post-compile-single:      called after javac compilation of single file
+      -pre-compile-test:         called before javac compilation of JUnit tests
+      -post-compile-test:        called after javac compilation of JUnit tests
+      -pre-compile-test-single:  called before javac compilation of single JUnit test
+      -post-compile-test-single: called after javac compilation of single JUunit test
+      -pre-jar:                  called before JAR building
+      -post-jar:                 called after JAR building
+      -post-clean:               called after cleaning build products
+
+    (Targets beginning with '-' are not intended to be called on their own.)
+
+    Example of inserting an obfuscator after compilation could look like this:
+
+        <target name="-post-compile">
+            <obfuscate>
+                <fileset dir="${build.classes.dir}"/>
+            </obfuscate>
+        </target>
+
+    For list of available properties check the imported 
+    nbproject/build-impl.xml file. 
+
+
+    Another way to customize the build is by overriding existing main targets.
+    The targets of interest are: 
+
+      -init-macrodef-javac:     defines macro for javac compilation
+      -init-macrodef-junit:     defines macro for junit execution
+      -init-macrodef-debug:     defines macro for class debugging
+      -init-macrodef-java:      defines macro for class execution
+      -do-jar:                  JAR building
+      run:                      execution of project 
+      -javadoc-build:           Javadoc generation
+      test-report:              JUnit report generation
+
+    An example of overriding the target for project execution could look like this:
+
+        <target name="run" depends="WorldWindEarth-impl.jar">
+            <exec dir="bin" executable="launcher.exe">
+                <arg file="${dist.jar}"/>
+            </exec>
+        </target>
+
+    Notice that the overridden target depends on the jar target and not only on 
+    the compile target as the regular run target does. Again, for a list of available 
+    properties which you can use, check the target you are overriding in the
+    nbproject/build-impl.xml file. 
+
+    -->
+    
+    <target name="-pre-compile">
+        <antcall target="update_libs"/>
+        
+    </target>
+    
+    <target name="-post-jar" description="Create all jars">
+        <antcall target="create_jars"/>
+        
+        <antcall target="copy_libs"/>
+    </target>
+    
+    <target name="create_jars">
+        <echo message="Creating stand alone jars and main libraries"/>
+        
+        <echo message="[App] WorldWindEarth"/>
+        <jar destfile="${dist.dir}/WWEarth.jar" manifest="Manifests/WWEarth.mf">
+            <fileset dir="${build.dir}/classes" includes="app/**"/>
+        </jar>
+        
+        <mkdir dir="${dist.dir}/lib/ext"/>
+        <echo message="[Desktop] WorldWindEarth main frame and panels"/>
+        <jar destfile="${dist.dir}/lib/ext/worldwindearth.jar" manifest="Manifests/worldwindearth.mf">
+            <fileset dir="${build.dir}/classes" includes="org/worldwindearth/**"/>
+        </jar>
+        
+        <mkdir dir="${dist.dir}/lib/ext/layers"/>
+        
+        <!-- Layers -->
+        <echo message="[Layer] Blue Marble NG"/>
+        <jar destfile="${dist.dir}/lib/ext/layers/BMNG.jar" manifest="Manifests/layers/BMNG.mf">
+            <fileset dir="${build.dir}/classes" includes="gov/nasa/bmng/**"/>
+        </jar>
+        <echo message="[Layer] Stars"/>
+        <jar destfile="${dist.dir}/lib/ext/layers/Stars.jar" manifest="Manifests/layers/Stars.mf">
+            <fileset dir="${build.dir}/classes" includes="gov/nasa/stars/**"/>
+        </jar>
+        <echo message="[Layer] Landsat"/>
+        <jar destfile="${dist.dir}/lib/ext/layers/Landsat.jar" manifest="Manifests/layers/Landsat.mf">
+            <fileset dir="${build.dir}/classes" includes="gov/nasa/landsat/**"/>
+        </jar>
+        <echo message="[Layer] Sky gradient"/>
+        <jar destfile="${dist.dir}/lib/ext/layers/SkyGradient.jar" manifest="Manifests/layers/SkyGradient.mf">
+            <fileset dir="${build.dir}/classes" includes="gov/nasa/skygradient/**"/>
+        </jar>
+        <echo message="[Layer] Bing (NASA)"/>
+        <jar destfile="${dist.dir}/lib/ext/layers/Bing.jar" manifest="Manifests/layers/Bing.mf">
+            <fileset dir="${build.dir}/classes" includes="gov/nasa/bing/**"/>
+        </jar>
+        <echo message="[Layer] Openstreetmap (NASA)"/>
+        <jar destfile="${dist.dir}/lib/ext/layers/Openstreetmap.jar" manifest="Manifests/layers/Openstreetmap.mf">
+            <fileset dir="${build.dir}/classes" includes="gov/nasa/openstreetmap/**"/>
+        </jar>
+        <echo message="[Layer] Countries"/>
+        <jar destfile="${dist.dir}/lib/ext/layers/Countries.jar" manifest="Manifests/layers/Countries.mf">
+            <fileset dir="${build.dir}/classes" includes="gov/nasa/countries/**"/>
+        </jar>
+        <echo message="[Layer] Placenames"/>
+        <jar destfile="${dist.dir}/lib/ext/layers/Placenames.jar" manifest="Manifests/layers/Placenames.mf">
+            <fileset dir="${build.dir}/classes" includes="gov/nasa/placenames/**"/>
+        </jar>
+        <echo message="[Layer] Openstreetmap (Mapnik)"/>
+        <jar destfile="${dist.dir}/lib/ext/layers/OSMMapnik.jar" manifest="Manifests/layers/OSMMapnik.mf">
+            <fileset dir="${build.dir}/classes" includes="gov/nasa/osmmapnik/**"/>
+        </jar>
+        <echo message="[Layer] Microsoft Virtualearth"/>
+        <jar destfile="${dist.dir}/lib/ext/layers/Virtualearth.jar" manifest="Manifests/layers/Virtualearth.mf">
+            <fileset dir="${build.dir}/classes" includes="org/microsoft/virtualearth/**"/>
+        </jar>
+        <echo message="[Layer] LatLonGraticule"/>
+        <jar destfile="${dist.dir}/lib/ext/layers/LatLonGraticule.jar" manifest="Manifests/layers/LatLonGraticule.mf">
+            <fileset dir="${build.dir}/classes" includes="gov/nasa/latlongraticule/**"/>
+        </jar>
+        <echo message="[Layer] Scale"/>
+        <jar destfile="${dist.dir}/lib/ext/layers/Scale.jar" manifest="Manifests/layers/Scale.mf">
+            <fileset dir="${build.dir}/classes" includes="gov/nasa/scale/**"/>
+        </jar>
+        <echo message="[Layer] Worldmap"/>
+        <jar destfile="${dist.dir}/lib/ext/layers/Worldmap.jar" manifest="Manifests/layers/Worldmap.mf">
+            <fileset dir="${build.dir}/classes" includes="gov/nasa/worldmap/**"/>
+        </jar>
+        <echo message="[Layer] Compass"/>
+        <jar destfile="${dist.dir}/lib/ext/layers/Compass.jar" manifest="Manifests/layers/Compass.mf">
+            <fileset dir="${build.dir}/classes" includes="gov/nasa/compass/**"/>
+        </jar>
+        <echo message="[Layer] Viewcontrols"/>
+        <jar destfile="${dist.dir}/lib/ext/layers/ViewControls.jar" manifest="Manifests/layers/ViewControls.mf">
+            <fileset dir="${build.dir}/classes" includes="gov/nasa/viewcontrols/**"/>
+        </jar>
+        <echo message="[Layer] OSM"/>
+        <jar destfile="${dist.dir}/lib/ext/layers/OSM.jar" manifest="Manifests/layers/OSM.mf">
+            <fileset dir="${build.dir}/classes" includes="org/osm/**"/>
+        </jar>
+        
+        <echo message="[Layer] OSMBuildings"/>
+        <jar destfile="${dist.dir}/lib/ext/layers/OSMBuildings.jar" manifest="Manifests/layers/OSMBuildings.mf">
+            <fileset dir="${build.dir}/classes" includes="org/osmbuildings/**"/>
+        </jar>
+    </target>
+    
+    <target name="copy_libs">
+        <echo message="Copy libs to dist"/>
+        <copy todir="${dist.dir}/lib">
+            <fileset dir="lib/worldwind"/>
+            <fileset file="lib/TinyRCP.jar"/>
+        </copy>
+        
+    </target>
+    
+    <target name="update_libs">
+        <echo message="Update libs to dist"/>
+        <copy todir="lib">
+            <fileset file="../TinyRCP/dist/TinyRCP.jar"/>
+        </copy>
+        
+        
+    </target>
+</project>

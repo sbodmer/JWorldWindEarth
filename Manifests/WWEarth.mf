@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Main-Class: app.WorldWindEarth
+Class-Path: lib/TinyRCP.jar
+  lib/worldwind.jar
+  lib/worldwindx.jar
+  lib/jogl-all.jar
+  lib/gluegen-rt.jar
+  lib/gdal.jar
+

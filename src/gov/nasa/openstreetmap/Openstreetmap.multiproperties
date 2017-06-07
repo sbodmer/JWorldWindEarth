@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<MultiProperties xmlns="hu.skzs.multiproperties">
+    <Version>1.2</Version>
+    <Name>ML</Name>
+    <Description>Openstreetmap</Description>
+    <Handler>Java Properties Handler</Handler>
+    <Columns>
+        <Key>
+            <Width>150</Width>
+        </Key>
+        <Column>
+            <Width>244</Width>
+            <Name>(en)</Name>
+            <Description/>
+            <HandlerConfiguration>./Openstreetmap.properties|false|true|true|false</HandlerConfiguration>
+        </Column>
+        <Column>
+            <Width>75</Width>
+            <Name>fr</Name>
+            <Description/>
+            <HandlerConfiguration>./Openstreetmap_fr.properties|false|true|true|false</HandlerConfiguration>
+        </Column>
+    </Columns>
+    <Records>
+        <Property>
+            <Name>factory_name</Name>
+            <Description/>
+            <Disabled>false</Disabled>
+            <MultiLine>true</MultiLine>
+            <DefaultValue>Open street map (Nasa)</DefaultValue>
+            <Value disabled="true" final="false">Open street map (Nasa)</Value>
+            <Value disabled="true" final="false">Open street map (Nasa)</Value>
+        </Property>
+    </Records>
+</MultiProperties>
