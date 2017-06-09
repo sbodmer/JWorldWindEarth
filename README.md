@@ -32,7 +32,7 @@ The project is a Netbeans project, for manual compiling, use the ant build.xml
 
 To run the application cd in the newly created dist dir
 
-    cd {cwd}/dist
+    cd dist
     java -jar WWEarth.jar
 
 ## Features
