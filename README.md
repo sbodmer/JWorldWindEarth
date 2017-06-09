@@ -26,12 +26,11 @@ Work in progress, alpha quality for the moment...
 
 ## Building
 The project is a Netbeans project, for manual compiling, use the ant build.xml
-file whcic will create a a {cwd}/dist folder with the executable
 
     cd {cwd}
     ant jar
 
-To run the application cd in the dist dir
+To run the application cd in the newly created dist dir
 
     cd {cwd}/dist
     java -jar WWEarth.jar
