@@ -25,14 +25,15 @@ The layers are recursively loaded from file system in the default folders
 Work in progress, alpha quality for the moment...
 
 ## Building
-The project is a Netbean project, for manual compiling, use the ant build.xml
-file
+The project is a Netbeans project, for manual compiling, use the ant build.xml
+file whcic will create a a {cwd}/dist folder with the executable
 
+    cd {cwd}
     ant jar
 
 To run the application cd in the dist dir
 
-    cd dist
+    cd {cwd}/dist
     java -jar WWEarth.jar
 
 ## Features
