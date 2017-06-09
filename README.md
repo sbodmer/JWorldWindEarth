@@ -8,17 +8,16 @@ Each contributor could add a specific layer to the project (or add a reference
 to the layer code) to increase the number of exposed layers.
 
 ## Architecture
-The project is base on a Java Swing framework called TinyRCP
-[Github TinyRCP project](https://github.com/lsimedia/TinyRCP)
+The project is base on a Java Swing framework called [TinyRCP](https://github.com/lsimedia/TinyRCP)
 
 The system is complelty modular and plugin based
 
-Each visual component is stored in a jar file with a specific manifest entry
+Each world wind layer is stored in a jar file with a specific manifest entry
     
-    TinyRCP-Factory: {full qualified class name of the factory
+    Tiny-Factory: {full qualified class name of the factory
 
 
-The components are recursively loaded from file system in the default folders
+The layers are recursively loaded from file system in the default folders
 
     {cwd}/lib/ext
 
@@ -34,7 +33,7 @@ file
 To run the application cd in the dist dir
 
     cd dist
-    java -jar WorldWindEarth.jar
+    java -jar WWEarth.jar
 
 ## Features
 TODO
