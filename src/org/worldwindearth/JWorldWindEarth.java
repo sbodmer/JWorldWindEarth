@@ -229,9 +229,7 @@ public class JWorldWindEarth extends javax.swing.JFrame implements ActionListene
     protected void save(File save) {
         try {
             //--- Create main config
-            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder builder = factory.newDocumentBuilder();
-            Document document = builder.newDocument();
+            Document document = app.getDocumentBuilder().newDocument();
             Element root = document.createElement("WorldWindEarth");
             root.setAttribute("x", "" + getX());
             root.setAttribute("y", "" + getY());
@@ -276,13 +274,8 @@ public class JWorldWindEarth extends javax.swing.JFrame implements ActionListene
         Element root = null;
         try {
             FileInputStream in = new FileInputStream(load);
-
-            //--- Parse config file
-            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder builder = factory.newDocumentBuilder();
-            InputSource source = new InputSource(in);
-            source.setEncoding("UTF-8");
-            Document tmp = builder.parse(source);
+            Document tmp = app.getDocumentBuilder().parse(in);
+                    
             root = tmp.getDocumentElement();
             in.close();
 

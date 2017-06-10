@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Default configuration when started for the first time -->
+<Panel>
+    <WorldWindLayer factory="gov.nasa.compass.JCompassWWEFactory" active="true" name="Compass"/>
+    <WorldWindLayer factory="gov.nasa.scale.JScaleWWEFactory" active="true" name="Scale"/>
+    <WorldWindLayer factory="gov.nasa.worldmap.JWorldmapWWEFactory" active="true" name="Worldmap"/>
+    <WorldWindLayer factory="gov.nasa.bmng.JBMNGWWEFactory" active="true" name="Blue Marble (2004)"/>
+    <WorldWindLayer factory="gov.nasa.bing.JBingWWEFactory" active="true" name="Bing aerial tile"/>
+    <!--
+    <Layer factory="gov.nasa.landsat.JLandsatWWEFactory"/>
+    <Layer factory="gov.nasa.viewcontrols.JViewControlsWWEFactory"/>
+    -->
+</Panel>
+

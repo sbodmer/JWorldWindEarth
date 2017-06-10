@@ -8,42 +8,18 @@ package org.worldwindearth.flatearth;
 import gov.nasa.worldwind.Model;
 import gov.nasa.worldwind.WorldWind;
 import gov.nasa.worldwind.avlist.AVKey;
-import gov.nasa.worldwind.awt.WorldWindowGLJPanel;
-import gov.nasa.worldwind.event.InputHandler;
-import gov.nasa.worldwind.geom.Position;
-import gov.nasa.worldwind.geom.Vec4;
 import gov.nasa.worldwind.globes.EarthFlat;
-import gov.nasa.worldwind.globes.FlatGlobe;
-import gov.nasa.worldwind.globes.GeographicProjection;
 import gov.nasa.worldwind.globes.projections.ProjectionMercator;
-import gov.nasa.worldwind.layers.Layer;
-import gov.nasa.worldwind.layers.LayerList;
 import gov.nasa.worldwind.terrain.ZeroElevationModel;
 import java.awt.*;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ComponentEvent;
-import java.awt.event.ComponentListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseWheelEvent;
-import java.awt.event.MouseWheelListener;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
+import java.io.InputStream;
 import java.util.*;
 import javax.swing.*;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 import org.tinyrcp.App;
 import org.tinyrcp.TinyFactory;
 import org.w3c.dom.*;
-import org.worldwindearth.WWEPlugin;
 import org.tinyrcp.TinyPlugin;
-import org.worldwindearth.JWWEPluginCellRenderer;
-import org.worldwindearth.WWEFactory;
-import org.worldwindearth.WorldWindLayersTableModel;
 import org.worldwindearth.components.JPlanet;
 
 /**
@@ -126,6 +102,17 @@ public class JFlatEarthPlugin extends JPanel implements TinyPlugin {
     
     @Override
     public void configure(Element config) {
+        if (config == null) {
+            try {
+                //--- Load default config
+                InputStream in = app.getLoader().getResourceAsStream("org/worldwindearth/flatearth/Resources/Configs/FlatEarth.xml");
+                config = app.getDocumentBuilder().parse(in).getDocumentElement();
+                
+            } catch (Exception ex) {
+
+            }
+
+        }
         jplanet.configure(config);
         jplanet.revalidate();
         jplanet.repaint();

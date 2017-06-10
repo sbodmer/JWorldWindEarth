@@ -180,7 +180,7 @@
     </target>
     
     <target name="update_libs">
-        <echo message="Update libs to dist"/>
+        <echo message="Update libs from TinyRCP project"/>
         <copy todir="lib">
             <fileset file="../TinyRCP/dist/TinyRCP.jar"/>
         </copy>
