@@ -79,8 +79,8 @@ public class JWorldWindEarth extends javax.swing.JFrame implements ActionListene
                 // close();
             }
         });
-        */
-        
+         */
+
         //--- Check the configuration file in user home dir
         file = new File(System.getProperty("user.home"), ".WorldWindEarth" + File.separator + "WorldWindEarth.xml");
         if (!file.exists()) {
@@ -275,7 +275,7 @@ public class JWorldWindEarth extends javax.swing.JFrame implements ActionListene
         try {
             FileInputStream in = new FileInputStream(load);
             Document tmp = app.getDocumentBuilder().parse(in);
-                    
+
             root = tmp.getDocumentElement();
             in.close();
 
@@ -376,14 +376,30 @@ public class JWorldWindEarth extends javax.swing.JFrame implements ActionListene
 
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
+                //--------------------------------------------------------------
+                //--- Find the manual factories to create
+                //--------------------------------------------------------------
+                ArrayList<String> mfac = new ArrayList<>();
+                for (int i = 0; i < args.length; i++) {
+                    if (args[i].equals("-factory")) {
+                        mfac.add(args[i + 1]);
+                        i++;
+                    }
+                }
+
                 JarClassLoader loader = null;
                 if (getClass().getClassLoader() instanceof JarClassLoader) {
                     loader = (JarClassLoader) getClass().getClassLoader();
 
                 } else {
                     loader = new JarClassLoader();
-                    loader.addJar("lib/ext");
-                    loader.addJar(System.getProperty("user.home") + File.separator + ".WorldWindEarth");
+                    //--- If not in manual factory creation context, set default path
+                    if (mfac.isEmpty()) {
+                        loader.addJar("lib/ext");
+                        loader.addJar(System.getProperty("user.home") + File.separator + ".WorldWindEarth");
+                    }
+                    
+
                 }
 
                 //--- Set the default font
@@ -414,15 +430,15 @@ public class JWorldWindEarth extends javax.swing.JFrame implements ActionListene
                     fout.close();
 
                     System.setProperty("gov.nasa.worldwind.app.config.document", config.getPath());
-                    
+
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
 
                 //--- Prepare main resource singleton
-                App app = new App(loader, "WorldWindEarth");
+                App app = new App(loader, "WorldWindEarth", mfac);
                 app.initialize();
-                
+
                 //--- Main frame
                 JWorldWindEarth jframe = new JWorldWindEarth(app);
                 jframe.open();
