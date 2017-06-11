@@ -12,11 +12,13 @@ import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.InputStream;
+import java.net.URL;
 import javax.swing.JComponent;
 import javax.swing.JToggleButton;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import org.tinyrcp.App;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.worldwindearth.WWEFactory;
 import org.worldwindearth.WWEFactory;
@@ -27,22 +29,22 @@ import org.worldwindearth.WWEPlugin;
  * @author sbodmer
  */
 public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlugin, ChangeListener, ActionListener {
+
     WWEFactory factory = null;
     App app = null;
     WorldWindow ww = null;
-    
+
     OSMBuildingsLayer layer = null;
-    
+
     /**
      * Creates new form OSMBuildingsWWELayerPlugin
      */
     public JOSMBuildingsWWEPlugin(WWEFactory factory, WorldWindow ww) {
         this.factory = factory;
         this.ww = ww;
-        
+
         initComponents();
-       
-        
+
     }
 
     //**************************************************************************
@@ -57,12 +59,12 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
     public String getPluginName() {
         return layer.getName();
     }
-    
+
     @Override
     public void setPluginName(String name) {
         layer.setName(name);
     }
-    
+
     //**************************************************************************
     //***WWELayerPlugin
     //**************************************************************************
@@ -97,27 +99,28 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
     @Override
     public void setup(App app, Object argument) {
         this.app = app;
-     
+
         BasicLayerFactory bl = new BasicLayerFactory();
-        
+
         InputStream in = getClass().getResourceAsStream("/org/osmbuildings/Resources/Config/OSMBuildings.xml");
+        // InputStream in = app.getLoader().getResourceAsStream("org/osmbuildings/Resources/Config/OSMBuildings.xml");
         layer = (OSMBuildingsLayer) bl.createFromConfigSource(in, null);
         layer.setName("OSMBuildings");
         layer.setValue(AVKEY_WORLDWIND_LAYER_PLUGIN, this);
-        
+
         SP_DefaultHeight.addChangeListener(this);
         CB_DrawProcessingBox.addActionListener(this);
         SP_MaxTiles.addChangeListener(this);
         SP_Opacity.addChangeListener(this);
         CB_DrawOutline.addActionListener(this);
         CB_ApplyTextures.addActionListener(this);
-        
+
     }
 
     @Override
     public void configure(Element config) {
         if (config == null) return;
-        
+
         try {
             SP_DefaultHeight.setValue(Integer.parseInt(config.getAttribute("defaultHeight")));
             layer.setDefaultBuildingHeight((int) SP_DefaultHeight.getValue());
@@ -126,16 +129,16 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
             SP_MaxTiles.setValue(Integer.parseInt(config.getAttribute("maxTiles")));
             layer.setMaxTiles((int) SP_MaxTiles.getValue());
             SP_Opacity.setValue(Integer.parseInt(config.getAttribute("opacity")));
-            layer.setOpacity(SP_Opacity.getValue()/100d);
+            layer.setOpacity(SP_Opacity.getValue() / 100d);
             CB_DrawOutline.setSelected(config.getAttribute("drawOutline").equals("true"));
             CB_ApplyTextures.setSelected(config.getAttribute("applyTextures").equals("true"));
-            
+
         } catch (NumberFormatException ex) {
             //---
         }
-        
+
     }
-    
+
     @Override
     public void cleanup() {
         layer.dispose();
@@ -144,13 +147,13 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
     @Override
     public void saveConfig(Element config) {
         if (config == null) return;
-        
+
         config.setAttribute("defaultHeight", SP_DefaultHeight.getValue().toString());
-        config.setAttribute("drawProcessingBox", ""+CB_DrawProcessingBox.isSelected());
+        config.setAttribute("drawProcessingBox", "" + CB_DrawProcessingBox.isSelected());
         config.setAttribute("maxTiles", SP_MaxTiles.getValue().toString());
-        config.setAttribute("opacity", ""+SP_Opacity.getValue());
-        config.setAttribute("drawOutline", ""+CB_DrawOutline.isSelected());
-        config.setAttribute("applyTextures", ""+CB_ApplyTextures.isSelected());
+        config.setAttribute("opacity", "" + SP_Opacity.getValue());
+        config.setAttribute("drawOutline", "" + CB_DrawOutline.isSelected());
+        config.setAttribute("applyTextures", "" + CB_ApplyTextures.isSelected());
     }
 
     @Override
@@ -162,7 +165,7 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
     public void setProperty(String name, Object value) {
         //---
     }
-    
+
     //**************************************************************************
     //*** ChangeListener
     //**************************************************************************
@@ -171,32 +174,32 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
         if (e.getSource() == SP_DefaultHeight) {
             layer.setDefaultBuildingHeight((int) SP_DefaultHeight.getValue());
             layer.clearTiles();
-            
+
         } else if (e.getSource() == SP_MaxTiles) {
             layer.setMaxTiles((int) SP_MaxTiles.getValue());
-            
-        }else if (e.getSource() == SP_Opacity) {
-            layer.setOpacity(SP_Opacity.getValue()/100d);
-            
+
+        } else if (e.getSource() == SP_Opacity) {
+            layer.setOpacity(SP_Opacity.getValue() / 100d);
+
         }
         ww.redraw();
     }
-    
+
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getActionCommand().equals("drawProcessingBox")) {
             layer.setDrawProcessingBox(CB_DrawProcessingBox.isSelected());
-            
+
         } else if (e.getActionCommand().equals("drawOutline")) {
             layer.setDrawOutline(CB_DrawOutline.isSelected());
-            
+
         } else if (e.getActionCommand().equals("applyTextures")) {
             layer.setApplyTextures(CB_ApplyTextures.isSelected());
-            
+
         }
         ww.redraw();
     }
-    
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -351,12 +354,6 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
         add(jPanel2, java.awt.BorderLayout.PAGE_START);
     }// </editor-fold>//GEN-END:initComponents
 
-    
-
-    
-
-    
-
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     protected javax.swing.JToggleButton BT_Layer;
@@ -375,7 +372,4 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
     protected javax.swing.JPanel jPanel2;
     // End of variables declaration//GEN-END:variables
 
-    
-
-    
 }

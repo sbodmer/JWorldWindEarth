@@ -7,6 +7,8 @@ Nasa WorldWind SDK to expose all the layers available.
 Each contributor could add a specific layer to the project (or add a reference
 to the layer code) to increase the number of exposed layers.
 
+A Java Web Start app is available to start the application without installation
+
 ## Architecture
 The project is base on a Java Swing framework called [TinyRCP](https://github.com/lsimedia/TinyRCP)
 

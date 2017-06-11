@@ -173,10 +173,16 @@
     <target name="copy_libs">
         <echo message="Copy libs to dist"/>
         <copy todir="${dist.dir}/lib">
-            <fileset dir="lib/worldwind"/>
             <fileset file="lib/TinyRCP.jar"/>
+            <fileset file="lib/worldwind/gdal.jar"/>
+            <fileset file="lib/worldwind/gluegen-*.jar"/>
+            <fileset file="lib/worldwind/jogl-*.jar"/>
         </copy>
-        
+        <mkdir dir="${dist.dir}/lib/ext"/>
+        <copy todir="${dist.dir}/lib/ext">
+            <fileset file="lib/worldwind/worldwind.jar"/>
+            <fileset file="lib/worldwind/worldwindx.jar"/>
+        </copy>
     </target>
     
     <target name="update_libs">
