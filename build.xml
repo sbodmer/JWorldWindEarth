@@ -185,12 +185,18 @@
         </copy>
     </target>
     
+    <!-- If the TinyRCP project is available use it to get the latest version -->
     <target name="update_libs">
         <echo message="Update libs from TinyRCP project"/>
-        <copy todir="lib">
+        <copy failonerror="false" todir="lib">
             <fileset file="../TinyRCP/dist/TinyRCP.jar"/>
         </copy>
-        
-        
+       
     </target>
+    
+    <target name="sign_jws" description="Sign Java Web Start jar" depends="-init-project">
+        <signjar tsaurl="http://timestamp.comodoca.com/rfc3161" jar="dist/WWEarthJWS.jar" alias="${keystore.alias}" storepass="${keystore.password}" keystore="${keystore}" keypass="${keystore.keypass}" verbose="true"/>
+        <signjar tsaurl="http://timestamp.comodoca.com/rfc3161" jar="dist/lib/TinyRCP.jar" alias="${keystore.alias}" storepass="${keystore.password}" keystore="${keystore}" keypass="${keystore.keypass}" verbose="true"/>
+    </target>
+    
 </project>

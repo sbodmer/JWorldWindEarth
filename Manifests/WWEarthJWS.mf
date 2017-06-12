@@ -1,5 +1,8 @@
 Manifest-Version: 1.0
 Main-Class: app.WorldWindEarthJWS
+Permissions: all-permissions
+Application-Name: WWEarthJWS
+Codebase: *
 Class-Path: lib/TinyRCP.jar
   lib/ext/worldwind.jar
   lib/ext/worldwindx.jar

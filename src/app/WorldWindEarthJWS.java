@@ -24,6 +24,16 @@ public class WorldWindEarthJWS {
         "-factory", "gov.nasa.compass.JCompassWWEFactory",
         "-factory", "gov.nasa.bmng.JBMNGWWEFactory",
         "-factory", "gov.nasa.stars.JStarsWWEFactory",
+        "-factory", "gov.nasa.scale.JScaleWWEFactory",
+        "-factory", "gov.nasa.worldmap.JWorldmapWWEFactory",
+        "-factory", "gov.nasa.placenames.JPlacenamesWWEFactory",
+        "-factory", "gov.nasa.bing.JBingWWEFactory",
+        "-factory", "gov.nasa.latlongraticule.JLatLonGraticuleWWEFactory",
+        "-factory", "gov.nasa.osmmapnik.JOSMMapnikWWEFactory",
+        "-factory", "gov.nasa.openstreetmap.JOpenstreetmapWWEFactory",
+        "-factory", "gov.nasa.countries.JCountriesWWEFactory",
+        "-factory", "gov.nasa.landsat.JLandsatWWEFactory",
+        "-factory", "org.osmbuildings.JOSMBuildingsWWEFactory",
         "-main", "org.worldwindearth.JWorldWindEarth"
     };
 

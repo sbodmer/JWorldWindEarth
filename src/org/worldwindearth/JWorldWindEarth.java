@@ -392,7 +392,7 @@ public class JWorldWindEarth extends javax.swing.JFrame implements ActionListene
                     loader = (JarClassLoader) getClass().getClassLoader();
 
                 } else {
-                    loader = new JarClassLoader();
+                    loader = new JarClassLoader(getClass().getClassLoader());
                     //--- If not in manual factory creation context, set default path
                     if (mfac.isEmpty()) {
                         loader.addJar("lib/ext");
@@ -435,6 +435,7 @@ public class JWorldWindEarth extends javax.swing.JFrame implements ActionListene
                     ex.printStackTrace();
                 }
 
+                
                 //--- Prepare main resource singleton
                 App app = new App(loader, "WorldWindEarth", mfac);
                 app.initialize();

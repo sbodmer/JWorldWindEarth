@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<jnlp spec="1.0+" codebase="https://www.knop-tech.com/tools" href="WWEarthJWS.jnlp">
+    <information>
+        <title>WorldWindEarth</title>
+        <vendor>LSI Media Sarl</vendor>
+        <homepage href="https://github.com/lsimedia/WorldWindEarth"/>
+        <description>Nasa WorldWind SDK Example application</description>
+        <description kind="short">Nasa WorldWind SDK Example application</description>
+        <offline-allowed/>
+        <icon href="resources/icons/64x64/WorldWindEarth.png"/>
+        <icon href="resources/icons/64x64/WorldWindEarth.png" kind="shortcut"/>
+        <shortcut online="true">
+            <desktop/>
+        </shortcut>
+    </information>
+
+    <security>
+        <all-permissions/>
+    </security>
+
+    <resources>
+        <java version="1.8+" max-heap-size="1024m"/>
+        <jar href="archives/lib/TinyRCP.jar"/>
+        <jar href="archives/WWEarthJWS.jar" main="true"/>
+        <extension name="worldwind" href="https://worldwind.arc.nasa.gov/java/v2.1.0/webstart/worldwind.jnlp"/>
+        <extension name="worldwindx" href="https://worldwind.arc.nasa.gov/java/v2.1.0/webstart/worldwindx.jnlp"/>
+        <extension name="gdal" href="https://worldwind.arc.nasa.gov/java/v2.1.0/webstart/gdal.jnlp"/>
+    </resources>
+
+    <application-desc main-class="app.WorldWindEarthJWS">
+        <!-- <argument>-image</argument> -->
+    </application-desc>
+
+</jnlp>
