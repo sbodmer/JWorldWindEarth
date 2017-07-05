@@ -26,6 +26,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import org.tinyrcp.App;
+import org.tinyrcp.JPluginsFrame;
 import org.tinyrcp.JarClassLoader;
 import org.tinyrcp.TinyFactory;
 import org.tinyrcp.TinyPlugin;
@@ -51,6 +52,8 @@ public class JWorldWindEarth extends javax.swing.JFrame implements ActionListene
 
     TinyPlugin main = null;
 
+    JPluginsFrame jplugins = null;
+    
     /**
      * Creates new form JWorldWindEarth
      */
@@ -66,6 +69,11 @@ public class JWorldWindEarth extends javax.swing.JFrame implements ActionListene
 
         MN_Exit.addActionListener(this);
 
+        MN_Plugins.addActionListener(this);
+        
+        jplugins = new JPluginsFrame();
+        jplugins.initialize(app);
+        
     }
 
     //**************************************************************************
@@ -141,6 +149,10 @@ public class JWorldWindEarth extends javax.swing.JFrame implements ActionListene
                 save(file);
             }
 
+        } else if (e.getActionCommand().equals("plugins")) {
+            jplugins.setLocationRelativeTo(this);
+            jplugins.setVisible(true);
+            
         } else if (e.getActionCommand().equals("exit")) {
             close();
 
@@ -164,7 +176,9 @@ public class JWorldWindEarth extends javax.swing.JFrame implements ActionListene
         MN_SaveAs = new javax.swing.JMenuItem();
         jSeparator1 = new javax.swing.JPopupMenu.Separator();
         MN_Exit = new javax.swing.JMenuItem();
-        jMenu2 = new javax.swing.JMenu();
+        MN_Tools = new javax.swing.JMenu();
+        MN_Plugins = new javax.swing.JMenuItem();
+        MN_Help = new javax.swing.JMenu();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         setTitle("WorlWindEarth");
@@ -199,8 +213,16 @@ public class JWorldWindEarth extends javax.swing.JFrame implements ActionListene
 
         MB_Topbar.add(MN_File);
 
-        jMenu2.setText("About");
-        MB_Topbar.add(jMenu2);
+        MN_Tools.setText("Tools");
+
+        MN_Plugins.setText("Plugins");
+        MN_Plugins.setActionCommand("plugins");
+        MN_Tools.add(MN_Plugins);
+
+        MB_Topbar.add(MN_Tools);
+
+        MN_Help.setText("About");
+        MB_Topbar.add(MN_Help);
 
         setJMenuBar(MB_Topbar);
 
@@ -218,11 +240,13 @@ public class JWorldWindEarth extends javax.swing.JFrame implements ActionListene
     protected javax.swing.JMenuBar MB_Topbar;
     protected javax.swing.JMenuItem MN_Exit;
     protected javax.swing.JMenu MN_File;
+    protected javax.swing.JMenu MN_Help;
     protected javax.swing.JMenuItem MN_Load;
     protected javax.swing.JMenuItem MN_New;
+    protected javax.swing.JMenuItem MN_Plugins;
     protected javax.swing.JMenuItem MN_Save;
     protected javax.swing.JMenuItem MN_SaveAs;
-    protected javax.swing.JMenu jMenu2;
+    protected javax.swing.JMenu MN_Tools;
     protected javax.swing.JPopupMenu.Separator jSeparator1;
     // End of variables declaration//GEN-END:variables
 

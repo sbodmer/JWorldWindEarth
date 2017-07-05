@@ -5,6 +5,7 @@
  */
 package app;
 
+import java.io.File;
 import java.util.ArrayList;
 import org.tinyrcp.AppLauncher;
 import org.tinyrcp.JAppLauncher;
@@ -13,10 +14,18 @@ import org.tinyrcp.JAppLauncher;
  * The Java web start version which will not load dynamically the plugins, but
  * will have a fixed list of factories to create<p>
  *
+ * Additional used libraries are available at
+ * <PRE>
+ * {user.home}/.WorldWindEarth/plugins
+ * {user.home}/.WorldWindEarth/lib
+ * </PRE>
  * @author sbodmer
  */
 public class WorldWindEarthJWS {
 
+    /**
+     * Hard coded list if available layers
+     */
     static final String ADITIONAL_ARGUMENTS[] = {
         "-factory", "org.worldwindearth.earth.JEarthFactory",
         "-factory", "org.worldwindearth.flatearth.JFlatEarthFactory",
@@ -75,7 +84,18 @@ public class WorldWindEarthJWS {
                 for (int i = 0; i < args.length; i++) targs[i] = args[i];
                 for (int i = 0; i < ADITIONAL_ARGUMENTS.length; i++) targs[args.length+i] = ADITIONAL_ARGUMENTS[i];
                 
-                AppLauncher.boot(japp, new String[0], targs, "WorldWindEarth");
+                //--- Additional plugins
+                
+                File plugins = new File(System.getProperty("user.home")+File.separatorChar+".WorldWindEarth"+File.separatorChar+"plugins");
+                plugins.mkdirs();
+                
+                //--- Additional libs
+                File lib = new File(System.getProperty("user.home")+File.separatorChar+".WorldWindEarth"+File.separatorChar+"lib");
+                lib.mkdirs();
+                
+                String libs[] = { plugins.getPath(), lib.getPath() };
+            
+                AppLauncher.boot(japp, libs, targs, "WorldWindEarth");
             }
         });
 

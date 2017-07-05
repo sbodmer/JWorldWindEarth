@@ -43,7 +43,20 @@
             </MenuItem>
           </SubComponents>
         </Menu>
-        <Menu class="javax.swing.JMenu" name="jMenu2">
+        <Menu class="javax.swing.JMenu" name="MN_Tools">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Tools"/>
+          </Properties>
+          <SubComponents>
+            <MenuItem class="javax.swing.JMenuItem" name="MN_Plugins">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Plugins"/>
+                <Property name="actionCommand" type="java.lang.String" value="plugins"/>
+              </Properties>
+            </MenuItem>
+          </SubComponents>
+        </Menu>
+        <Menu class="javax.swing.JMenu" name="MN_Help">
           <Properties>
             <Property name="text" type="java.lang.String" value="About"/>
           </Properties>
