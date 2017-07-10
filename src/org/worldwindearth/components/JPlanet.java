@@ -165,11 +165,11 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         DP_Main.addComponentListener(this);
         DP_Main.addMouseListener(this);
 
-        PU_Main.add(app.createFactoryMenus(app.getString("word_panels", "App"), TinyFactory.PLUGIN_CATEGORY_PANEL, TinyFactory.PLUGIN_FAMILY_PANEL, this),0);
-        PU_Main.add(app.createFactoryMenus(app.getString("word_containers", "App"), TinyFactory.PLUGIN_CATEGORY_PANEL, TinyFactory.PLUGIN_FAMILY_CONTAINER, this),0);
+        PU_Main.add(app.createFactoryMenus(app.getString("word_panels", "App"), TinyFactory.PLUGIN_CATEGORY_PANEL, TinyFactory.PLUGIN_FAMILY_PANEL, this), 0);
+        PU_Main.add(app.createFactoryMenus(app.getString("word_containers", "App"), TinyFactory.PLUGIN_CATEGORY_PANEL, TinyFactory.PLUGIN_FAMILY_CONTAINER, this), 0);
 
         MN_HideStatusBar.addActionListener(this);
-        
+
         InputHandler ih = wwd.getInputHandler();
         ih.addKeyListener(this);
         ih.addMouseListener(this);
@@ -343,7 +343,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
             //--- If plugin, cleanup
             TinyPlugin p = (TinyPlugin) jcomp.getClientProperty("plugin");
             if (p != null) p.cleanup();
-            
+
             fr[0].setVisible(false);
             fr[0].dispose();
         }
@@ -477,7 +477,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
 
         } else if (e.getActionCommand().equals("hideStatusBar")) {
             PN_Status.setVisible(!MN_HideStatusBar.isSelected());
-            
+
         } else if (e.getActionCommand().equals("renameLayer")) {
             int index = TB_Layers.getSelectedRow();
             if (index != -1) {
@@ -771,21 +771,21 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
     @Override
     public void mouseClicked(MouseEvent e) {
         //---
+
     }
 
     @Override
     public void mousePressed(MouseEvent e) {
-        if (e.isPopupTrigger()) {
+        if (e.isPopupTrigger() && e.getClickCount() == 2) {
             PU_Main.show(DP_Main, e.getX(), e.getY());
         }
-
     }
 
     @Override
     public void mouseReleased(MouseEvent e) {
         vtimer.restart();
 
-        if (e.isPopupTrigger()) {
+        if (e.isPopupTrigger() && e.getClickCount() == 2) {
             PU_Main.show(DP_Main, e.getX(), e.getY());
         }
     }
