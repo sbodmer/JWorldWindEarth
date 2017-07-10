@@ -8,6 +8,7 @@ Each contributor could add a specific layer to the project (or add a reference
 to the layer code) to increase the number of exposed layers.
 
 A Java Web Start app is available to start the application without installation
+[WorldWindEarthJWS](http://tools.knop-tech.com)
 
 ## Architecture
 The project is base on a Java Swing framework called [TinyRCP](https://github.com/lsimedia/TinyRCP)
@@ -16,7 +17,7 @@ The system is complelty modular and plugin based
 
 Each world wind layer is stored in a jar file with a specific manifest entry
     
-    Tiny-Factory: {full qualified class name of the factory
+    Tiny-Factory: {full qualified class name of the factory}
 
 
 The layers are recursively loaded from file system in the default folders
