@@ -5,11 +5,8 @@
  */
 package org.worldwindearth.components;
 
-import org.worldwindearth.earth.*;
 import gov.nasa.worldwind.Model;
 import gov.nasa.worldwind.WorldWind;
-import gov.nasa.worldwind.avlist.AVKey;
-import gov.nasa.worldwind.awt.WorldWindowGLCanvas;
 import gov.nasa.worldwind.awt.WorldWindowGLJPanel;
 import gov.nasa.worldwind.event.InputHandler;
 import gov.nasa.worldwind.geom.Position;
@@ -31,6 +28,8 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.*;
 import javax.swing.*;
+import javax.swing.event.InternalFrameAdapter;
+import javax.swing.event.InternalFrameEvent;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import org.tinyrcp.App;
@@ -105,8 +104,6 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         initComponents();
 
         //--- Set a custom desktop manager, which will block the layers internal frame if sticky
-        DP_Main.setDesktopManager(new ImmovableDesktopManager());
-
         TB_Layers.getSelectionModel().addListSelectionListener(this);
         TB_Layers.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
@@ -118,7 +115,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         BT_Collapse.addActionListener(this);
         BT_More.addActionListener(this);
         BT_Sticky.addActionListener(this);
-        
+
         BT_ScrollLeft.addActionListener(this);
         BT_ScrollRight.addActionListener(this);
 
@@ -160,36 +157,42 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
     public void initialize(App app, Model model, Object obj) {
         this.app = app;
         this.m = model;
-        
+
         wwd = new WorldWindowGLJPanel();
         wwd.setModel(m);
-        
-        DP_Main.add(wwd);
-        DP_Main.addComponentListener(this);
 
+        DP_Main.add(wwd, JLayeredPane.DEFAULT_LAYER);
+        DP_Main.addComponentListener(this);
+        DP_Main.addMouseListener(this);
+
+        PU_Main.add(app.createFactoryMenus(app.getString("word_panels", "App"), TinyFactory.PLUGIN_CATEGORY_PANEL, TinyFactory.PLUGIN_FAMILY_PANEL, this),0);
+        PU_Main.add(app.createFactoryMenus(app.getString("word_containers", "App"), TinyFactory.PLUGIN_CATEGORY_PANEL, TinyFactory.PLUGIN_FAMILY_CONTAINER, this),0);
+
+        MN_HideStatusBar.addActionListener(this);
+        
         InputHandler ih = wwd.getInputHandler();
         ih.addKeyListener(this);
         ih.addMouseListener(this);
         ih.addMouseWheelListener(this);
     }
-    
+
     public void configure(Element config) {
         //------------------------------------------------------------------------
         //--- Find "layer" category in jars and create the new layer menu
         //------------------------------------------------------------------------
         MN_NewLayers.removeAll();
         JMenu jmenu = app.createFactoryMenus("Worldwind", WWEFactory.PLUGIN_CATEGORY_WORLDWIND_LAYER, WWEFactory.PLUGIN_FAMILY_WORLDWIND_LAYER_WORLDWIND, this);
-        MN_NewLayers.add(jmenu,0);
+        MN_NewLayers.add(jmenu, 0);
         jmenu = app.createFactoryMenus("Nasa", WWEFactory.PLUGIN_CATEGORY_WORLDWIND_LAYER, WWEFactory.PLUGIN_FAMILY_WORLDWIND_LAYER_NASA, this);
-        MN_NewLayers.add(jmenu,1);
+        MN_NewLayers.add(jmenu, 1);
         jmenu = app.createFactoryMenus("Map Tiles", WWEFactory.PLUGIN_CATEGORY_WORLDWIND_LAYER, WWEFactory.PLUGIN_FAMILY_WORLDWIND_LAYER_MAPTILES, this);
-        MN_NewLayers.add(jmenu,2);
+        MN_NewLayers.add(jmenu, 2);
         jmenu = app.createFactoryMenus("Web Map Server (WMS)", WWEFactory.PLUGIN_CATEGORY_WORLDWIND_LAYER, WWEFactory.PLUGIN_FAMILY_WORLDWIND_LAYER_WMS, this);
-        MN_NewLayers.add(jmenu,3);
+        MN_NewLayers.add(jmenu, 3);
         jmenu = app.createFactoryMenus("Buildings", WWEFactory.PLUGIN_CATEGORY_WORLDWIND_LAYER, WWEFactory.PLUGIN_FAMILY_WORLDWIND_LAYER_BUILDINGS, this);
-        MN_NewLayers.add(jmenu,4);
+        MN_NewLayers.add(jmenu, 4);
         jmenu = app.createFactoryMenus("Graticules", WWEFactory.PLUGIN_CATEGORY_WORLDWIND_LAYER, WWEFactory.PLUGIN_FAMILY_WORLDWIND_LAYER_GRATICULE, this);
-        MN_NewLayers.add(jmenu,5);
+        MN_NewLayers.add(jmenu, 5);
         /*
         MN_NewLayers.removeAll();
         ArrayList<TinyFactory> v = app.getFactory(WWEFactory.PLUGIN_CATEGORY_WORLDWIND_LAYER);
@@ -207,19 +210,18 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
 
             }
         }
-        */
-        
+         */
+
         //--- Create the world wind panel and model
         // wwd = new WorldWindowGLCanvas();
         /*
         wwd = new WorldWindowGLJPanel();
         wwd.setModel(m);
-        */
+         */
         //--- Create default globe and layers (see config/worldwind.xml)
         // Configuration.setValue(AVKey.GLOBE_CLASS_NAME, EarthFlat.class.getName());
         // Configuration.setValue(AVKey.VIEW_CLASS_NAME, FlatOrbitView.class.getName());
         // m = (Model) WorldWind.createConfigurationComponent(AVKey.MODEL_CLASS_NAME);
-        
         // wwd.getSceneController().setVerticalExaggeration(10d);
 
         /*
@@ -239,8 +241,6 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         // FlatWorldPanel jfp = new FlatWorldPanel(wwd);
         // DP_Main.add(jfp, JLayeredPane.PALETTE_LAYER);
         // jfp.setBounds(0,0,640,480);
-        
-
         //--- Prepare table
         layers = new WorldWindLayersTableModel(m.getLayers());
         TB_Layers.setModel(layers);
@@ -335,6 +335,19 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         timer.stop();
         vtimer.stop();
 
+        JInternalFrame fr[] = DP_Main.getAllFrames();
+        for (int i = 0; i < fr.length; i++) {
+            JComponent jcomp = (JComponent) fr[0].getContentPane().getComponent(0);
+            fr[0].removeAll();
+
+            //--- If plugin, cleanup
+            TinyPlugin p = (TinyPlugin) jcomp.getClientProperty("plugin");
+            if (p != null) p.cleanup();
+            
+            fr[0].setVisible(false);
+            fr[0].dispose();
+        }
+
         m.getLayers().clear();
         InputHandler ih = wwd.getInputHandler();
         ih.removeKeyListener(this);
@@ -423,12 +436,48 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
                 PB_Downloading.setIndeterminate(WorldWind.getRetrievalService().hasActiveTasks());
             }
             wwd.redraw();
-            
+
         } else if (e.getSource() == vtimer) {
             //--- Forward to plugin the motion stop
             Iterator<WWEPlugin> it = plugins.values().iterator();
             while (it.hasNext()) it.next().doAction(WWEPlugin.DO_ACTION_VIEWPORT, null);
 
+        } else if (e.getActionCommand().equals("newPlugin")) {
+            JMenuItem ji = (JMenuItem) e.getSource();
+            TinyFactory factory = (TinyFactory) ji.getClientProperty("factory");
+            TinyPlugin p = factory.newPlugin(null);
+            p.setup(app, null);
+            p.configure(null);
+
+            JComponent jcomp = p.getVisualComponent();
+            jcomp.putClientProperty("plugin", p);
+            JInternalFrame iframe = new JInternalFrame(p.getPluginName());
+            iframe.setClosable(true);
+            iframe.setMaximizable(true);
+            iframe.setResizable(true);
+            iframe.setIconifiable(true);
+            iframe.getContentPane().add(jcomp);
+            iframe.addInternalFrameListener(new InternalFrameAdapter() {
+                @Override
+                public void internalFrameClosing(InternalFrameEvent e) {
+                    JInternalFrame ifr = e.getInternalFrame();
+                    JComponent jcomp = (JComponent) ifr.getContentPane().getComponent(0);
+                    ifr.removeAll();
+
+                    TinyPlugin p = (TinyPlugin) jcomp.getClientProperty("plugin");
+                    if (p != null) p.cleanup();
+
+                    ifr.setVisible(false);
+                    ifr.dispose();
+                }
+            });
+            DP_Main.add(iframe, JLayeredPane.PALETTE_LAYER);
+            iframe.setBounds(100, 100, 320, 240);
+            iframe.setVisible(true);
+
+        } else if (e.getActionCommand().equals("hideStatusBar")) {
+            PN_Status.setVisible(!MN_HideStatusBar.isSelected());
+            
         } else if (e.getActionCommand().equals("renameLayer")) {
             int index = TB_Layers.getSelectedRow();
             if (index != -1) {
@@ -504,7 +553,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
                 SP_Main.setDividerLocation(0);
                 SP_Main.setDividerSize(0);
             }
-            
+
         } else if (e.getActionCommand().equals("fullscreen")) {
             if (MN_Fullscreen.isSelected()) {
                 //--- Try to find the selected graphics device
@@ -619,7 +668,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         } else if (e.getKeyCode() == KeyEvent.VK_SPACE) {
             boolean sticky = BT_Sticky.isSelected();
             BT_Sticky.setSelected(!sticky);
-            
+
             actionPerformed(new ActionEvent(BT_Sticky, ActionEvent.ACTION_PERFORMED, BT_Sticky.getActionCommand()));
 
         }
@@ -672,7 +721,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
                 CardLayout layout = (CardLayout) PN_LayersData.getLayout();
                 Layer l = (Layer) TB_Layers.getValueAt(index, 1);
                 LB_Layer.setText(l.getName());
-                
+
                 //--- Display config
                 layout.show(PN_LayersData, "empty");
                 layout.show(PN_LayersData, "" + l.hashCode());
@@ -682,7 +731,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
                 WWEPlugin p = plugins.get("" + l.hashCode());
                 if (p != null) {
                     LB_Layer.setIcon(p.getPluginFactory().getFactoryIcon(TinyFactory.ICON_SIZE_NORMAL));
-                    
+
                     JToggleButton jb = p.getLayerButton();
                     if (jb != null) jb.setSelected(true);
 
@@ -692,10 +741,10 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
                         LB_Licence.setText(licence);
                         LB_Licence.setIcon(p.getPluginFactory().getFactoryIcon(TinyFactory.ICON_SIZE_NORMAL));
                     }
-                    
+
                 } else {
                     //--- Worldwind layer ins not managed by WWE
-                    
+
                 }
 
                 /*
@@ -726,7 +775,9 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
 
     @Override
     public void mousePressed(MouseEvent e) {
-        //---
+        if (e.isPopupTrigger()) {
+            PU_Main.show(DP_Main, e.getX(), e.getY());
+        }
 
     }
 
@@ -734,6 +785,9 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
     public void mouseReleased(MouseEvent e) {
         vtimer.restart();
 
+        if (e.isPopupTrigger()) {
+            PU_Main.show(DP_Main, e.getX(), e.getY());
+        }
     }
 
     @Override
@@ -775,6 +829,9 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         jSeparator6 = new javax.swing.JSeparator();
         btgscreens = new javax.swing.ButtonGroup();
         btgmodel = new javax.swing.ButtonGroup();
+        PU_Main = new javax.swing.JPopupMenu();
+        jSeparator2 = new javax.swing.JPopupMenu.Separator();
+        MN_HideStatusBar = new javax.swing.JCheckBoxMenuItem();
         SP_Main = new javax.swing.JSplitPane();
         jPanel5 = new javax.swing.JPanel();
         PN_LayersTop = new javax.swing.JPanel();
@@ -845,6 +902,12 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         MN_Screens.add(jSeparator6);
 
         PU_More.add(MN_Screens);
+
+        PU_Main.add(jSeparator2);
+
+        MN_HideStatusBar.setText("Hide status bar");
+        MN_HideStatusBar.setActionCommand("hideStatusBar");
+        PU_Main.add(MN_HideStatusBar);
 
         setLayout(new java.awt.BorderLayout());
 
@@ -1099,6 +1162,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
     private javax.swing.JLabel LB_Layer;
     private javax.swing.JLabel LB_Licence;
     private javax.swing.JCheckBoxMenuItem MN_Fullscreen;
+    private javax.swing.JCheckBoxMenuItem MN_HideStatusBar;
     private javax.swing.JMenu MN_NewLayers;
     private javax.swing.JMenuItem MN_RemoveLayer;
     private javax.swing.JMenuItem MN_Rename;
@@ -1114,6 +1178,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
     private javax.swing.JPanel PN_Topbar;
     private javax.swing.JPanel PN_Tray;
     private javax.swing.JPopupMenu PU_Layers;
+    private javax.swing.JPopupMenu PU_Main;
     private javax.swing.JPopupMenu PU_More;
     private javax.swing.JSplitPane SP_Layers;
     private javax.swing.JScrollPane SP_LayersButtons;
@@ -1136,6 +1201,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
     private javax.swing.JPanel jPanel7;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JSeparator jSeparator1;
+    private javax.swing.JPopupMenu.Separator jSeparator2;
     private javax.swing.JSeparator jSeparator6;
     private javax.swing.JSeparator jSeparator7;
     private javax.swing.JToolBar.Separator jSeparator8;
@@ -1184,6 +1250,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
 
     }
 
+    /*
     private class ImmovableDesktopManager extends DefaultDesktopManager {
 
         @Override
@@ -1192,10 +1259,8 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
 
         }
     }
-
+     */
     //**************************************************************************
     //*** For debug
     //**************************************************************************
-    
-
 }
