@@ -3,6 +3,7 @@ package gov.nasa.bmng;
 import gov.nasa.worldwind.WorldWindow;
 import java.util.ResourceBundle;
 import javax.swing.Icon;
+import javax.swing.JComponent;
 import javax.swing.JPanel;
 import org.tinyrcp.App;
 import org.w3c.dom.Element;
@@ -47,6 +48,11 @@ public class JBMNGWWEFactory extends JPanel implements WWEFactory {
 
     }
 
+    @Override
+    public JComponent getFactoryConfigComponent() {
+        return null;
+    }
+    
     @Override
     public void configure(Element config) {
         //---

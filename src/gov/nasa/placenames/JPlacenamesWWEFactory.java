@@ -50,6 +50,12 @@ public class JPlacenamesWWEFactory extends JPanel implements WWEFactory {
     }
 
     @Override
+    public JComponent getFactoryConfigComponent() {
+        return null;
+    }
+    
+    
+    @Override
     public void configure(Element config) {
         //---
     }

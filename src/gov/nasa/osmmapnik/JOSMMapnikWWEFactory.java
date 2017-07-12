@@ -3,6 +3,7 @@ package gov.nasa.osmmapnik;
 import gov.nasa.worldwind.WorldWindow;
 import java.util.ResourceBundle;
 import javax.swing.Icon;
+import javax.swing.JComponent;
 import javax.swing.JPanel;
 import org.tinyrcp.App;
 import org.w3c.dom.Element;
@@ -61,6 +62,11 @@ public class JOSMMapnikWWEFactory extends JPanel implements WWEFactory {
         return LB_Name.getText();
     }
 
+    @Override
+    public JComponent getFactoryConfigComponent() {
+        return null;
+    }
+    
     /**
      * The pass argument is the WorldWindow
      * @param arg

@@ -55,6 +55,11 @@ public class JCountriesWWEFactory extends JPanel implements WWEFactory {
     }
 
     @Override
+    public JComponent getFactoryConfigComponent() {
+        return null;
+    }
+    
+    @Override
     public void store(Element config) {
         //---
     }

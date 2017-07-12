@@ -6,6 +6,7 @@
 package org.worldwindearth;
 
 import java.awt.BorderLayout;
+import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -15,6 +16,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
@@ -27,6 +29,7 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import org.tinyrcp.App;
 import org.tinyrcp.JPluginsFrame;
+import org.tinyrcp.JSettingsFrame;
 import org.tinyrcp.JarClassLoader;
 import org.tinyrcp.TinyFactory;
 import org.tinyrcp.TinyPlugin;
@@ -53,6 +56,7 @@ public class JWorldWindEarth extends javax.swing.JFrame implements ActionListene
     TinyPlugin main = null;
 
     JPluginsFrame jplugins = null;
+    JSettingsFrame jsettings = null;
     
     /**
      * Creates new form JWorldWindEarth
@@ -66,14 +70,19 @@ public class JWorldWindEarth extends javax.swing.JFrame implements ActionListene
         MN_Load.addActionListener(this);
         MN_Save.addActionListener(this);
         MN_SaveAs.addActionListener(this);
-
+        MN_Settings.addActionListener(this);
         MN_Exit.addActionListener(this);
 
         MN_Plugins.addActionListener(this);
         
+        
         jplugins = new JPluginsFrame();
         jplugins.initialize(app);
         
+        jsettings = new JSettingsFrame();
+        jsettings.initialize(app);
+        
+        setIconImage(((ImageIcon) LB_Title.getIcon()).getImage());
     }
 
     //**************************************************************************
@@ -153,6 +162,10 @@ public class JWorldWindEarth extends javax.swing.JFrame implements ActionListene
             jplugins.setLocationRelativeTo(this);
             jplugins.setVisible(true);
             
+        } else if (e.getActionCommand().equals("settings")) {
+            jsettings.setLocationRelativeTo(this);
+            jsettings.setVisible(true);
+            
         } else if (e.getActionCommand().equals("exit")) {
             close();
 
@@ -168,6 +181,7 @@ public class JWorldWindEarth extends javax.swing.JFrame implements ActionListene
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        LB_Title = new javax.swing.JLabel();
         MB_Topbar = new javax.swing.JMenuBar();
         MN_File = new javax.swing.JMenu();
         MN_New = new javax.swing.JMenuItem();
@@ -175,10 +189,15 @@ public class JWorldWindEarth extends javax.swing.JFrame implements ActionListene
         MN_Save = new javax.swing.JMenuItem();
         MN_SaveAs = new javax.swing.JMenuItem();
         jSeparator1 = new javax.swing.JPopupMenu.Separator();
+        MN_Settings = new javax.swing.JMenuItem();
+        jSeparator2 = new javax.swing.JPopupMenu.Separator();
         MN_Exit = new javax.swing.JMenuItem();
         MN_Tools = new javax.swing.JMenu();
         MN_Plugins = new javax.swing.JMenuItem();
         MN_Help = new javax.swing.JMenu();
+
+        LB_Title.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/22x22/WorldWindEarth.png"))); // NOI18N
+        LB_Title.setText("jLabel1");
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         setTitle("WorlWindEarth");
@@ -206,6 +225,11 @@ public class JWorldWindEarth extends javax.swing.JFrame implements ActionListene
         MN_SaveAs.setActionCommand("saveAs");
         MN_File.add(MN_SaveAs);
         MN_File.add(jSeparator1);
+
+        MN_Settings.setText("Settings");
+        MN_Settings.setActionCommand("settings");
+        MN_File.add(MN_Settings);
+        MN_File.add(jSeparator2);
 
         MN_Exit.setText("Exit");
         MN_Exit.setActionCommand("exit");
@@ -237,6 +261,7 @@ public class JWorldWindEarth extends javax.swing.JFrame implements ActionListene
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    protected javax.swing.JLabel LB_Title;
     protected javax.swing.JMenuBar MB_Topbar;
     protected javax.swing.JMenuItem MN_Exit;
     protected javax.swing.JMenu MN_File;
@@ -246,8 +271,10 @@ public class JWorldWindEarth extends javax.swing.JFrame implements ActionListene
     protected javax.swing.JMenuItem MN_Plugins;
     protected javax.swing.JMenuItem MN_Save;
     protected javax.swing.JMenuItem MN_SaveAs;
+    protected javax.swing.JMenuItem MN_Settings;
     protected javax.swing.JMenu MN_Tools;
     protected javax.swing.JPopupMenu.Separator jSeparator1;
+    protected javax.swing.JPopupMenu.Separator jSeparator2;
     // End of variables declaration//GEN-END:variables
 
     protected void save(File save) {

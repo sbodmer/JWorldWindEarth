@@ -6,6 +6,7 @@
 package org.worldwindearth.earth;
 
 import javax.swing.Icon;
+import javax.swing.JComponent;
 import org.tinyrcp.App;
 import org.tinyrcp.TinyFactory;
 import org.tinyrcp.TinyPlugin;
@@ -55,6 +56,11 @@ public class JEarthFactory extends javax.swing.JPanel implements TinyFactory {
     @Override
     public String getFactoryFamily() {
         return PLUGIN_FAMILY_PANEL;
+    }
+    
+    @Override
+    public JComponent getFactoryConfigComponent() {
+        return null;
     }
     
     @Override

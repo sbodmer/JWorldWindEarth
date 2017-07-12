@@ -3,6 +3,7 @@ package gov.nasa.stars;
 import gov.nasa.worldwind.WorldWindow;
 import java.util.ResourceBundle;
 import javax.swing.Icon;
+import javax.swing.JComponent;
 import javax.swing.JPanel;
 import org.tinyrcp.App;
 import org.w3c.dom.Element;
@@ -43,6 +44,11 @@ public class JStarsWWEFactory extends JPanel implements WWEFactory {
         return PLUGIN_FAMILY_WORLDWIND_LAYER_WORLDWIND;
     }
 
+    @Override
+    public JComponent getFactoryConfigComponent() {
+        return null;
+    }
+    
     @Override
     public void initialize(App app) {
         this.app = app;

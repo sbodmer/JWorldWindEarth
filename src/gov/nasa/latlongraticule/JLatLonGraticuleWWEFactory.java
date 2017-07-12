@@ -4,6 +4,7 @@ import gov.nasa.bmng.*;
 import gov.nasa.worldwind.WorldWindow;
 import java.util.ResourceBundle;
 import javax.swing.Icon;
+import javax.swing.JComponent;
 import javax.swing.JPanel;
 import org.tinyrcp.App;
 import org.w3c.dom.Element;
@@ -72,6 +73,11 @@ public class JLatLonGraticuleWWEFactory extends JPanel implements WWEFactory {
     @Override
     public String getFactoryDescription() {
         return LB_Description.getText();
+    }
+    
+    @Override
+    public JComponent getFactoryConfigComponent() {
+        return null;
     }
     
     /**

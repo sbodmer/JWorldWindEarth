@@ -3,6 +3,7 @@ package gov.nasa.openstreetmap;
 import gov.nasa.worldwind.WorldWindow;
 import java.util.ResourceBundle;
 import javax.swing.Icon;
+import javax.swing.JComponent;
 import javax.swing.JPanel;
 import org.w3c.dom.Element;
 import org.tinyrcp.App;
@@ -48,6 +49,11 @@ public class JOpenstreetmapWWEFactory extends JPanel implements WWEFactory {
         return LB_Description.getText();
     }
 
+    @Override
+    public JComponent getFactoryConfigComponent() {
+        return null;
+    }
+    
     @Override
     public void configure(Element config) {
         //---

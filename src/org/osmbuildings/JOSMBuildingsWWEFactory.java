@@ -6,7 +6,10 @@
 package org.osmbuildings;
 
 import gov.nasa.worldwind.WorldWindow;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import javax.swing.Icon;
+import javax.swing.JComponent;
 import org.tinyrcp.App;
 import org.w3c.dom.Element;
 import org.worldwindearth.WWEPlugin;
@@ -16,7 +19,7 @@ import org.worldwindearth.WWEFactory;
  *
  * @author sbodmer
  */
-public class JOSMBuildingsWWEFactory extends javax.swing.JPanel implements WWEFactory {
+public class JOSMBuildingsWWEFactory extends javax.swing.JPanel implements WWEFactory, ActionListener {
     public static final String LICENCE_TEXT = "© Data OpenStreetMap · © 3D OSM Buildings";
     
     App app = null;
@@ -63,6 +66,11 @@ public class JOSMBuildingsWWEFactory extends javax.swing.JPanel implements WWEFa
     }
     
     @Override
+    public JComponent getFactoryConfigComponent() {
+        return this;
+    }
+    
+    @Override
     public void initialize(App app) {
         this.app = app;
     }
@@ -88,6 +96,17 @@ public class JOSMBuildingsWWEFactory extends javax.swing.JPanel implements WWEFa
         return null;
     }
     
+    //**************************************************************************
+    //*** ActionListener
+    //**************************************************************************
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        if (e.getActionCommand().equals("cache")) {
+            //--- Check the cache size
+            
+        }
+    }
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -99,28 +118,57 @@ public class JOSMBuildingsWWEFactory extends javax.swing.JPanel implements WWEFa
 
         LB_Name = new javax.swing.JLabel();
         LB_Description = new javax.swing.JLabel();
+        jPanel1 = new javax.swing.JPanel();
+        BT_CheckCache = new javax.swing.JButton();
+        TF_CacheSize = new javax.swing.JTextField();
 
         LB_Name.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/osmbuildings/Resources/Icons/22x22/osmbuildings.png"))); // NOI18N
         java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("org/osmbuildings/OSMBuildings"); // NOI18N
         LB_Name.setText(bundle.getString("factory_name")); // NOI18N
 
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
-        this.setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 400, Short.MAX_VALUE)
+        setLayout(new java.awt.BorderLayout());
+
+        BT_CheckCache.setText("Check cache size");
+        BT_CheckCache.setActionCommand("cache");
+
+        TF_CacheSize.setEditable(false);
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(BT_CheckCache)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(TF_CacheSize, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(133, Short.MAX_VALUE))
         );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 300, Short.MAX_VALUE)
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(BT_CheckCache)
+                    .addComponent(TF_CacheSize, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(267, Short.MAX_VALUE))
         );
+
+        add(jPanel1, java.awt.BorderLayout.CENTER);
     }// </editor-fold>//GEN-END:initComponents
 
     
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    protected javax.swing.JButton BT_CheckCache;
     protected javax.swing.JLabel LB_Description;
     protected javax.swing.JLabel LB_Name;
+    protected javax.swing.JTextField TF_CacheSize;
+    protected javax.swing.JPanel jPanel1;
     // End of variables declaration//GEN-END:variables
+
+    
+
+    
 }

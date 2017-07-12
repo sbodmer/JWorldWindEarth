@@ -3,6 +3,7 @@ package gov.nasa.landsat;
 import gov.nasa.worldwind.WorldWindow;
 import java.util.ResourceBundle;
 import javax.swing.Icon;
+import javax.swing.JComponent;
 import javax.swing.JPanel;
 import org.w3c.dom.Element;
 import org.tinyrcp.App;
@@ -64,6 +65,11 @@ public class JLandsatWWEFactory extends JPanel implements WWEFactory {
         return PLUGIN_FAMILY_WORLDWIND_LAYER_NASA;
     }
 
+    @Override
+    public JComponent getFactoryConfigComponent() {
+        return null;
+    }
+    
     @Override
     public void configure(Element config) {
         //---

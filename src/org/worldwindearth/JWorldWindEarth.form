@@ -2,6 +2,14 @@
 
 <Form version="1.3" maxVersion="1.9" type="org.netbeans.modules.form.forminfo.JFrameFormInfo">
   <NonVisualComponents>
+    <Component class="javax.swing.JLabel" name="LB_Title">
+      <Properties>
+        <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+          <Image iconType="3" name="/org/worldwindearth/Resources/Icons/22x22/WorldWindEarth.png"/>
+        </Property>
+        <Property name="text" type="java.lang.String" value="jLabel1"/>
+      </Properties>
+    </Component>
     <Menu class="javax.swing.JMenuBar" name="MB_Topbar">
       <SubComponents>
         <Menu class="javax.swing.JMenu" name="MN_File">
@@ -34,6 +42,14 @@
               </Properties>
             </MenuItem>
             <MenuItem class="javax.swing.JPopupMenu$Separator" name="jSeparator1">
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="MN_Settings">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Settings"/>
+                <Property name="actionCommand" type="java.lang.String" value="settings"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JPopupMenu$Separator" name="jSeparator2">
             </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="MN_Exit">
               <Properties>

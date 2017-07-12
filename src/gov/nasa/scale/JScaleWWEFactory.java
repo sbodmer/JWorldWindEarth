@@ -3,6 +3,7 @@ package gov.nasa.scale;
 import gov.nasa.worldwind.WorldWindow;
 import java.util.ResourceBundle;
 import javax.swing.Icon;
+import javax.swing.JComponent;
 import javax.swing.JPanel;
 import org.w3c.dom.Element;
 import org.tinyrcp.App;
@@ -60,6 +61,11 @@ public class JScaleWWEFactory extends JPanel implements WWEFactory {
         return LB_Name.getText();
     }
 
+    @Override
+    public JComponent getFactoryConfigComponent() {
+        return null;
+    }
+    
     /**
      * The pass argument is the WorldWindow
      * @param arg

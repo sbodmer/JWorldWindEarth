@@ -9,7 +9,6 @@
 package org.worldwindearth;
 
 import org.tinyrcp.TinyFactory;
-import org.tinyrcp.TinyPlugin;
 
 
 /**

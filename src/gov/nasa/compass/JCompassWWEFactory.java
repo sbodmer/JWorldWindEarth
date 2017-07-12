@@ -58,6 +58,11 @@ public class JCompassWWEFactory extends JPanel implements WWEFactory {
         return LB_Name.getText();
     }
 
+    @Override
+    public JComponent getFactoryConfigComponent() {
+        return null;
+    }
+    
     /**
      * The pass argument is the WorldWindow
      * @param arg

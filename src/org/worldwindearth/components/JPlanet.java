@@ -165,8 +165,8 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         DP_Main.addComponentListener(this);
         DP_Main.addMouseListener(this);
 
-        PU_Main.add(app.createFactoryMenus(app.getString("word_panels", "App"), TinyFactory.PLUGIN_CATEGORY_PANEL, TinyFactory.PLUGIN_FAMILY_PANEL, this), 0);
-        PU_Main.add(app.createFactoryMenus(app.getString("word_containers", "App"), TinyFactory.PLUGIN_CATEGORY_PANEL, TinyFactory.PLUGIN_FAMILY_CONTAINER, this), 0);
+        PU_More.add(app.createFactoryMenus(app.getString("word_panels", "App"), TinyFactory.PLUGIN_CATEGORY_PANEL, TinyFactory.PLUGIN_FAMILY_PANEL, this), 0);
+        PU_More.add(app.createFactoryMenus(app.getString("word_containers", "App"), TinyFactory.PLUGIN_CATEGORY_PANEL, TinyFactory.PLUGIN_FAMILY_CONTAINER, this), 0);
 
         MN_HideStatusBar.addActionListener(this);
 
@@ -445,36 +445,58 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         } else if (e.getActionCommand().equals("newPlugin")) {
             JMenuItem ji = (JMenuItem) e.getSource();
             TinyFactory factory = (TinyFactory) ji.getClientProperty("factory");
-            TinyPlugin p = factory.newPlugin(null);
-            p.setup(app, null);
-            p.configure(null);
+            
+            //--- If it's a new layer
+            if (factory instanceof WWEFactory) {
+                int index = TB_Layers.getSelectedRow();
+                JComponent jcomp = (JComponent) e.getSource();
+                String name = JOptionPane.showInputDialog(this, "Layer name", factory.getFactoryName());
+                if (name != null) {
+                    WWEPlugin p = (WWEPlugin) factory.newPlugin(wwd);
+                    p.setup(app, DP_Main);
+                    p.configure(null);
+                    Layer l = p.getLayer();
+                    l.setName(name);
+                    l.setEnabled(true);
+                    plugins.put("" + l.hashCode(), p);
 
-            JComponent jcomp = p.getVisualComponent();
-            jcomp.putClientProperty("plugin", p);
-            JInternalFrame iframe = new JInternalFrame(p.getPluginName());
-            iframe.setClosable(true);
-            iframe.setMaximizable(true);
-            iframe.setResizable(true);
-            iframe.setIconifiable(true);
-            iframe.getContentPane().add(jcomp);
-            iframe.addInternalFrameListener(new InternalFrameAdapter() {
-                @Override
-                public void internalFrameClosing(InternalFrameEvent e) {
-                    JInternalFrame ifr = e.getInternalFrame();
-                    JComponent jcomp = (JComponent) ifr.getContentPane().getComponent(0);
-                    ifr.removeAll();
+                    installLayer(p, index);
 
-                    TinyPlugin p = (TinyPlugin) jcomp.getClientProperty("plugin");
-                    if (p != null) p.cleanup();
-
-                    ifr.setVisible(false);
-                    ifr.dispose();
                 }
-            });
-            DP_Main.add(iframe, JLayeredPane.PALETTE_LAYER);
-            iframe.setBounds(100, 100, 320, 240);
-            iframe.setVisible(true);
+                layers.fireTableDataChanged();
+                
+            } else {
+                TinyPlugin p = factory.newPlugin(null);
+                p.setup(app, null);
+                p.configure(null);
 
+                JComponent jcomp = p.getVisualComponent();
+                jcomp.putClientProperty("plugin", p);
+                JInternalFrame iframe = new JInternalFrame(p.getPluginName());
+                iframe.setClosable(true);
+                iframe.setMaximizable(true);
+                iframe.setResizable(true);
+                iframe.setIconifiable(true);
+                iframe.getContentPane().add(jcomp);
+                iframe.addInternalFrameListener(new InternalFrameAdapter() {
+                    @Override
+                    public void internalFrameClosing(InternalFrameEvent e) {
+                        JInternalFrame ifr = e.getInternalFrame();
+                        JComponent jcomp = (JComponent) ifr.getContentPane().getComponent(0);
+                        ifr.removeAll();
+
+                        TinyPlugin p = (TinyPlugin) jcomp.getClientProperty("plugin");
+                        if (p != null) p.cleanup();
+
+                        ifr.setVisible(false);
+                        ifr.dispose();
+                    }
+                });
+                DP_Main.add(iframe, JLayeredPane.PALETTE_LAYER);
+                iframe.setBounds(100, 100, 320, 240);
+                iframe.setVisible(true);
+            }
+            
         } else if (e.getActionCommand().equals("hideStatusBar")) {
             PN_Status.setVisible(!MN_HideStatusBar.isSelected());
 
@@ -597,25 +619,6 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         } else if (e.getActionCommand().equals("addLayer")) {
             MN_NewLayers.setEnabled(true);
             PU_Layers.show(BT_AddLayer, BT_AddLayer.getX(), BT_AddLayer.getY());
-
-        } else if (e.getActionCommand().equals("newPlugin")) {
-            int index = TB_Layers.getSelectedRow();
-            JComponent jcomp = (JComponent) e.getSource();
-            WWEFactory factory = (WWEFactory) jcomp.getClientProperty("factory");
-            String name = JOptionPane.showInputDialog(this, "Layer name", factory.getFactoryName());
-            if (name != null) {
-                WWEPlugin p = (WWEPlugin) factory.newPlugin(wwd);
-                p.setup(app, DP_Main);
-                p.configure(null);
-                Layer l = p.getLayer();
-                l.setName(name);
-                l.setEnabled(true);
-                plugins.put("" + l.hashCode(), p);
-
-                installLayer(p, index);
-
-            }
-            layers.fireTableDataChanged();
 
         } else if (e.getActionCommand().equals("upLayer")) {
             int index = TB_Layers.getSelectedRow();
@@ -777,7 +780,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
     @Override
     public void mousePressed(MouseEvent e) {
         if (e.isPopupTrigger() && e.getClickCount() == 2) {
-            PU_Main.show(DP_Main, e.getX(), e.getY());
+            PU_More.show(DP_Main, e.getX(), e.getY());
         }
     }
 
@@ -786,7 +789,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         vtimer.restart();
 
         if (e.isPopupTrigger() && e.getClickCount() == 2) {
-            PU_Main.show(DP_Main, e.getX(), e.getY());
+            PU_More.show(DP_Main, e.getX(), e.getY());
         }
     }
 
@@ -823,15 +826,15 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         MN_Rename = new javax.swing.JMenuItem();
         MN_RemoveLayer = new javax.swing.JMenuItem();
         PU_More = new javax.swing.JPopupMenu();
+        jSeparator10 = new javax.swing.JPopupMenu.Separator();
+        MN_HideStatusBar = new javax.swing.JCheckBoxMenuItem();
+        jSeparator11 = new javax.swing.JPopupMenu.Separator();
         MN_Screens = new javax.swing.JMenu();
         MN_Fullscreen = new javax.swing.JCheckBoxMenuItem();
         MN_ScreenIdentifier = new javax.swing.JMenuItem();
         jSeparator6 = new javax.swing.JSeparator();
         btgscreens = new javax.swing.ButtonGroup();
         btgmodel = new javax.swing.ButtonGroup();
-        PU_Main = new javax.swing.JPopupMenu();
-        jSeparator2 = new javax.swing.JPopupMenu.Separator();
-        MN_HideStatusBar = new javax.swing.JCheckBoxMenuItem();
         SP_Main = new javax.swing.JSplitPane();
         jPanel5 = new javax.swing.JPanel();
         PN_LayersTop = new javax.swing.JPanel();
@@ -889,6 +892,13 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         MN_RemoveLayer.setActionCommand("removeLayer");
         PU_Layers.add(MN_RemoveLayer);
 
+        PU_More.add(jSeparator10);
+
+        MN_HideStatusBar.setText("Hide status bar");
+        MN_HideStatusBar.setActionCommand("hideStatusBar");
+        PU_More.add(MN_HideStatusBar);
+        PU_More.add(jSeparator11);
+
         MN_Screens.setText("Screens");
 
         MN_Fullscreen.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F, 0));
@@ -902,12 +912,6 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         MN_Screens.add(jSeparator6);
 
         PU_More.add(MN_Screens);
-
-        PU_Main.add(jSeparator2);
-
-        MN_HideStatusBar.setText("Hide status bar");
-        MN_HideStatusBar.setActionCommand("hideStatusBar");
-        PU_Main.add(MN_HideStatusBar);
 
         setLayout(new java.awt.BorderLayout());
 
@@ -1178,7 +1182,6 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
     private javax.swing.JPanel PN_Topbar;
     private javax.swing.JPanel PN_Tray;
     private javax.swing.JPopupMenu PU_Layers;
-    private javax.swing.JPopupMenu PU_Main;
     private javax.swing.JPopupMenu PU_More;
     private javax.swing.JSplitPane SP_Layers;
     private javax.swing.JScrollPane SP_LayersButtons;
@@ -1201,7 +1204,8 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
     private javax.swing.JPanel jPanel7;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JSeparator jSeparator1;
-    private javax.swing.JPopupMenu.Separator jSeparator2;
+    private javax.swing.JSeparator jSeparator10;
+    private javax.swing.JPopupMenu.Separator jSeparator11;
     private javax.swing.JSeparator jSeparator6;
     private javax.swing.JSeparator jSeparator7;
     private javax.swing.JToolBar.Separator jSeparator8;

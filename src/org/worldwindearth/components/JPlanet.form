@@ -37,6 +37,16 @@
         <Property name="useNullLayout" type="boolean" value="true"/>
       </Layout>
       <SubComponents>
+        <Component class="javax.swing.JPopupMenu$Separator" name="jSeparator10">
+        </Component>
+        <MenuItem class="javax.swing.JCheckBoxMenuItem" name="MN_HideStatusBar">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Hide status bar"/>
+            <Property name="actionCommand" type="java.lang.String" value="hideStatusBar"/>
+          </Properties>
+        </MenuItem>
+        <Component class="javax.swing.JPopupMenu$Separator" name="jSeparator11">
+        </Component>
         <Menu class="javax.swing.JMenu" name="MN_Screens">
           <Properties>
             <Property name="text" type="java.lang.String" value="Screens"/>
@@ -67,22 +77,6 @@
     </Component>
     <Component class="javax.swing.ButtonGroup" name="btgmodel">
     </Component>
-    <Container class="javax.swing.JPopupMenu" name="PU_Main">
-
-      <Layout class="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout">
-        <Property name="useNullLayout" type="boolean" value="true"/>
-      </Layout>
-      <SubComponents>
-        <Component class="javax.swing.JPopupMenu$Separator" name="jSeparator2">
-        </Component>
-        <MenuItem class="javax.swing.JCheckBoxMenuItem" name="MN_HideStatusBar">
-          <Properties>
-            <Property name="text" type="java.lang.String" value="Hide status bar"/>
-            <Property name="actionCommand" type="java.lang.String" value="hideStatusBar"/>
-          </Properties>
-        </MenuItem>
-      </SubComponents>
-    </Container>
   </NonVisualComponents>
   <AuxValues>
     <AuxValue name="FormSettings_autoSetComponentName" type="java.lang.Boolean" value="false"/>

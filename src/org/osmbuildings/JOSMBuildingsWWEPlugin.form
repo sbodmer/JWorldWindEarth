@@ -72,7 +72,7 @@
                               <Group type="102" alignment="0" attributes="0">
                                   <Component id="jLabel6" min="-2" max="-2" attributes="0"/>
                                   <EmptySpace type="separate" max="-2" attributes="0"/>
-                                  <Component id="CB_ApplyTextures" min="-2" max="-2" attributes="0"/>
+                                  <Component id="CB_ApplyRoofTextures" min="-2" max="-2" attributes="0"/>
                               </Group>
                           </Group>
                           <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
@@ -107,7 +107,7 @@
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="1" attributes="0">
                       <Component id="jLabel6" min="-2" max="-2" attributes="0"/>
-                      <Component id="CB_ApplyTextures" min="-2" max="-2" attributes="0"/>
+                      <Component id="CB_ApplyRoofTextures" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace pref="91" max="32767" attributes="0"/>
               </Group>
@@ -190,13 +190,13 @@
         <Component class="javax.swing.JLabel" name="jLabel6">
           <Properties>
             <Property name="horizontalAlignment" type="int" value="4"/>
-            <Property name="text" type="java.lang.String" value="Apply textures"/>
+            <Property name="text" type="java.lang.String" value="Apply roof textures"/>
             <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
               <Dimension value="[150, 26]"/>
             </Property>
           </Properties>
         </Component>
-        <Component class="javax.swing.JCheckBox" name="CB_ApplyTextures">
+        <Component class="javax.swing.JCheckBox" name="CB_ApplyRoofTextures">
           <Properties>
             <Property name="actionCommand" type="java.lang.String" value="applyTextures"/>
             <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">

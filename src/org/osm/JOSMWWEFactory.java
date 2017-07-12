@@ -4,6 +4,7 @@ import org.microsoft.virtualearth.*;
 import gov.nasa.worldwind.WorldWindow;
 import java.util.ResourceBundle;
 import javax.swing.Icon;
+import javax.swing.JComponent;
 import javax.swing.JPanel;
 import org.tinyrcp.App;
 import org.tinyrcp.TinyPlugin;
@@ -63,6 +64,11 @@ public class JOSMWWEFactory extends JPanel implements WWEFactory {
         return LB_Name.getText();
     }
 
+    @Override
+    public JComponent getFactoryConfigComponent() {
+        return null;
+    }
+    
     /**
      * The pass argument is the WorldWindow
      * @param arg

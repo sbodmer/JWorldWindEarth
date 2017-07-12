@@ -3,6 +3,7 @@ package gov.nasa.worldmap;
 import gov.nasa.worldwind.WorldWindow;
 import java.util.ResourceBundle;
 import javax.swing.Icon;
+import javax.swing.JComponent;
 import javax.swing.JPanel;
 import org.tinyrcp.App;
 import org.tinyrcp.TinyPlugin;
@@ -45,6 +46,10 @@ public class JWorldmapWWEFactory extends JPanel implements WWEFactory {
 
     }
 
+    @Override
+    public JComponent getFactoryConfigComponent() {
+        return null;
+    }
     
     @Override
     public String getFactoryDescription() {

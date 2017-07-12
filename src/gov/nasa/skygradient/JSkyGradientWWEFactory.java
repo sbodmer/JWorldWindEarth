@@ -4,6 +4,7 @@ import static gov.nasa.openstreetmap.JOpenstreetmapWWEFactory.LICENCE_TEXT;
 import gov.nasa.worldwind.WorldWindow;
 import java.util.ResourceBundle;
 import javax.swing.Icon;
+import javax.swing.JComponent;
 import javax.swing.JPanel;
 import org.tinyrcp.App;
 import static org.tinyrcp.TinyFactory.PROPERTY_LICENCE_TEXT;
@@ -42,6 +43,11 @@ public class JSkyGradientWWEFactory extends JPanel implements WWEFactory {
     @Override
     public String getFactoryFamily() {
         return PLUGIN_FAMILY_WORLDWIND_LAYER_WORLDWIND;
+    }
+    
+    @Override
+    public JComponent getFactoryConfigComponent() {
+        return null;
     }
     
     @Override

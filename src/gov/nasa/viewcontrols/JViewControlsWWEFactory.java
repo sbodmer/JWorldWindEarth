@@ -3,6 +3,7 @@ package gov.nasa.viewcontrols;
 import gov.nasa.worldwind.WorldWindow;
 import java.util.ResourceBundle;
 import javax.swing.Icon;
+import javax.swing.JComponent;
 import javax.swing.JPanel;
 import org.tinyrcp.App;
 import org.tinyrcp.TinyPlugin;
@@ -31,8 +32,6 @@ public class JViewControlsWWEFactory extends JPanel implements WWEFactory {
     //***************************************************************************
     //*** LayerManagerfactory
     //***************************************************************************
-
-    
     @Override
     public String getFactoryCategory() {
         return PLUGIN_CATEGORY_WORLDWIND_LAYER;
@@ -72,6 +71,11 @@ public class JViewControlsWWEFactory extends JPanel implements WWEFactory {
         
     }
 
+    @Override
+    public JComponent getFactoryConfigComponent() {
+        return null;
+    }
+    
     @Override
     public Object getProperty(String property) {
         return null;
