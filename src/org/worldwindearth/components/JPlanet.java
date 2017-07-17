@@ -183,7 +183,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
 
         DP_Main.add(wwd, JLayeredPane.DEFAULT_LAYER);
         DP_Main.addComponentListener(this);
-        DP_Main.addMouseListener(this);
+        // DP_Main.addMouseListener(this);
 
         PU_More.add(app.createFactoryMenus(app.getString("word_panels", "App"), TinyFactory.PLUGIN_CATEGORY_PANEL, TinyFactory.PLUGIN_FAMILY_PANEL, this), 0);
         PU_More.add(app.createFactoryMenus(app.getString("word_containers", "App"), TinyFactory.PLUGIN_CATEGORY_PANEL, TinyFactory.PLUGIN_FAMILY_CONTAINER, this), 0);
@@ -846,7 +846,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
 
     @Override
     public void mousePressed(MouseEvent e) {
-        if (e.getSource() == DP_Main) {
+        if (e.getSource() == wwd) {
             if (e.isPopupTrigger() && e.getClickCount() == 2) {
                 PU_More.show(DP_Main, e.getX(), e.getY());
             }
@@ -855,7 +855,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        if (e.getSource() == DP_Main) {
+        if (e.getSource() == wwd) {
             vtimer.restart();
 
             if (e.isPopupTrigger() && e.getClickCount() == 2) {

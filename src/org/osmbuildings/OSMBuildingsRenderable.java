@@ -47,6 +47,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 
 /**
@@ -58,6 +59,8 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
 
     protected static final Map<String, String> COLORS = new HashMap<String, String>();
 
+    protected static Random random = new Random();
+    
     /**
      * Default height of buildings
      */
@@ -78,6 +81,7 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
         COLORS.put("cream", "#ffffcc");
         COLORS.put("brickred", "#cb4154");
         COLORS.put("bluegreen", "#0d98ba");
+        
     }
 
     /**
@@ -556,14 +560,17 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
      * @param properties
      */
     private void fillShapeAttribute(ShapeAttributes sa, AVList properties) {
-        String v = "gray";
+        //--- Use a default random gray scale
+        int r = random.nextInt(16);
+        String v = "#";
+        for (int i=0;i<6;i++) v += Integer.toHexString(r);
         if (properties != null) {
             v = properties.getStringValue("color");
             String mat = properties.getStringValue("material");
             if (mat == null) mat = "concrete";
             if (mat.equals("glass")) sa.setDrawOutline(true);
         }
-        if (v == null) v = "gray";
+        if (v == null) v = "#bbbbbb";   //--
         sa.setInteriorMaterial(new Material(stringToColor(v)));
         /*
         sa.setInteriorOpacity(opacity);
@@ -585,7 +592,7 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
      * @return
      */
     private Color stringToColor(String value) {
-        if (value == null) return Color.GRAY;
+        if (value == null) return Color.LIGHT_GRAY;
 
         // Clean name for FX
         value = value.replace(" ", "").replace("-", "").replace("_", "").toLowerCase();
@@ -599,14 +606,14 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
             javafx.scene.paint.Color fxColor = javafx.scene.paint.Color.valueOf(value);
             if (fxColor == null) {
                 System.out.println("Color not found:" + value);
-                return Color.GRAY;
+                return Color.LIGHT_GRAY;
             }
 
             return new Color((float) fxColor.getRed(), (float) fxColor.getGreen(), (float) fxColor.getBlue(), (float) fxColor.getOpacity());
 
         } catch (Exception e) {
             System.out.println("Color not found:" + value);
-            return Color.GRAY;
+            return Color.LIGHT_GRAY;
         }
     }
 }
