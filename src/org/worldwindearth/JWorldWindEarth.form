@@ -82,7 +82,7 @@
   </NonVisualComponents>
   <Properties>
     <Property name="defaultCloseOperation" type="int" value="0"/>
-    <Property name="title" type="java.lang.String" value="WorlWindEarth"/>
+    <Property name="title" type="java.lang.String" value="WorldWindEarth"/>
   </Properties>
   <SyntheticProperties>
     <SyntheticProperty name="menuBar" type="java.lang.String" value="MB_Topbar"/>

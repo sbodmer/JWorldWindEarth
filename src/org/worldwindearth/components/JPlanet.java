@@ -7,12 +7,20 @@ package org.worldwindearth.components;
 
 import gov.nasa.worldwind.Model;
 import gov.nasa.worldwind.WorldWind;
+import gov.nasa.worldwind.animation.AngleAnimator;
+import gov.nasa.worldwind.animation.CompoundAnimator;
+import gov.nasa.worldwind.animation.PositionAnimator;
+import gov.nasa.worldwind.animation.SmoothInterpolator;
 import gov.nasa.worldwind.awt.WorldWindowGLJPanel;
 import gov.nasa.worldwind.event.InputHandler;
+import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.geom.Vec4;
 import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.layers.LayerList;
+import gov.nasa.worldwind.util.PropertyAccessor;
+import gov.nasa.worldwind.util.PropertyAccessor.PositionAccessor;
+import gov.nasa.worldwind.view.ViewPropertyAccessor.EyePositionAccessor;
 import gov.nasa.worldwindx.examples.ScreenShots;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -39,6 +47,7 @@ import javax.swing.event.InternalFrameEvent;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import org.tinyrcp.App;
+import org.tinyrcp.AppActionEvent;
 import org.tinyrcp.JSettingsFrame;
 import org.tinyrcp.TinyFactory;
 import org.w3c.dom.*;
@@ -72,6 +81,9 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
      * Initial camera position
      */
     Position eye = null;
+    double heading = 0.0d;
+    double pitch = 0.0d;
+    double roll = 0.0d;
     DefaultListModel<Camera> cameras = new DefaultListModel<Camera>();
 
     /**
@@ -113,7 +125,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         initComponents();
 
         BT_Configure.setVisible(false);
-        
+
         PN_Cameras.setVisible(false);
         LI_Cameras.setModel(cameras);
 
@@ -124,7 +136,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         //--- Find available screens
         GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
         GraphicsDevice[] gd = ge.getScreenDevices();
-        for (int i = 0;i < gd.length;i++) {
+        for (int i = 0; i < gd.length; i++) {
             JRadioButtonMenuItem jitem = new JRadioButtonMenuItem(gd[i].getIDstring());
             jitem.setActionCommand("screen");
             jitem.addActionListener(this);
@@ -136,9 +148,10 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         MN_Fullscreen.addActionListener(this);
         MN_ScreenIdentifier.addActionListener(this);
 
-        //--- Position check (send viewport message after this delay)
-        timer = new javax.swing.Timer(2000, this);
+        //--- Initial view and position display on the bottom
+        timer = new javax.swing.Timer(1000, this);
 
+        //--- View port timer
         vtimer = new javax.swing.Timer(1000, this);
         vtimer.setRepeats(false);
     }
@@ -171,6 +184,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         BT_RemoveLayer.addActionListener(this);
         BT_LayerUp.addActionListener(this);
         BT_LayerDown.addActionListener(this);
+        BT_Configure.addActionListener(this);
 
         BT_Collapse.addActionListener(this);
         BT_More.addActionListener(this);
@@ -191,9 +205,11 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         MN_HideStatusBar.addActionListener(this);
 
         InputHandler ih = wwd.getInputHandler();
+        System.out.println("IH:" + ih);
         ih.addKeyListener(this);
         ih.addMouseListener(this);
         ih.addMouseWheelListener(this);
+
     }
 
     public void configure(Element config) {
@@ -226,7 +242,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         //--- Instantiate layers
         if (config != null) {
             NodeList nl = config.getChildNodes();
-            for (int i = 0;i < nl.getLength();i++) {
+            for (int i = 0; i < nl.getLength(); i++) {
                 if (nl.item(i).getNodeName().equals("Eye")) {
                     try {
                         //--- Set viewport
@@ -239,6 +255,10 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
                         // wwd.getView().goTo(Position.fromDegrees(y, x), z);
                         eye = Position.fromDegrees(lat, lon, alt);
 
+                        heading = Double.parseDouble(c.getAttribute("heading"));
+                        pitch = Double.parseDouble(c.getAttribute("pitch"));
+                        roll = Double.parseDouble(c.getAttribute("roll"));
+
                         // center = Position.fromDegrees(cy, cx, cz);
                     } catch (NumberFormatException ex) {
                         ex.printStackTrace();
@@ -249,7 +269,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
 
                 } else if (nl.item(i).getNodeName().equals("Cameras")) {
                     NodeList nl2 = ((Element) nl.item(i)).getChildNodes();
-                    for (int j = 0;j < nl2.getLength();j++) {
+                    for (int j = 0; j < nl2.getLength(); j++) {
                         if (nl2.item(j).getNodeName().equals("Camera")) {
                             Element e = (Element) nl2.item(j);
 
@@ -330,7 +350,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         vtimer.stop();
 
         JInternalFrame fr[] = DP_Main.getAllFrames();
-        for (int i = 0;i < fr.length;i++) {
+        for (int i = 0; i < fr.length; i++) {
             JComponent jcomp = (JComponent) fr[0].getContentPane().getComponent(0);
             fr[0].removeAll();
 
@@ -381,21 +401,19 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         config.appendChild(e);
 
         e = config.getOwnerDocument().createElement("Eye");
-        Position camera = wwd.getView().getEyePosition();
-        e.setAttribute("lon", "" + camera.longitude.degrees);
-        e.setAttribute("lat", "" + camera.latitude.degrees);
-        e.setAttribute("alt", "" + camera.elevation);
-        Vec4 center = wwd.getView().getCenterPoint();
-        e.setAttribute("cx", "" + center.x);
-        e.setAttribute("cy", "" + center.y);
+        Position eye = wwd.getView().getCurrentEyePosition();
+        e.setAttribute("lon", "" + eye.longitude.degrees);
+        e.setAttribute("lat", "" + eye.latitude.degrees);
+        e.setAttribute("alt", "" + eye.elevation);
         e.setAttribute("heading", "" + wwd.getView().getHeading().degrees);
         e.setAttribute("pitch", "" + wwd.getView().getPitch().degrees);
+        e.setAttribute("roll", "" + wwd.getView().getRoll().degrees);
         // e.setAttribute("z", "" + camera.elevation);
         config.appendChild(e);
 
         //--- Add the saved cameras
         e = config.getOwnerDocument().createElement("Cameras");
-        for (int i = 0;i < cameras.size();i++) {
+        for (int i = 0; i < cameras.size(); i++) {
             Camera c = cameras.get(i);
             Element e2 = config.getOwnerDocument().createElement("Camera");
             e2.setAttribute("title", c.getTitle());
@@ -424,7 +442,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
 
         //--- Get the layer configs
         LayerList ll = m.getLayers();
-        for (int i = 0;i < ll.size();i++) {
+        for (int i = 0; i < ll.size(); i++) {
             Layer l = ll.get(i);
             WWEPlugin p = plugins.get("" + l.hashCode());
             if (p != null) {
@@ -446,11 +464,84 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == timer) {
             if (eye != null) {
-                wwd.getView().goTo(eye, eye.elevation);
+                //--- Position animator
+                SmoothInterpolator inter = new SmoothInterpolator(5000);
+                PropertyAccessor.PositionAccessor ac = new PropertyAccessor.PositionAccessor() {
+                    @Override
+                    public Position getPosition() {
+                        return wwd.getView().getEyePosition();
+                    }
+
+                    @Override
+                    public boolean setPosition(Position value) {
+                        wwd.getView().setEyePosition(value);
+                        return true;
+                    }
+                };
+                PositionAnimator pos = new PositionAnimator(inter, wwd.getView().getCurrentEyePosition(), eye, ac);
+                
+                //--- Heading animator
+                PropertyAccessor.AngleAccessor haa = new PropertyAccessor.AngleAccessor() {
+                    @Override
+                    public Angle getAngle() {
+                        return wwd.getView().getHeading();
+                    }
+
+                    @Override
+                    public boolean setAngle(Angle value) {
+                        wwd.getView().setHeading(value);
+                        return true;
+                    }
+                    
+                };
+                AngleAnimator ha = new AngleAnimator(inter, wwd.getView().getHeading(), Angle.fromDegrees(heading), haa);
+                
+                //--- Pitch animator
+                PropertyAccessor.AngleAccessor paa = new PropertyAccessor.AngleAccessor() {
+                    @Override
+                    public Angle getAngle() {
+                        return wwd.getView().getPitch();
+                    }
+
+                    @Override
+                    public boolean setAngle(Angle value) {
+                        wwd.getView().setPitch(value);
+                        return true;
+                    }
+                    
+                };
+                AngleAnimator pa = new AngleAnimator(inter, wwd.getView().getPitch(), Angle.fromDegrees(pitch), paa);
+                
+                //--- Roll animatir
+                PropertyAccessor.AngleAccessor raa = new PropertyAccessor.AngleAccessor() {
+                    @Override
+                    public Angle getAngle() {
+                        return wwd.getView().getRoll();
+                    }
+
+                    @Override
+                    public boolean setAngle(Angle value) {
+                        wwd.getView().setRoll(value);
+                        return true;
+                    }
+                    
+                };
+                AngleAnimator ra = new AngleAnimator(inter, wwd.getView().getRoll(), Angle.fromDegrees(roll), raa);
+                
+                CompoundAnimator cn = new CompoundAnimator(inter,pos,ha,pa,ra);
+                wwd.getView().addAnimator(cn);
+                cn.start();
+                
+                // wwd.getView().goTo(eye, eye.elevation);
                 eye = null;
+                
                 //--- Return because the globe could not yet be created
                 return;
+                
+            } else {
+                //---
             }
+            
             Position cam = wwd.getView().getEyePosition();
             if (cam != null) {
                 TF_Altitude.setText("" + (int) cam.getElevation());
@@ -571,7 +662,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         } else if (e.getActionCommand().equals("activeLayer")) {
             WWEPlugin p = (WWEPlugin) ((JToggleButton) e.getSource()).getClientProperty("plugin");
 
-            for (int i = 0;i < TB_Layers.getRowCount();i++) {
+            for (int i = 0; i < TB_Layers.getRowCount(); i++) {
                 Layer tmp = (Layer) TB_Layers.getValueAt(i, 1);
                 if (tmp == p.getLayer()) {
                     TB_Layers.getSelectionModel().addSelectionInterval(i, i);
@@ -697,8 +788,8 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
             TinyPlugin p = (TinyPlugin) jcomp.getClientProperty("plugin");
             if (p != null) {
                 TinyFactory f = p.getPluginFactory();
-                // app.get// .select(f);
-                
+                app.fireActionPerformed(new AppActionEvent(this, AppActionEvent.ACTION_ID_TINYFACTORY_SETTINGS, null, f));
+
             }
         }
 
@@ -781,7 +872,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
                 CardLayout layout = (CardLayout) PN_LayersData.getLayout();
                 Layer l = (Layer) TB_Layers.getValueAt(index, 1);
                 LB_Layer.setText(l.getName());
-                
+
                 //--- Display config
                 layout.show(PN_LayersData, "empty");
                 layout.show(PN_LayersData, "" + l.hashCode());
@@ -790,16 +881,16 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
                 btgblayers.clearSelection();
                 WWEPlugin p = plugins.get("" + l.hashCode());
                 if (p != null) {
-                    BT_Configure.setVisible(p.getPluginFactory().getFactoryConfigComponent()!=null);
+                    BT_Configure.setVisible(p.getPluginFactory().getFactoryConfigComponent() != null);
                     BT_Configure.putClientProperty("plugin", p);
-                    
+
                     LB_LayerIcon.setIcon(p.getPluginFactory().getFactoryIcon(TinyFactory.ICON_SIZE_NORMAL));
 
                     JToggleButton jb = p.getLayerButton();
                     if (jb != null) jb.setSelected(true);
 
                     //--- Find licence
-                    String licence = (String) p.getPluginFactory().getProperty(TinyFactory.PROPERTY_LICENCE_TEXT);
+                    String licence = (String) p.getPluginFactory().getProperty(TinyFactory.PROPERTY_COPYRIGHT_TEXT);
                     if (licence != null) {
                         LB_Licence.setText(licence);
                         LB_Licence.setIcon(p.getPluginFactory().getFactoryIcon(TinyFactory.ICON_SIZE_NORMAL));

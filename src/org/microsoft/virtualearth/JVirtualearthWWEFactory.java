@@ -15,7 +15,7 @@ import org.worldwindearth.WWEFactory;
  * @author sbodmer
  */
 public class JVirtualearthWWEFactory extends JPanel implements WWEFactory {
-    public static final String LICENCE_TEXT = "© Microsoft";
+    public static final String COPYRIGHT_TEXT = "© Microsoft";
     
     ResourceBundle bundle = null;
     App app = null;
@@ -83,7 +83,7 @@ public class JVirtualearthWWEFactory extends JPanel implements WWEFactory {
 
     @Override
     public Object getProperty(String property) {
-        if (property.equals(PROPERTY_LICENCE_TEXT)) return LICENCE_TEXT;
+        if (property.equals(PROPERTY_COPYRIGHT_TEXT)) return COPYRIGHT_TEXT;
         return null;
     }
 

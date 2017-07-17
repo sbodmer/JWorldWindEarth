@@ -15,7 +15,7 @@ import org.worldwindearth.WWEFactory;
  * @author sbodmer
  */
 public class JOpenstreetmapWWEFactory extends JPanel implements WWEFactory {
-    public static final String LICENCE_TEXT = "© Data OpenStreetMap";
+    public static final String COPYRIGHT_TEXT = "© Data OpenStreetMap";
     
     ResourceBundle bundle = null;
     App app = null;
@@ -97,7 +97,7 @@ public class JOpenstreetmapWWEFactory extends JPanel implements WWEFactory {
     
     @Override
     public Object getProperty(String property) {
-        if (property.equals(PROPERTY_LICENCE_TEXT)) return LICENCE_TEXT;
+        if (property.equals(PROPERTY_COPYRIGHT_TEXT)) return COPYRIGHT_TEXT;
         return null;
     }
     

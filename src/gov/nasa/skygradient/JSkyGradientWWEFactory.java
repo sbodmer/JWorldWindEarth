@@ -1,13 +1,11 @@
 package gov.nasa.skygradient;
 
-import static gov.nasa.openstreetmap.JOpenstreetmapWWEFactory.LICENCE_TEXT;
 import gov.nasa.worldwind.WorldWindow;
 import java.util.ResourceBundle;
 import javax.swing.Icon;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import org.tinyrcp.App;
-import static org.tinyrcp.TinyFactory.PROPERTY_LICENCE_TEXT;
 import org.w3c.dom.Element;
 import org.worldwindearth.WWEPlugin;
 import org.worldwindearth.WWEFactory;

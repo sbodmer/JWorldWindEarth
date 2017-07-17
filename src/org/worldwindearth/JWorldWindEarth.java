@@ -28,6 +28,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import org.tinyrcp.App;
+import org.tinyrcp.AppActionEvent;
 import org.tinyrcp.JPluginsFrame;
 import org.tinyrcp.JSettingsFrame;
 import org.tinyrcp.JarClassLoader;
@@ -75,12 +76,13 @@ public class JWorldWindEarth extends javax.swing.JFrame implements ActionListene
 
         MN_Plugins.addActionListener(this);
         
-        
         jplugins = new JPluginsFrame();
         jplugins.initialize(app);
         
         jsettings = new JSettingsFrame();
         jsettings.initialize(app);
+        
+        app.addActionListener(this);
         
         setIconImage(((ImageIcon) LB_Title.getIcon()).getImage());
     }
@@ -130,7 +132,15 @@ public class JWorldWindEarth extends javax.swing.JFrame implements ActionListene
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (e.getActionCommand().equals("new")) {
+        if (e.getID() == AppActionEvent.ACTION_ID_TINYFACTORY_SETTINGS) {
+            //--- Open the settings dialog
+            AppActionEvent ae = (AppActionEvent) e;
+            TinyFactory f = (TinyFactory) ae.getData();
+            jsettings.setLocationRelativeTo(this);
+            jsettings.select(f);
+            jsettings.setVisible(true);
+            
+        } else if (e.getActionCommand().equals("new")) {
             remove(main.getVisualComponent());
             main.cleanup();
             TinyFactory fac = app.getFactory("org.tinyrcp.tabs.JTabsFactory");
@@ -171,7 +181,7 @@ public class JWorldWindEarth extends javax.swing.JFrame implements ActionListene
             
         } else if (e.getActionCommand().equals("exit")) {
             close();
-
+    
         }
     }
 
@@ -203,7 +213,7 @@ public class JWorldWindEarth extends javax.swing.JFrame implements ActionListene
         LB_Title.setText("jLabel1");
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
-        setTitle("WorlWindEarth");
+        setTitle("WorldWindEarth");
         addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowClosing(java.awt.event.WindowEvent evt) {
                 formWindowClosing(evt);
@@ -344,7 +354,7 @@ public class JWorldWindEarth extends javax.swing.JFrame implements ActionListene
                 if (nl.item(i).getNodeName().equals("Main")) {
                     mainNode = (Element) nl.item(i);
 
-                } else if (nl.item(i).getNodeName().equals("Factory")) {
+                } else if (nl.item(i).getNodeName().equals("TinyFactory")) {
                     Element e = (Element) nl.item(i);
                     confs.put(e.getAttribute("class"), e);
 
