@@ -61,7 +61,7 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
     double defaultHeight = 10;
     boolean drawProcessingBox = true;
     boolean drawOutline = false;
-    boolean applyTextures = false;
+    boolean applyRoofTextures = false;
     
     // Cylinder c = null;
     public OSMBuildingsLayer() {
@@ -193,8 +193,8 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
         }
     }
 
-    public void setApplyTextures(boolean applyTextures) {
-        this.applyTextures = applyTextures;
+    public void setApplyRoofTextures(boolean applyRoofTextures) {
+        this.applyRoofTextures = applyRoofTextures;
         
         clearTiles();
     }
@@ -408,7 +408,7 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
                     String key = (x + i) + "x" + (y + j) + "@" + ZOOM;
                     OSMBuildingsTile t = buildings.get(key);
                     if (t == null) {
-                        t = new OSMBuildingsTile(ZOOM, (x + i), (y + j), this, center, getDataFileStore(), isNetworkRetrievalEnabled(), getExpiryTime(), defaultHeight, applyTextures, produceDefaultShapeAttribute());
+                        t = new OSMBuildingsTile(ZOOM, (x + i), (y + j), this, center, getDataFileStore(), isNetworkRetrievalEnabled(), getExpiryTime(), defaultHeight, applyRoofTextures, produceDefaultShapeAttribute());
                         buildings.put(key, t);
                         t.fetch();
                     }

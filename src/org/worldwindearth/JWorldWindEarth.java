@@ -119,10 +119,13 @@ public class JWorldWindEarth extends javax.swing.JFrame implements ActionListene
             }
         }
 
+        //--- Open it before loading the config, so the panels have the correct size
+        setVisible(true);
+        
         //--- Load the configuration
         load(file);
 
-        setVisible(true);
+        
     }
 
     @Override

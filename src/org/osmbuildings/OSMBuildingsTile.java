@@ -49,7 +49,7 @@ public class OSMBuildingsTile {
     int y = 0;
     int level = 15;
     double defaultHeight = 10;
-    boolean applyTextures = false;
+    boolean applyRoofTextures = false;
     ShapeAttributes defaultAttrs = null;
 
     Position center = null;
@@ -82,7 +82,7 @@ public class OSMBuildingsTile {
     LatLon tr = null;   //--- Top right
     LatLon br = null;   //--- Bottom right
 
-    public OSMBuildingsTile(int level, int x, int y, OSMBuildingsTileListener listener, Position center, FileStore store, boolean retrieveRemoteData, long expireDate, double defaultHeight, boolean applyTextures, ShapeAttributes defaultAttrs) {
+    public OSMBuildingsTile(int level, int x, int y, OSMBuildingsTileListener listener, Position center, FileStore store, boolean retrieveRemoteData, long expireDate, double defaultHeight, boolean applyRoofTextures, ShapeAttributes defaultAttrs) {
         this.x = x;
         this.y = y;
         this.level = level;
@@ -93,7 +93,7 @@ public class OSMBuildingsTile {
         this.defaultHeight = defaultHeight;
         this.expireDate = expireDate;
         this.defaultAttrs = defaultAttrs;
-        this.applyTextures = applyTextures;
+        this.applyRoofTextures = applyRoofTextures;
         
         cachePath = OSMBuildingsLayer.CACHE_FOLDER + File.separatorChar + level + File.separatorChar + x + File.separatorChar + y + ".json";
 
@@ -371,7 +371,7 @@ public class OSMBuildingsTile {
                 renderable = new OSMBuildingsRenderable(doc, defaultHeight, defaultAttrs);
                 if (listener != null) listener.osmBuildingsLoaded(ti);
 
-                if (applyTextures) fetchTextures();
+                if (applyRoofTextures) fetchRoofTextures();
 
             } catch (NullPointerException ex) {
                 //--- File is no more in local storage ?
@@ -407,7 +407,7 @@ public class OSMBuildingsTile {
                     renderable = new OSMBuildingsRenderable(doc, defaultHeight, defaultAttrs);
                     if (listener != null) listener.osmBuildingsLoaded(ti);
 
-                    if (applyTextures) fetchTextures();
+                    if (applyRoofTextures) fetchRoofTextures();
 
                 } else {
                     //--- Wrong http response
@@ -424,7 +424,7 @@ public class OSMBuildingsTile {
             return hr.getBuffer();
         }
 
-        private void fetchTextures() {
+        private void fetchRoofTextures() {
             RoofTextureLoader rtl = new RoofTextureLoader(cachePath + "_roof.png", ti);
 
             try {

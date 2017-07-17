@@ -194,7 +194,7 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
             layer.setDrawOutline(CB_DrawOutline.isSelected());
 
         } else if (e.getActionCommand().equals("applyRoofTextures")) {
-            layer.setApplyTextures(CB_ApplyRoofTextures.isSelected());
+            layer.setApplyRoofTextures(CB_ApplyRoofTextures.isSelected());
 
         }
         ww.redraw();

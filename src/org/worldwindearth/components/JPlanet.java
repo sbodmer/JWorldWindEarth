@@ -40,6 +40,7 @@ import org.tinyrcp.TinyPlugin;
 import org.worldwindearth.JWWEPluginCellRenderer;
 import org.worldwindearth.WWEFactory;
 import org.worldwindearth.WorldWindLayersTableModel;
+import org.worldwindearth.components.renderers.JCameraCellRenderer;
 
 /**
  * All events are handled and fired by the embedded JQueryPanel
@@ -64,7 +65,8 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
      * Initial camera position
      */
     Position camera = null;
-
+    DefaultListModel<Camera> cameras = new DefaultListModel<Camera>();
+    
     /**
      * The layers list
      */
@@ -103,23 +105,12 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
 
         initComponents();
 
+        PN_Cameras.setVisible(false);
+        LI_Cameras.setModel(cameras);
+        
         //--- Set a custom desktop manager, which will block the layers internal frame if sticky
         TB_Layers.getSelectionModel().addListSelectionListener(this);
         TB_Layers.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-
-        BT_AddLayer.addActionListener(this);
-        BT_RemoveLayer.addActionListener(this);
-        BT_LayerUp.addActionListener(this);
-        BT_LayerDown.addActionListener(this);
-
-        BT_Collapse.addActionListener(this);
-        BT_More.addActionListener(this);
-        BT_Sticky.addActionListener(this);
-
-        BT_ScrollLeft.addActionListener(this);
-        BT_ScrollRight.addActionListener(this);
-
-        BT_RenameLayer.addActionListener(this);
 
         //--- Find available screens
         GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
@@ -161,6 +152,23 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         wwd = new WorldWindowGLJPanel();
         wwd.setModel(m);
 
+        LI_Cameras.setCellRenderer(new JCameraCellRenderer(app));
+        BT_Cameras.addActionListener(this);
+        
+        BT_AddLayer.addActionListener(this);
+        BT_RemoveLayer.addActionListener(this);
+        BT_LayerUp.addActionListener(this);
+        BT_LayerDown.addActionListener(this);
+
+        BT_Collapse.addActionListener(this);
+        BT_More.addActionListener(this);
+        BT_Sticky.addActionListener(this);
+
+        BT_ScrollLeft.addActionListener(this);
+        BT_ScrollRight.addActionListener(this);
+
+        BT_RenameLayer.addActionListener(this);
+        
         DP_Main.add(wwd, JLayeredPane.DEFAULT_LAYER);
         DP_Main.addComponentListener(this);
         DP_Main.addMouseListener(this);
@@ -170,6 +178,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
 
         MN_HideStatusBar.addActionListener(this);
 
+        
         InputHandler ih = wwd.getInputHandler();
         ih.addKeyListener(this);
         ih.addMouseListener(this);
@@ -332,6 +341,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
     }
 
     public void destroy() {
+        
         timer.stop();
         vtimer.stop();
 
@@ -646,6 +656,9 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
 
             }
 
+        } else if (e.getActionCommand().equals("cameras")) {
+            PN_Cameras.setVisible(BT_Cameras.isSelected());
+            
         }
 
     }
@@ -691,6 +704,9 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         wwd.setBounds(0, 0, DP_Main.getWidth(), DP_Main.getHeight());
         // LB_Licence.setBounds(0,DP_Main.getHeight()-LB_Licence.getHeight(), DP_Main.getWidth(), LB_Licence.getHeight());
 
+        //--- Replace the cameras panel
+        PN_Cameras.setBounds(DP_Main.getWidth()-320,0,320,DP_Main.getHeight());
+        
         //--- Forward to plugin the resize
         Iterator<WWEPlugin> it = plugins.values().iterator();
         while (it.hasNext()) it.next().doAction(WWEPlugin.DO_ACTION_NEWSIZE, getSize());
@@ -849,7 +865,6 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         BT_LayerDown = new javax.swing.JButton();
         BT_RenameLayer = new javax.swing.JButton();
         jSeparator9 = new javax.swing.JToolBar.Separator();
-        jSeparator8 = new javax.swing.JToolBar.Separator();
         BT_RemoveLayer = new javax.swing.JButton();
         jScrollPane2 = new javax.swing.JScrollPane();
         TB_Layers = new javax.swing.JTable();
@@ -869,6 +884,16 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         TF_Longitude = new javax.swing.JTextField();
         LB_Licence = new javax.swing.JLabel();
         DP_Main = new javax.swing.JDesktopPane();
+        PN_Cameras = new javax.swing.JPanel();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        LI_Cameras = new javax.swing.JList<>();
+        TB_CameraTools = new javax.swing.JToolBar();
+        BT_NewCamera = new javax.swing.JButton();
+        BT_CameraUp = new javax.swing.JButton();
+        BT_CameraDown = new javax.swing.JButton();
+        BT_EditCamera = new javax.swing.JButton();
+        jSeparator13 = new javax.swing.JToolBar.Separator();
+        BT_RemoveCamera = new javax.swing.JButton();
         PN_Topbar = new javax.swing.JPanel();
         jPanel1 = new javax.swing.JPanel();
         SP_LayersButtons = new javax.swing.JScrollPane();
@@ -876,6 +901,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         BT_ScrollLeft = new javax.swing.JButton();
         BT_ScrollRight = new javax.swing.JButton();
         PN_Tray = new javax.swing.JPanel();
+        BT_Cameras = new javax.swing.JToggleButton();
         jPanel7 = new javax.swing.JPanel();
         BT_More = new javax.swing.JButton();
         BT_Sticky = new javax.swing.JToggleButton();
@@ -919,7 +945,6 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
 
         jPanel5.setLayout(new java.awt.BorderLayout());
 
-        PN_LayersTop.setBackground(java.awt.Color.lightGray);
         PN_LayersTop.setMaximumSize(new java.awt.Dimension(2147483647, 32));
         PN_LayersTop.setLayout(new java.awt.BorderLayout());
 
@@ -928,7 +953,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         BT_Collapse.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
         BT_Collapse.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/collapse.png"))); // NOI18N
         BT_Collapse.setActionCommand("collapse");
-        BT_Collapse.setPreferredSize(new java.awt.Dimension(26, 26));
+        BT_Collapse.setPreferredSize(new java.awt.Dimension(32, 32));
         jPanel2.add(BT_Collapse);
 
         PN_LayersTop.add(jPanel2, java.awt.BorderLayout.WEST);
@@ -942,12 +967,10 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         PN_LayersFrame.setMinimumSize(new java.awt.Dimension(135, 0));
         PN_LayersFrame.setLayout(new java.awt.BorderLayout());
 
-        jPanel4.setBackground(new java.awt.Color(151, 172, 197));
         jPanel4.setLayout(new java.awt.BorderLayout());
 
         TB_Tools.setBorder(null);
         TB_Tools.setFloatable(false);
-        TB_Tools.setOpaque(false);
 
         BT_AddLayer.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
         BT_AddLayer.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/add.png"))); // NOI18N
@@ -982,7 +1005,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         TB_Tools.add(BT_LayerDown);
 
         BT_RenameLayer.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
-        BT_RenameLayer.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/rename.png"))); // NOI18N
+        BT_RenameLayer.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/edit.png"))); // NOI18N
         BT_RenameLayer.setToolTipText("rename layer");
         BT_RenameLayer.setActionCommand("renameLayer");
         BT_RenameLayer.setBorderPainted(false);
@@ -991,9 +1014,6 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         BT_RenameLayer.setPreferredSize(new java.awt.Dimension(26, 26));
         TB_Tools.add(BT_RenameLayer);
         TB_Tools.add(jSeparator9);
-
-        jSeparator8.setSeparatorSize(new java.awt.Dimension(10, 20));
-        TB_Tools.add(jSeparator8);
 
         BT_RemoveLayer.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
         BT_RemoveLayer.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/remove.png"))); // NOI18N
@@ -1085,6 +1105,78 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         PN_Status.add(LB_Licence);
 
         jPanel6.add(PN_Status, java.awt.BorderLayout.SOUTH);
+
+        PN_Cameras.setLayout(new java.awt.BorderLayout());
+
+        LI_Cameras.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        jScrollPane1.setViewportView(LI_Cameras);
+
+        PN_Cameras.add(jScrollPane1, java.awt.BorderLayout.CENTER);
+
+        TB_CameraTools.setBorder(null);
+        TB_CameraTools.setFloatable(false);
+
+        BT_NewCamera.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
+        BT_NewCamera.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/add.png"))); // NOI18N
+        BT_NewCamera.setToolTipText("new layer");
+        BT_NewCamera.setActionCommand("addLayer");
+        BT_NewCamera.setBorderPainted(false);
+        BT_NewCamera.setFocusPainted(false);
+        BT_NewCamera.setFocusable(false);
+        BT_NewCamera.setPreferredSize(new java.awt.Dimension(26, 26));
+        TB_CameraTools.add(BT_NewCamera);
+
+        BT_CameraUp.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
+        BT_CameraUp.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/up.png"))); // NOI18N
+        BT_CameraUp.setToolTipText("move layer up");
+        BT_CameraUp.setActionCommand("upLayer");
+        BT_CameraUp.setBorderPainted(false);
+        BT_CameraUp.setFocusPainted(false);
+        BT_CameraUp.setFocusable(false);
+        BT_CameraUp.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        BT_CameraUp.setPreferredSize(new java.awt.Dimension(26, 26));
+        TB_CameraTools.add(BT_CameraUp);
+
+        BT_CameraDown.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
+        BT_CameraDown.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/down.png"))); // NOI18N
+        BT_CameraDown.setToolTipText("move layer down");
+        BT_CameraDown.setActionCommand("downLayer");
+        BT_CameraDown.setBorderPainted(false);
+        BT_CameraDown.setFocusPainted(false);
+        BT_CameraDown.setFocusable(false);
+        BT_CameraDown.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        BT_CameraDown.setPreferredSize(new java.awt.Dimension(26, 26));
+        TB_CameraTools.add(BT_CameraDown);
+
+        BT_EditCamera.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
+        BT_EditCamera.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/edit.png"))); // NOI18N
+        BT_EditCamera.setToolTipText("rename layer");
+        BT_EditCamera.setActionCommand("renameLayer");
+        BT_EditCamera.setBorderPainted(false);
+        BT_EditCamera.setFocusPainted(false);
+        BT_EditCamera.setFocusable(false);
+        BT_EditCamera.setPreferredSize(new java.awt.Dimension(26, 26));
+        TB_CameraTools.add(BT_EditCamera);
+
+        jSeparator13.setSeparatorSize(new java.awt.Dimension(10, 20));
+        TB_CameraTools.add(jSeparator13);
+
+        BT_RemoveCamera.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
+        BT_RemoveCamera.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/remove.png"))); // NOI18N
+        BT_RemoveCamera.setToolTipText("delete layer");
+        BT_RemoveCamera.setActionCommand("removeLayer");
+        BT_RemoveCamera.setBorderPainted(false);
+        BT_RemoveCamera.setFocusPainted(false);
+        BT_RemoveCamera.setFocusable(false);
+        BT_RemoveCamera.setPreferredSize(new java.awt.Dimension(26, 26));
+        TB_CameraTools.add(BT_RemoveCamera);
+
+        PN_Cameras.add(TB_CameraTools, java.awt.BorderLayout.PAGE_START);
+
+        DP_Main.setLayer(PN_Cameras, javax.swing.JLayeredPane.PALETTE_LAYER);
+        DP_Main.add(PN_Cameras);
+        PN_Cameras.setBounds(420, 0, 200, 480);
+
         jPanel6.add(DP_Main, java.awt.BorderLayout.CENTER);
 
         PN_Topbar.setLayout(new java.awt.BorderLayout());
@@ -1129,6 +1221,12 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
 
         PN_Tray.setOpaque(false);
         PN_Tray.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT));
+
+        BT_Cameras.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/components/Resources/Icons/22x22/camera.png"))); // NOI18N
+        BT_Cameras.setActionCommand("cameras");
+        BT_Cameras.setPreferredSize(new java.awt.Dimension(32, 32));
+        PN_Tray.add(BT_Cameras);
+
         PN_Topbar.add(PN_Tray, java.awt.BorderLayout.EAST);
 
         BT_More.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
@@ -1153,10 +1251,16 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
     }// </editor-fold>//GEN-END:initComponents
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton BT_AddLayer;
+    private javax.swing.JButton BT_CameraDown;
+    private javax.swing.JButton BT_CameraUp;
+    private javax.swing.JToggleButton BT_Cameras;
     private javax.swing.JButton BT_Collapse;
+    private javax.swing.JButton BT_EditCamera;
     private javax.swing.JButton BT_LayerDown;
     private javax.swing.JButton BT_LayerUp;
     private javax.swing.JButton BT_More;
+    private javax.swing.JButton BT_NewCamera;
+    private javax.swing.JButton BT_RemoveCamera;
     private javax.swing.JButton BT_RemoveLayer;
     private javax.swing.JButton BT_RenameLayer;
     private javax.swing.JButton BT_ScrollLeft;
@@ -1165,6 +1269,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
     private javax.swing.JDesktopPane DP_Main;
     private javax.swing.JLabel LB_Layer;
     private javax.swing.JLabel LB_Licence;
+    private javax.swing.JList<Camera> LI_Cameras;
     private javax.swing.JCheckBoxMenuItem MN_Fullscreen;
     private javax.swing.JCheckBoxMenuItem MN_HideStatusBar;
     private javax.swing.JMenu MN_NewLayers;
@@ -1173,6 +1278,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
     private javax.swing.JMenuItem MN_ScreenIdentifier;
     private javax.swing.JMenu MN_Screens;
     private javax.swing.JProgressBar PB_Downloading;
+    private javax.swing.JPanel PN_Cameras;
     private javax.swing.JPanel PN_LayersButtons;
     private javax.swing.JPanel PN_LayersCenter;
     private javax.swing.JPanel PN_LayersData;
@@ -1186,6 +1292,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
     private javax.swing.JSplitPane SP_Layers;
     private javax.swing.JScrollPane SP_LayersButtons;
     private javax.swing.JSplitPane SP_Main;
+    private javax.swing.JToolBar TB_CameraTools;
     private javax.swing.JTable TB_Layers;
     private javax.swing.JToolBar TB_Tools;
     private javax.swing.JTextField TF_Altitude;
@@ -1202,13 +1309,14 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
     private javax.swing.JPanel jPanel5;
     private javax.swing.JPanel jPanel6;
     private javax.swing.JPanel jPanel7;
+    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JSeparator jSeparator1;
-    private javax.swing.JSeparator jSeparator10;
+    private javax.swing.JPopupMenu.Separator jSeparator10;
     private javax.swing.JPopupMenu.Separator jSeparator11;
+    private javax.swing.JToolBar.Separator jSeparator13;
     private javax.swing.JSeparator jSeparator6;
     private javax.swing.JSeparator jSeparator7;
-    private javax.swing.JToolBar.Separator jSeparator8;
     private javax.swing.JToolBar.Separator jSeparator9;
     private javax.swing.JLabel jlabel1;
     private javax.swing.JLabel jlabel2;
@@ -1267,4 +1375,5 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
     //**************************************************************************
     //*** For debug
     //**************************************************************************
+    
 }

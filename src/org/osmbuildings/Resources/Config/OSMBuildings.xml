@@ -8,5 +8,5 @@
     <Property name="MaxTiles" value="30"/>
     <Property name="DrawOutline" value="false"/>
     <Property name="DrawProcessingBox" value="true"/>
-    <Property name="ApplyTextures" value="false"/>
+    <Property name="ApplyRoofTextures" value="false"/>
 </Layer>
