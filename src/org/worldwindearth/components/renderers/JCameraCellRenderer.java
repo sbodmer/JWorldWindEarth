@@ -5,7 +5,9 @@
  */
 package org.worldwindearth.components.renderers;
 
+import java.awt.Color;
 import java.awt.Component;
+import javax.swing.ImageIcon;
 import javax.swing.JList;
 import javax.swing.ListCellRenderer;
 import org.tinyrcp.App;
@@ -33,7 +35,20 @@ public class JCameraCellRenderer extends javax.swing.JPanel implements ListCellR
     //**************************************************************************
     @Override
     public Component getListCellRendererComponent(JList list, Camera value, int index, boolean isSelected, boolean cellHasFocus) {
+        Color fg = isSelected?list.getSelectionForeground():list.getForeground();
+        
         LB_Title.setText(value.getTitle());
+        LB_Title.setForeground(fg);
+        
+        LB_Thumbnail.setIcon(value.getThumbnail()==null?null:new ImageIcon(value.getThumbnail()));
+        
+        if (isSelected) {
+            setBackground(list.getSelectionBackground());
+            
+        } else {
+            setBackground(Color.WHITE);
+            
+        }
         return this;
     }
     /**
@@ -45,14 +60,14 @@ public class JCameraCellRenderer extends javax.swing.JPanel implements ListCellR
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        LB_Icon = new javax.swing.JLabel();
+        LB_Thumbnail = new javax.swing.JLabel();
         LB_Title = new javax.swing.JLabel();
 
         setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
 
-        LB_Icon.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        LB_Icon.setPreferredSize(new java.awt.Dimension(64, 64));
-        add(LB_Icon);
+        LB_Thumbnail.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        LB_Thumbnail.setPreferredSize(new java.awt.Dimension(128, 84));
+        add(LB_Thumbnail);
 
         LB_Title.setText("...");
         add(LB_Title);
@@ -60,7 +75,7 @@ public class JCameraCellRenderer extends javax.swing.JPanel implements ListCellR
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JLabel LB_Icon;
+    private javax.swing.JLabel LB_Thumbnail;
     private javax.swing.JLabel LB_Title;
     // End of variables declaration//GEN-END:variables
 
