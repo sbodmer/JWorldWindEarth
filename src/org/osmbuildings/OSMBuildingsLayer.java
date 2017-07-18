@@ -62,7 +62,7 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
     boolean drawProcessingBox = true;
     boolean drawOutline = false;
     boolean applyRoofTextures = false;
-    
+
     // Cylinder c = null;
     public OSMBuildingsLayer() {
         super();
@@ -146,8 +146,7 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
 
         addRenderable(box);
          */
-         
-        /*
+ /*
         //--- Prepare the cursor
         ShapeAttributes a1 = new BasicShapeAttributes();
         a1.setInteriorMaterial(Material.GREEN);
@@ -160,7 +159,7 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
         cursor = new SurfaceCircle(a1, LatLon.ZERO, 20d);
         cursor.setVisible(true);
         addRenderable(cursor);
-        */
+         */
     }
 
     //**************************************************************************
@@ -173,9 +172,12 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
     public void clearTiles() {
         Iterator<OSMBuildingsTile> it = buildings.values().iterator();
         while (it.hasNext()) {
-            OSMBuildingsTile tile = it.next();
-            removeRenderable(tile.getTileSurfaceRenderable());
-            removeRenderable(tile.getRenderable());
+                OSMBuildingsTile tile = it.next();
+                removeRenderable(tile.getTileSurfaceRenderable());
+                //--- Sometime the renerable is not yet received before clearing it
+                if (tile.getRenderable() != null) removeRenderable(tile.getRenderable());
+                
+                
         }
         buildings.clear();
     }
@@ -196,10 +198,10 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
 
     public void setApplyRoofTextures(boolean applyRoofTextures) {
         this.applyRoofTextures = applyRoofTextures;
-        
+
         clearTiles();
     }
-    
+
     public void setMaxTiles(int maxTiles) {
         this.maxTiles = maxTiles;
     }
@@ -249,12 +251,13 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
 
     /**
      * Return the x,y and the zoom for the passed quad
+     *
      * @param quad
      * @param zoom
-     * @return 
+     * @return
      */
     public static int[] quad2xy(String quad) {
-        int xyz[] = { 0,0,0};
+        int xyz[] = {0, 0, 0};
         xyz[2] = quad.length();
         for (int i = xyz[2]; i > 0; i--) {
             int mask = 1 << (i - 1);
@@ -275,7 +278,6 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
                     xyz[1] |= mask;
                     break;
 
-                    
             }
         }
         return xyz;

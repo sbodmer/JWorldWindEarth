@@ -10,10 +10,9 @@ import gov.nasa.worldwind.WorldWindow;
 import gov.nasa.worldwind.event.RenderingEvent;
 import gov.nasa.worldwind.event.RenderingListener;
 import gov.nasa.worldwind.geom.Position;
+import gov.nasa.worldwind.view.orbit.BasicOrbitView;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
-import javax.imageio.ImageIO;
 import javax.media.opengl.GLAutoDrawable;
 
 /**
@@ -25,7 +24,10 @@ public class Camera implements RenderingListener {
     String title = "N/A";
     WorldWindow wwd = null;
     Image thumbnail = null;
-    Position eye = null;
+    Position center = null;
+    double heading = 0.0d;
+    double pitch = 0.0d;
+    double zoom = 1000d;
     
     /**
      * A screenshot will be generated for the next GL rendering pass
@@ -37,15 +39,22 @@ public class Camera implements RenderingListener {
         this.title = title;
         this.wwd = wwd;
         
-        eye = wwd.getView().getCurrentEyePosition();
+        BasicOrbitView view = (BasicOrbitView) wwd.getView();
+        center = view.getCenterPosition();
+        heading = view.getHeading().degrees;
+        pitch = view.getPitch().degrees;
+        zoom = view.getZoom();
         
         //--- For the screenshot
         wwd.addRenderingListener(this);
     }
 
-    public Camera(String title, Position eye, Image thumbnail) {
+    public Camera(String title, Position center, double heading, double pitch, double zoom, Image thumbnail) {
         this.title = title;
-        this.eye = eye;
+        this.center = center;
+        this.heading = heading;
+        this.pitch = pitch;
+        this.zoom = zoom;
         this.thumbnail = thumbnail;
     }
     
@@ -60,7 +69,12 @@ public class Camera implements RenderingListener {
     public void set(String title, WorldWindow wwd) {
         this.title = title;
         this.wwd = wwd;
-        eye = wwd.getView().getCurrentEyePosition();
+        
+        BasicOrbitView view = (BasicOrbitView) wwd.getView();
+        center = view.getCenterPosition();
+        heading = view.getHeading().degrees;
+        pitch = view.getPitch().degrees;
+        zoom = view.getZoom();
         
         //--- For the screenshot
         wwd.addRenderingListener(this);
@@ -79,8 +93,20 @@ public class Camera implements RenderingListener {
         return thumbnail;
     }
     
-    public Position getEyePosition() {
-        return eye;
+    public Position getCenterPosition() {
+        return center;
+    }
+    
+    public double getHeading() {
+        return heading;
+    }
+    
+    public double getPitch() {
+        return pitch;
+    }
+    
+    public double getZoom() {
+        return zoom;
     }
     
     //**************************************************************************

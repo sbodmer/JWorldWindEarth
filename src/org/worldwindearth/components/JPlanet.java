@@ -21,6 +21,7 @@ import gov.nasa.worldwind.layers.LayerList;
 import gov.nasa.worldwind.util.PropertyAccessor;
 import gov.nasa.worldwind.util.PropertyAccessor.PositionAccessor;
 import gov.nasa.worldwind.view.ViewPropertyAccessor.EyePositionAccessor;
+import gov.nasa.worldwind.view.orbit.BasicOrbitView;
 import gov.nasa.worldwindx.examples.ScreenShots;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -78,9 +79,10 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
     WorldWindowGLJPanel wwd = null;
 
     /**
-     * Initial camera position
+     * Initial camera position for the BasicOrbitView
      */
-    Position eye = null;
+    Position center = null;
+    double zoom = 1000d;    //--- distance from eye to center of view
     double heading = 0.0d;
     double pitch = 0.0d;
     double roll = 0.0d;
@@ -150,6 +152,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
 
         //--- Initial view and position display on the bottom
         timer = new javax.swing.Timer(1000, this);
+        //timer.setInitialDelay(5000);
 
         //--- View port timer
         vtimer = new javax.swing.Timer(1000, this);
@@ -179,7 +182,8 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         BT_Cameras.addActionListener(this);
         BT_NewCamera.addActionListener(this);
         BT_RemoveCamera.addActionListener(this);
-
+        BT_UpdateCamera.addActionListener(this);
+        
         BT_AddLayer.addActionListener(this);
         BT_RemoveLayer.addActionListener(this);
         BT_LayerUp.addActionListener(this);
@@ -205,7 +209,6 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         MN_HideStatusBar.addActionListener(this);
 
         InputHandler ih = wwd.getInputHandler();
-        System.out.println("IH:" + ih);
         ih.addKeyListener(this);
         ih.addMouseListener(this);
         ih.addMouseWheelListener(this);
@@ -243,23 +246,21 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         if (config != null) {
             NodeList nl = config.getChildNodes();
             for (int i = 0; i < nl.getLength(); i++) {
-                if (nl.item(i).getNodeName().equals("Eye")) {
+                if (nl.item(i).getNodeName().equals("Center")) {
                     try {
                         //--- Set viewport
                         Element c = (Element) nl.item(i);
-                        double lat = Double.parseDouble(c.getAttribute("lat"));
-                        double lon = Double.parseDouble(c.getAttribute("lon"));
+                        double y = Double.parseDouble(c.getAttribute("lat"));
+                        double x = Double.parseDouble(c.getAttribute("lon"));
                         double alt = Double.parseDouble(c.getAttribute("alt"));
 
-                        // double cz = Double.parseDouble(c.getAttribute("cz"));
-                        // wwd.getView().goTo(Position.fromDegrees(y, x), z);
-                        eye = Position.fromDegrees(lat, lon, alt);
+                        center = Position.fromDegrees(y, x, alt);
 
                         heading = Double.parseDouble(c.getAttribute("heading"));
                         pitch = Double.parseDouble(c.getAttribute("pitch"));
                         roll = Double.parseDouble(c.getAttribute("roll"));
+                        zoom = Double.parseDouble(c.getAttribute("zoom"));
 
-                        // center = Position.fromDegrees(cy, cx, cz);
                     } catch (NumberFormatException ex) {
                         ex.printStackTrace();
 
@@ -273,21 +274,28 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
                         if (nl2.item(j).getNodeName().equals("Camera")) {
                             Element e = (Element) nl2.item(j);
 
-                            double lat = Double.parseDouble(e.getAttribute("lat"));
-                            double lon = Double.parseDouble(e.getAttribute("lon"));
-                            double alt = Double.parseDouble(e.getAttribute("alt"));
-
-                            Position p = Position.fromDegrees(lat, lon, alt);
-                            Image thumb = null;
                             try {
-                                byte b[] = Base64.getDecoder().decode(e.getFirstChild().getNodeValue());
-                                thumb = Toolkit.getDefaultToolkit().createImage(b);
+                                double lat = Double.parseDouble(e.getAttribute("lat"));
+                                double lon = Double.parseDouble(e.getAttribute("lon"));
+                                double alt = Double.parseDouble(e.getAttribute("alt"));
+                                double heading = Double.parseDouble(e.getAttribute("heading"));
+                                double pitch = Double.parseDouble(e.getAttribute("pitch"));
+                                double zoom = Double.parseDouble(e.getAttribute("zoom"));
+                                Position p = Position.fromDegrees(lat, lon, alt);
+                                Image thumb = null;
+                                try {
+                                    byte b[] = Base64.getDecoder().decode(e.getFirstChild().getNodeValue());
+                                    thumb = Toolkit.getDefaultToolkit().createImage(b);
 
-                            } catch (NullPointerException ex) {
-                                //--- No image
+                                } catch (NullPointerException ex) {
+                                    //--- No image
+                                }
+                                Camera c = new Camera(e.getAttribute("title"), p, heading, pitch, zoom, thumb);
+                                cameras.addElement(c);
+                                
+                            } catch (NumberFormatException ex) {
+
                             }
-                            Camera c = new Camera(e.getAttribute("title"), p, thumb);
-                            cameras.addElement(c);
                         }
                     }
 
@@ -399,27 +407,32 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         e.setAttribute("dividerLocation", "" + SP_Layers.getDividerLocation());
         config.appendChild(e);
 
-        e = config.getOwnerDocument().createElement("Eye");
-        Position eye = wwd.getView().getCurrentEyePosition();
-        Position center = wwd.getView().computePositionFromScreenPoint(wwd.getWidth()/2, wwd.getHeight()/2);
-        e.setAttribute("lon", "" + center.longitude.degrees);
-        e.setAttribute("lat", "" + center.latitude.degrees);
+        e = config.getOwnerDocument().createElement("Center");
+        BasicOrbitView view = (BasicOrbitView) wwd.getView();
+        Position eye = view.getCenterPosition();
+        e.setAttribute("lon", "" + eye.longitude.degrees);
+        e.setAttribute("lat", "" + eye.latitude.degrees);
         e.setAttribute("alt", "" + eye.elevation);
-        e.setAttribute("heading", "" + wwd.getView().getHeading().degrees);
-        e.setAttribute("pitch", "" + wwd.getView().getPitch().degrees);
-        e.setAttribute("roll", "" + wwd.getView().getRoll().degrees);
-        // e.setAttribute("z", "" + camera.elevation);
+        e.setAttribute("heading", "" + view.getHeading().degrees);
+        e.setAttribute("pitch", "" + view.getPitch().degrees);
+        e.setAttribute("roll", "" + view.getRoll().degrees);
+        e.setAttribute("zoom", "" + view.getZoom());
         config.appendChild(e);
 
         //--- Add the saved cameras
         e = config.getOwnerDocument().createElement("Cameras");
         for (int i = 0; i < cameras.size(); i++) {
             Camera c = cameras.get(i);
+            Position center = c.getCenterPosition();
+
             Element e2 = config.getOwnerDocument().createElement("Camera");
             e2.setAttribute("title", c.getTitle());
-            e2.setAttribute("lon", "" + c.getEyePosition().longitude.degrees);
-            e2.setAttribute("lat", "" + c.getEyePosition().latitude.degrees);
-            e2.setAttribute("alt", "" + c.getEyePosition().elevation);
+            e2.setAttribute("lon", "" + center.longitude.degrees);
+            e2.setAttribute("lat", "" + center.latitude.degrees);
+            e2.setAttribute("alt", "" + center.elevation);
+            e2.setAttribute("heading", "" + c.getHeading());
+            e2.setAttribute("pitch", "" + c.getPitch());
+            e2.setAttribute("zoom", "" + c.getZoom());
 
             try {
                 //--- Dump the thumbnail as png
@@ -463,7 +476,8 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == timer) {
-            if (eye != null) {
+            if (center != null) {
+                /*
                 //--- Position animator
                 SmoothInterpolator inter = new SmoothInterpolator(5000);
                 PropertyAccessor.PositionAccessor ac = new PropertyAccessor.PositionAccessor() {
@@ -528,20 +542,25 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
                 };
                 AngleAnimator ra = new AngleAnimator(inter, wwd.getView().getRoll(), Angle.fromDegrees(roll), raa);
                 
-                CompoundAnimator cn = new CompoundAnimator(inter,pos,ha,pa,ra);
-                wwd.getView().addAnimator(cn);
-                cn.start();
-                
+                // System.out.println("EYE:"+eye+" center:"+orientation);
+                // CompoundAnimator cn = new CompoundAnimator(inter,pos);// ,ha,pa,ra);
+                // wwd.getView().addAnimator(cn);
+                // cn.start();
+                 */
+
+                BasicOrbitView view = (BasicOrbitView) wwd.getView();
+                view.addPanToAnimator(center, Angle.fromDegrees(heading), Angle.fromDegrees(pitch), zoom);
+
                 // wwd.getView().goTo(eye, eye.elevation);
-                eye = null;
-                
+                center = null;
+
                 //--- Return because the globe could not yet be created
                 return;
-                
+
             } else {
-                //---
+
             }
-            
+
             Position cam = wwd.getView().getEyePosition();
             if (cam != null) {
                 TF_Altitude.setText("" + (int) cam.getElevation());
@@ -551,7 +570,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
             }
             // Position ce = wwd.getView().computePositionFromScreenPoint(wwd.getWidth()/2, wwd.getHeight()/2);
             // System.out.println("LAT:"+ce.getLongitude()+" => "+cam.getLongitude());
-            
+
             wwd.redraw();
 
         } else if (e.getSource() == vtimer) {
@@ -931,7 +950,11 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         if (e.getSource() == LI_Cameras) {
             if (e.getClickCount() >= 2) {
                 Camera c = LI_Cameras.getSelectedValue();
-                if (c != null) wwd.getView().goTo(c.getEyePosition(), c.getEyePosition().elevation);
+                if (c != null) {
+                    BasicOrbitView view = (BasicOrbitView) wwd.getView();
+                    view.addPanToAnimator(c.getCenterPosition(), Angle.fromDegrees(c.getHeading()), Angle.fromDegrees(c.getPitch()), c.getZoom());
+
+                }
 
             }
         }
