@@ -345,7 +345,6 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
     }
 
     public void destroy() {
-
         timer.stop();
         vtimer.stop();
 
@@ -402,8 +401,9 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
 
         e = config.getOwnerDocument().createElement("Eye");
         Position eye = wwd.getView().getCurrentEyePosition();
-        e.setAttribute("lon", "" + eye.longitude.degrees);
-        e.setAttribute("lat", "" + eye.latitude.degrees);
+        Position center = wwd.getView().computePositionFromScreenPoint(wwd.getWidth()/2, wwd.getHeight()/2);
+        e.setAttribute("lon", "" + center.longitude.degrees);
+        e.setAttribute("lat", "" + center.latitude.degrees);
         e.setAttribute("alt", "" + eye.elevation);
         e.setAttribute("heading", "" + wwd.getView().getHeading().degrees);
         e.setAttribute("pitch", "" + wwd.getView().getPitch().degrees);
@@ -549,6 +549,9 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
                 TF_Longitude.setText("" + nf.format(cam.getLongitude().degrees));
                 PB_Downloading.setIndeterminate(WorldWind.getRetrievalService().hasActiveTasks());
             }
+            // Position ce = wwd.getView().computePositionFromScreenPoint(wwd.getWidth()/2, wwd.getHeight()/2);
+            // System.out.println("LAT:"+ce.getLongitude()+" => "+cam.getLongitude());
+            
             wwd.redraw();
 
         } else if (e.getSource() == vtimer) {

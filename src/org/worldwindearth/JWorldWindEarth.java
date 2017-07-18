@@ -401,7 +401,7 @@ public class JWorldWindEarth extends javax.swing.JFrame implements ActionListene
             return;
 
         } else if (rep == JOptionPane.CLOSED_OPTION) {
-            //---
+            //--- Close without saving
         }
 
         setVisible(false);
@@ -418,6 +418,9 @@ public class JWorldWindEarth extends javax.swing.JFrame implements ActionListene
 
         }
          */
+        
+        main.cleanup();
+        
         app.destroy();
 
         System.runFinalization();
