@@ -74,7 +74,7 @@ public class JBMNGWWEPlugin extends JPanel implements WWEPlugin, ActionListener 
     public void setup(App app, Object arg) {
         this.app = app;
 
-        //--- Create layer form defaut config/Earth/BMNGWMSLayer2.xml
+        //--- Create layer form defaut config
         BasicLayerFactory bl = new BasicLayerFactory();
         layer = (TiledImageLayer) bl.createFromConfigSource("config/Earth/BMNGWMSLayer2.xml", null);
         layer.setName("Blue Marble (2004)");

@@ -68,7 +68,7 @@ public class JLandsatWWEPlugin extends JPanel implements WWEPlugin, ActionListen
     public void setup(App app, Object arg) {
         this.app = app;
         
-        //--- Create layer form defaut config/Earth/BMNGWMSLayer2.xml
+        //--- Create layer form defaut config
         BasicLayerFactory bl = new BasicLayerFactory();
         layer = (TiledImageLayer) bl.createFromConfigSource("config/Earth/LandsatI3WMSLayer2.xml", null);
         layer.setName("Landsat");

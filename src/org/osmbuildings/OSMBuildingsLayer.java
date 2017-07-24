@@ -7,7 +7,6 @@ package org.osmbuildings;
 
 import gov.nasa.worldwind.*;
 import gov.nasa.worldwind.event.*;
-import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.layers.RenderableLayer;
 import gov.nasa.worldwind.render.*;
