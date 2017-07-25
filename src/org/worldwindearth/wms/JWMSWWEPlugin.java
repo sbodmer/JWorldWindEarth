@@ -17,8 +17,10 @@ import gov.nasa.worldwind.layers.TiledImageLayer;
 import gov.nasa.worldwind.ogc.OGCCapabilities;
 import gov.nasa.worldwind.ogc.wms.WMSCapabilities;
 import gov.nasa.worldwind.ogc.wms.WMSCapabilityInformation;
+import gov.nasa.worldwind.ogc.wms.WMSLayerCapabilities;
 import gov.nasa.worldwind.util.DataConfigurationUtils;
 import gov.nasa.worldwind.util.LevelSet;
+import gov.nasa.worldwind.wms.Capabilities;
 import gov.nasa.worldwind.wms.CapabilitiesRequest;
 import gov.nasa.worldwind.wms.WMSTiledImageLayer;
 import java.awt.event.ActionEvent;
@@ -27,9 +29,13 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.net.URI;
 import java.net.URL;
+import java.util.Iterator;
+import java.util.List;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JToggleButton;
+import javax.swing.SwingUtilities;
+import javax.swing.table.DefaultTableModel;
 import org.tinyrcp.App;
 import org.w3c.dom.Element;
 import org.worldwindearth.WWEFactory;
@@ -40,7 +46,7 @@ import org.worldwindearth.WWEPlugin;
  *
  * @author sbodmer
  */
-public class JWMSWWEPlugin extends JPanel implements WWEPlugin, ActionListener, ItemListener {
+public class JWMSWWEPlugin extends JPanel implements WWEPlugin, ActionListener, ItemListener, WMSServer.WMSServerListener {
 
     App app = null;
     WWEFactory factory = null;
@@ -121,8 +127,8 @@ public class JWMSWWEPlugin extends JPanel implements WWEPlugin, ActionListener, 
         //--- Load the stored WMS server list
         CMB_Server.removeItemListener(this);
         try {
-            CMB_Server.addItem(new WMSServer("<none>", null));
-            CMB_Server.addItem(new WMSServer("Switzerland / BGDI", new URI("http://wms.geo.admin.ch/")));// ?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetCapabilities")));
+            CMB_Server.addItem(new WMSServer("<none>", null, null));
+            CMB_Server.addItem(new WMSServer("Switzerland / BGDI", new URI("http://wms.geo.admin.ch/"), this));// ?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetCapabilities")));
 
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -192,6 +198,9 @@ public class JWMSWWEPlugin extends JPanel implements WWEPlugin, ActionListener, 
             PB_Waiting.setIndeterminate(true);
             
             WMSServer w = (WMSServer) CMB_Server.getSelectedItem();
+            w.fetch();
+            
+            /*
             try {
                 AVListImpl av = new AVListImpl();
                 av.setValue(AVKey.SERVICE_NAME, "WMS");
@@ -213,9 +222,58 @@ public class JWMSWWEPlugin extends JPanel implements WWEPlugin, ActionListener, 
                 
             }
             PB_Waiting.setIndeterminate(false);
+            */
         }
     }
 
+    //**************************************************************************
+    //*** WMSListener
+    //**************************************************************************
+    @Override
+    public void wmsCapabilitiesLoading(WMSServer wms) {
+        SwingUtilities.invokeLater(new Runnable(){
+            public void run() {
+                PB_Waiting.setIndeterminate(true);
+                CMB_Server.setEnabled(false);
+            }
+        });
+    }
+
+    @Override
+    public void wmsCapabilitiesLoaded(final WMSServer wms, final WMSCapabilities caps) {
+        SwingUtilities.invokeLater(new Runnable(){
+            @Override
+            public void run() {
+                PB_Waiting.setIndeterminate(false);
+                CMB_Server.setEnabled(true);
+                
+                TA_Abstract.setText(caps.getServiceInformation().getServiceAbstract());
+                
+                DefaultTableModel model = (DefaultTableModel) TB_Layers.getModel();
+                model.setRowCount(0);
+                Iterator<WMSLayerCapabilities> it = caps.getNamedLayers().iterator();
+                while (it.hasNext()) {
+                    WMSLayerCapabilities l = it.next();
+                    System.out.println("LAYER:"+l.getTitle());
+                }
+            }
+        });
+        
+    }
+
+    @Override
+    public void wmsCapabilitiesFailed(final WMSServer wms, final String message) {
+        SwingUtilities.invokeLater(new Runnable(){
+            @Override
+            public void run() {
+                PB_Waiting.setIndeterminate(false);
+                CMB_Server.setEnabled(true);
+                
+                DefaultTableModel model = (DefaultTableModel) TB_Layers.getModel();
+                model.setRowCount(0);
+            }
+        });
+    }
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -225,61 +283,19 @@ public class JWMSWWEPlugin extends JPanel implements WWEPlugin, ActionListener, 
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jPanel1 = new javax.swing.JPanel();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        TB_Layers = new javax.swing.JTable();
         jPanel2 = new javax.swing.JPanel();
         CMB_Server = new javax.swing.JComboBox<>();
         jPanel3 = new javax.swing.JPanel();
         PB_Waiting = new javax.swing.JProgressBar();
+        TAB_Main = new javax.swing.JTabbedPane();
+        PN_Layers = new javax.swing.JPanel();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        TB_Layers = new javax.swing.JTable();
+        jPanel1 = new javax.swing.JPanel();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        TA_Abstract = new javax.swing.JTextArea();
 
         setLayout(new java.awt.BorderLayout());
-
-        TB_Layers.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                {null, null},
-                {null, null},
-                {null, null},
-                {null, null}
-            },
-            new String [] {
-                "Active", "Layer"
-            }
-        ) {
-            Class[] types = new Class [] {
-                java.lang.Boolean.class, java.lang.String.class
-            };
-            boolean[] canEdit = new boolean [] {
-                true, false
-            };
-
-            public Class getColumnClass(int columnIndex) {
-                return types [columnIndex];
-            }
-
-            public boolean isCellEditable(int rowIndex, int columnIndex) {
-                return canEdit [columnIndex];
-            }
-        });
-        jScrollPane1.setViewportView(TB_Layers);
-
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 388, Short.MAX_VALUE)
-                .addContainerGap())
-        );
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 228, Short.MAX_VALUE)
-                .addContainerGap())
-        );
-
-        add(jPanel1, java.awt.BorderLayout.CENTER);
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -300,20 +316,73 @@ public class JWMSWWEPlugin extends JPanel implements WWEPlugin, ActionListener, 
 
         add(jPanel2, java.awt.BorderLayout.NORTH);
 
+        PB_Waiting.setPreferredSize(new java.awt.Dimension(150, 26));
         jPanel3.add(PB_Waiting);
 
         add(jPanel3, java.awt.BorderLayout.PAGE_END);
+
+        PN_Layers.setLayout(new java.awt.BorderLayout());
+
+        TB_Layers.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+
+            },
+            new String [] {
+                "Active", "Layer"
+            }
+        ) {
+            Class[] types = new Class [] {
+                java.lang.Boolean.class, java.lang.String.class
+            };
+            boolean[] canEdit = new boolean [] {
+                true, false
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        TB_Layers.setRowHeight(22);
+        jScrollPane1.setViewportView(TB_Layers);
+
+        PN_Layers.add(jScrollPane1, java.awt.BorderLayout.CENTER);
+
+        TAB_Main.addTab("Layers", PN_Layers);
+
+        jPanel1.setLayout(new java.awt.BorderLayout());
+
+        TA_Abstract.setColumns(20);
+        TA_Abstract.setLineWrap(true);
+        TA_Abstract.setRows(5);
+        TA_Abstract.setWrapStyleWord(true);
+        jScrollPane2.setViewportView(TA_Abstract);
+
+        jPanel1.add(jScrollPane2, java.awt.BorderLayout.CENTER);
+
+        TAB_Main.addTab("Abstract", jPanel1);
+
+        add(TAB_Main, java.awt.BorderLayout.CENTER);
     }// </editor-fold>//GEN-END:initComponents
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JComboBox<WMSServer> CMB_Server;
     private javax.swing.JProgressBar PB_Waiting;
+    private javax.swing.JPanel PN_Layers;
+    private javax.swing.JTabbedPane TAB_Main;
+    private javax.swing.JTextArea TA_Abstract;
     private javax.swing.JTable TB_Layers;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
     // End of variables declaration//GEN-END:variables
+
+    
 
 }

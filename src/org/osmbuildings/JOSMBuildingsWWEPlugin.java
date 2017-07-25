@@ -262,7 +262,7 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
         jLabel6.setText("Apply roof textures");
         jLabel6.setPreferredSize(new java.awt.Dimension(150, 26));
 
-        CB_ApplyRoofTextures.setActionCommand("applyTextures");
+        CB_ApplyRoofTextures.setActionCommand("applyRoofTextures");
         CB_ApplyRoofTextures.setPreferredSize(new java.awt.Dimension(26, 26));
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);

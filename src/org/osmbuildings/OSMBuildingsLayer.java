@@ -197,7 +197,7 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
 
     public void setApplyRoofTextures(boolean applyRoofTextures) {
         this.applyRoofTextures = applyRoofTextures;
-
+        
         clearTiles();
     }
 

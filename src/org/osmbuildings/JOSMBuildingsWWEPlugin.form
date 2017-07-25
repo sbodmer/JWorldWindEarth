@@ -198,7 +198,7 @@
         </Component>
         <Component class="javax.swing.JCheckBox" name="CB_ApplyRoofTextures">
           <Properties>
-            <Property name="actionCommand" type="java.lang.String" value="applyTextures"/>
+            <Property name="actionCommand" type="java.lang.String" value="applyRoofTextures"/>
             <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
               <Dimension value="[26, 26]"/>
             </Property>
