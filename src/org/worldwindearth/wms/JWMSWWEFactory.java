@@ -1,6 +1,5 @@
 package org.worldwindearth.wms;
 
-import gov.nasa.bmng.*;
 import gov.nasa.worldwind.WorldWindow;
 import java.util.ResourceBundle;
 import javax.swing.Icon;

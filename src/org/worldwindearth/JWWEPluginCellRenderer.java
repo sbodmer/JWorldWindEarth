@@ -37,6 +37,7 @@ public class JWWEPluginCellRenderer extends javax.swing.JPanel implements TableC
         Layer l = (Layer) value;
         LB_Name.setText("");
         LB_Name.setIcon(null);
+        
         if (l != null) {
             LB_Name.setText(l.getName());
             WWEPlugin p = (WWEPlugin) l.getValue(WWEPlugin.AVKEY_WORLDWIND_LAYER_PLUGIN);
@@ -51,7 +52,7 @@ public class JWWEPluginCellRenderer extends javax.swing.JPanel implements TableC
             setBackground(table.getSelectionBackground());
 
         } else {
-            setBackground(Color.white);
+            setBackground(table.getBackground());
         }
         return this;
     }

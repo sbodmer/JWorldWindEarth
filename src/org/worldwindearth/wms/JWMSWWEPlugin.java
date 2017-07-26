@@ -18,6 +18,7 @@ import gov.nasa.worldwind.ogc.OGCCapabilities;
 import gov.nasa.worldwind.ogc.wms.WMSCapabilities;
 import gov.nasa.worldwind.ogc.wms.WMSCapabilityInformation;
 import gov.nasa.worldwind.ogc.wms.WMSLayerCapabilities;
+import gov.nasa.worldwind.ogc.wms.WMSLayerStyle;
 import gov.nasa.worldwind.util.DataConfigurationUtils;
 import gov.nasa.worldwind.util.LevelSet;
 import gov.nasa.worldwind.wms.Capabilities;
@@ -31,10 +32,14 @@ import java.net.URI;
 import java.net.URL;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JToggleButton;
+import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 import org.tinyrcp.App;
 import org.w3c.dom.Element;
@@ -46,7 +51,7 @@ import org.worldwindearth.WWEPlugin;
  *
  * @author sbodmer
  */
-public class JWMSWWEPlugin extends JPanel implements WWEPlugin, ActionListener, ItemListener, WMSServer.WMSServerListener {
+public class JWMSWWEPlugin extends JPanel implements WWEPlugin, ActionListener, ItemListener, WMSServer.WMSServerListener, ListSelectionListener {
 
     App app = null;
     WWEFactory factory = null;
@@ -95,6 +100,11 @@ public class JWMSWWEPlugin extends JPanel implements WWEPlugin, ActionListener, 
     public void setup(App app, Object arg) {
         this.app = app;
 
+        TB_Layers.getColumnModel().getColumn(0).setMaxWidth(32);
+        TB_Layers.getColumnModel().getColumn(1).setCellRenderer(new WMSLayerCapabilitiesCellRenderer());
+        TB_Layers.getSelectionModel().addListSelectionListener(this);
+        TB_Layers.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        
         /*
         //--- Create layer form defaut config
         BasicLayerFactory bl = new BasicLayerFactory();
@@ -102,23 +112,22 @@ public class JWMSWWEPlugin extends JPanel implements WWEPlugin, ActionListener, 
         layer.setName("Generic WMS");
         layer.setValue(AVKEY_WORLDWIND_LAYER_PLUGIN, this);
          */
-        
-        AVListImpl av =new AVListImpl();
+        AVListImpl av = new AVListImpl();
         av.setValue(AVKey.NUM_LEVELS, 19);
         av.setValue(AVKey.LEVEL_ZERO_TILE_DELTA, LatLon.fromDegrees(90, 180));
         av.setValue(AVKey.SECTOR, Sector.FULL_SPHERE);
         av.setValue(AVKey.TILE_WIDTH, 256);
         av.setValue(AVKey.TILE_HEIGHT, 256);
-        av.setValue(AVKey.FORMAT_SUFFIX,".png");
-        av.setValue(AVKey.DATA_CACHE_NAME,"WMS");
+        av.setValue(AVKey.FORMAT_SUFFIX, ".png");
+        av.setValue(AVKey.DATA_CACHE_NAME, "WMS");
         av.setValue(AVKey.DATASET_NAME, "generic");
-        LevelSet.SectorResolution[] sectorLimits = { 
+        LevelSet.SectorResolution[] sectorLimits = {
             new LevelSet.SectorResolution(Sector.FULL_SPHERE, 19)
         };
         av.setValue(AVKey.SECTOR_RESOLUTION_LIMITS, sectorLimits);
         layer = new WrappedWMSTiledImageLayer(av);
         layer.setEnabled(false);
-        
+        layer.setValue(WWEPlugin.AVKEY_WORLDWIND_LAYER_PLUGIN, this);
         CMB_Server.addItemListener(this);
     }
 
@@ -127,8 +136,12 @@ public class JWMSWWEPlugin extends JPanel implements WWEPlugin, ActionListener, 
         //--- Load the stored WMS server list
         CMB_Server.removeItemListener(this);
         try {
-            CMB_Server.addItem(new WMSServer("<none>", null, null));
+            // CMB_Server.addItem(new WMSServer("<none>", null, null));
             CMB_Server.addItem(new WMSServer("Switzerland / BGDI", new URI("http://wms.geo.admin.ch/"), this));// ?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetCapabilities")));
+            CMB_Server.addItem(new WMSServer("Switzerland / Geneva / Orthophoto 2011", new  URI("http://ge.ch/ags2/services/Orthophotos_2011/MapServer/WMSServer"), this));
+            CMB_Server.addItem(new WMSServer("Switzerland / Geneva / Plan", new URI("http://ge.ch/ags2/services/Plan_Officiel/MapServer/WMSServer"), this));
+            //--- Select first one
+            CMB_Server.getItemAt(0).fetch();
 
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -196,10 +209,10 @@ public class JWMSWWEPlugin extends JPanel implements WWEPlugin, ActionListener, 
     public void itemStateChanged(ItemEvent e) {
         if (e.getStateChange() == ItemEvent.SELECTED) {
             PB_Waiting.setIndeterminate(true);
-            
+
             WMSServer w = (WMSServer) CMB_Server.getSelectedItem();
             w.fetch();
-            
+
             /*
             try {
                 AVListImpl av = new AVListImpl();
@@ -222,7 +235,7 @@ public class JWMSWWEPlugin extends JPanel implements WWEPlugin, ActionListener, 
                 
             }
             PB_Waiting.setIndeterminate(false);
-            */
+             */
         }
     }
 
@@ -231,7 +244,7 @@ public class JWMSWWEPlugin extends JPanel implements WWEPlugin, ActionListener, 
     //**************************************************************************
     @Override
     public void wmsCapabilitiesLoading(WMSServer wms) {
-        SwingUtilities.invokeLater(new Runnable(){
+        SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 PB_Waiting.setIndeterminate(true);
                 CMB_Server.setEnabled(false);
@@ -241,39 +254,72 @@ public class JWMSWWEPlugin extends JPanel implements WWEPlugin, ActionListener, 
 
     @Override
     public void wmsCapabilitiesLoaded(final WMSServer wms, final WMSCapabilities caps) {
-        SwingUtilities.invokeLater(new Runnable(){
+        SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
                 PB_Waiting.setIndeterminate(false);
                 CMB_Server.setEnabled(true);
-                
+
                 TA_Abstract.setText(caps.getServiceInformation().getServiceAbstract());
+                
+                
+                Iterator<String> fmts = caps.getImageFormats().iterator();
+                while (fmts.hasNext()) {
+                    String prefix = fmts.next();
+                    System.out.println("image:"+prefix);
+                }
+                
                 
                 DefaultTableModel model = (DefaultTableModel) TB_Layers.getModel();
                 model.setRowCount(0);
                 Iterator<WMSLayerCapabilities> it = caps.getNamedLayers().iterator();
                 while (it.hasNext()) {
                     WMSLayerCapabilities l = it.next();
-                    System.out.println("LAYER:"+l.getTitle());
+                    Set<WMSLayerStyle> styles = l.getStyles();
+                    if (styles.size() > 0) {
+                        Object objs[] = {false, l};
+                        model.addRow(objs);
+                    }
+                    // System.out.println("LAYER:"+l.getTitle());
                 }
             }
         });
-        
+
     }
 
     @Override
     public void wmsCapabilitiesFailed(final WMSServer wms, final String message) {
-        SwingUtilities.invokeLater(new Runnable(){
+        SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
                 PB_Waiting.setIndeterminate(false);
                 CMB_Server.setEnabled(true);
-                
+
                 DefaultTableModel model = (DefaultTableModel) TB_Layers.getModel();
                 model.setRowCount(0);
             }
         });
     }
+
+    //**************************************************************************
+    //*** ListSelectionListener
+    //**************************************************************************
+    @Override
+    public void valueChanged(ListSelectionEvent e) {
+        if (e.getSource() == TB_Layers.getSelectionModel()) {
+            if (e.getValueIsAdjusting() == true) return;
+            
+            int index = TB_Layers.getSelectedRow();
+            if (index != -1) {
+                WMSLayerCapabilities l = (WMSLayerCapabilities) TB_Layers.getValueAt(index, 1);
+                TA_Layer.setText(l.getLayerAbstract());
+                
+            } else {
+                TA_Layer.setText("");
+            }
+        }
+    }
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -291,6 +337,8 @@ public class JWMSWWEPlugin extends JPanel implements WWEPlugin, ActionListener, 
         PN_Layers = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         TB_Layers = new javax.swing.JTable();
+        jScrollPane3 = new javax.swing.JScrollPane();
+        TA_Layer = new javax.swing.JTextArea();
         jPanel1 = new javax.swing.JPanel();
         jScrollPane2 = new javax.swing.JScrollPane();
         TA_Abstract = new javax.swing.JTextArea();
@@ -351,6 +399,13 @@ public class JWMSWWEPlugin extends JPanel implements WWEPlugin, ActionListener, 
 
         PN_Layers.add(jScrollPane1, java.awt.BorderLayout.CENTER);
 
+        TA_Layer.setColumns(20);
+        TA_Layer.setLineWrap(true);
+        TA_Layer.setRows(5);
+        jScrollPane3.setViewportView(TA_Layer);
+
+        PN_Layers.add(jScrollPane3, java.awt.BorderLayout.SOUTH);
+
         TAB_Main.addTab("Layers", PN_Layers);
 
         jPanel1.setLayout(new java.awt.BorderLayout());
@@ -375,12 +430,14 @@ public class JWMSWWEPlugin extends JPanel implements WWEPlugin, ActionListener, 
     private javax.swing.JPanel PN_Layers;
     private javax.swing.JTabbedPane TAB_Main;
     private javax.swing.JTextArea TA_Abstract;
+    private javax.swing.JTextArea TA_Layer;
     private javax.swing.JTable TB_Layers;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JScrollPane jScrollPane3;
     // End of variables declaration//GEN-END:variables
 
     

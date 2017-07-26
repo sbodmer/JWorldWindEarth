@@ -79,7 +79,6 @@ public class WMSServer implements Runnable {
             if (listener != null) listener.wmsCapabilitiesLoaded(this, caps);
             
         } catch (Exception ex) {
-            ex.printStackTrace();
             if (listener != null) listener.wmsCapabilitiesFailed(this, ex.getMessage());
         }
         
