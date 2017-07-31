@@ -88,7 +88,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
     Model m = null;
 
     /**
-     * Custom layer plugin, the key is the world wind layer hash
+     * Custom layer plugin, the key is the plugin hash code
      */
     HashMap<String, WWEPlugin> plugins = new HashMap<>();
 
@@ -317,7 +317,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
                             l.setName(e.getAttribute("name"));
                             Boolean b = Boolean.valueOf(e.getAttribute("active"));
                             l.setEnabled(b);
-                            plugins.put("" + l.hashCode(), p);
+                            plugins.put("" + p.hashCode(), p);
 
                             installLayer(p, -1);
 
@@ -446,7 +446,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         LayerList ll = m.getLayers();
         for (int i = 0; i < ll.size(); i++) {
             Layer l = ll.get(i);
-            WWEPlugin p = plugins.get("" + l.hashCode());
+            WWEPlugin p = (WWEPlugin) l.getValue(WWEPlugin.AVKEY_WORLDWIND_LAYER_PLUGIN);
             if (p != null) {
                 Element wwp = config.getOwnerDocument().createElement("WorldWindLayer");
                 wwp.setAttribute("active", "" + l.isEnabled());
@@ -583,7 +583,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
                     Layer l = p.getLayer();
                     l.setName(name);
                     l.setEnabled(true);
-                    plugins.put("" + l.hashCode(), p);
+                    plugins.put("" + p.hashCode(), p);
 
                     installLayer(p, index);
 
@@ -641,7 +641,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
                 LayerList ll = m.getLayers();
                 ll.remove(l);
 
-                WWEPlugin p = plugins.remove("" + l.hashCode());
+                WWEPlugin p = (WWEPlugin) l.getValue(WWEPlugin.AVKEY_WORLDWIND_LAYER_PLUGIN);
                 if (p != null) {
                     JComponent jcomp = (JComponent) p.getConfigComponent();
                     if (jcomp != null) PN_LayersData.remove(jcomp);
@@ -653,9 +653,10 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
 
                     }
                     PN_LayersButtons.revalidate();
-
+                    
+                    plugins.remove(p);
                     p.cleanup();
-
+                    
                 }
 
             }
@@ -886,11 +887,10 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
 
                 //--- Display config
                 layout.show(PN_LayersData, "empty");
-                layout.show(PN_LayersData, "" + l.hashCode());
-
+                
                 //--- Choose button if present
                 btgblayers.clearSelection();
-                WWEPlugin p = plugins.get("" + l.hashCode());
+                WWEPlugin p = (WWEPlugin) l.getValue(WWEPlugin.AVKEY_WORLDWIND_LAYER_PLUGIN);
                 if (p != null) {
                     BT_Configure.setVisible(p.getPluginFactory().getFactoryConfigComponent() != null);
                     BT_Configure.putClientProperty("plugin", p);
@@ -907,8 +907,10 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
                         LB_Licence.setIcon(p.getPluginFactory().getFactoryIcon(TinyFactory.ICON_SIZE_NORMAL));
                     }
 
+                    layout.show(PN_LayersData, "" + p.hashCode());
+
                 } else {
-                    //--- Worldwind layer ins not managed by WWE
+                    //--- Worldwind layer is not managed by WWE
                     BT_Configure.setVisible(false);
                     LB_LayerIcon.setIcon(null);
                 }
@@ -1141,9 +1143,6 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         BT_AddLayer.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/add.png"))); // NOI18N
         BT_AddLayer.setToolTipText("new layer");
         BT_AddLayer.setActionCommand("addLayer");
-        BT_AddLayer.setBorderPainted(false);
-        BT_AddLayer.setFocusPainted(false);
-        BT_AddLayer.setFocusable(false);
         BT_AddLayer.setPreferredSize(new java.awt.Dimension(26, 26));
         TB_Tools.add(BT_AddLayer);
 
@@ -1151,9 +1150,6 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         BT_LayerUp.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/up.png"))); // NOI18N
         BT_LayerUp.setToolTipText("move layer up");
         BT_LayerUp.setActionCommand("upLayer");
-        BT_LayerUp.setBorderPainted(false);
-        BT_LayerUp.setFocusPainted(false);
-        BT_LayerUp.setFocusable(false);
         BT_LayerUp.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         BT_LayerUp.setPreferredSize(new java.awt.Dimension(26, 26));
         TB_Tools.add(BT_LayerUp);
@@ -1162,9 +1158,6 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         BT_LayerDown.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/down.png"))); // NOI18N
         BT_LayerDown.setToolTipText("move layer down");
         BT_LayerDown.setActionCommand("downLayer");
-        BT_LayerDown.setBorderPainted(false);
-        BT_LayerDown.setFocusPainted(false);
-        BT_LayerDown.setFocusable(false);
         BT_LayerDown.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         BT_LayerDown.setPreferredSize(new java.awt.Dimension(26, 26));
         TB_Tools.add(BT_LayerDown);
@@ -1173,9 +1166,6 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         BT_RenameLayer.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/edit.png"))); // NOI18N
         BT_RenameLayer.setToolTipText("rename layer");
         BT_RenameLayer.setActionCommand("renameLayer");
-        BT_RenameLayer.setBorderPainted(false);
-        BT_RenameLayer.setFocusPainted(false);
-        BT_RenameLayer.setFocusable(false);
         BT_RenameLayer.setPreferredSize(new java.awt.Dimension(26, 26));
         TB_Tools.add(BT_RenameLayer);
         TB_Tools.add(jSeparator9);
@@ -1184,9 +1174,6 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         BT_RemoveLayer.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/remove.png"))); // NOI18N
         BT_RemoveLayer.setToolTipText("delete layer");
         BT_RemoveLayer.setActionCommand("removeLayer");
-        BT_RemoveLayer.setBorderPainted(false);
-        BT_RemoveLayer.setFocusPainted(false);
-        BT_RemoveLayer.setFocusable(false);
         BT_RemoveLayer.setPreferredSize(new java.awt.Dimension(26, 26));
         TB_Tools.add(BT_RemoveLayer);
 
@@ -1224,7 +1211,6 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         LB_LayerIcon.setPreferredSize(new java.awt.Dimension(32, 32));
         jPanel11.add(LB_LayerIcon);
 
-        LB_Layer.setFont(new java.awt.Font("Arial", 1, 11)); // NOI18N
         LB_Layer.setForeground(new java.awt.Color(52, 73, 93));
         LB_Layer.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         LB_Layer.setText("...");
@@ -1537,7 +1523,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
 
         //--- Store the hash code of the layer to show the layer config panel
         JComponent jcomp = (JComponent) p.getConfigComponent();
-        if (jcomp != null) PN_LayersData.add(jcomp, "" + l.hashCode());
+        if (jcomp != null) PN_LayersData.add(jcomp, ""+p.hashCode());
 
         JToggleButton jbutton = p.getLayerButton();
         if (jbutton != null) {

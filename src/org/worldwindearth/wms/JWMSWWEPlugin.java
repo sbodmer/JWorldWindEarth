@@ -24,6 +24,7 @@ import gov.nasa.worldwind.util.LevelSet;
 import gov.nasa.worldwind.wms.Capabilities;
 import gov.nasa.worldwind.wms.CapabilitiesRequest;
 import gov.nasa.worldwind.wms.WMSTiledImageLayer;
+import static gov.nasa.worldwind.wms.WMSTiledImageLayer.wmsGetParamsFromCapsDoc;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -32,14 +33,19 @@ import java.net.URI;
 import java.net.URL;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JToggleButton;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
 import org.tinyrcp.App;
 import org.w3c.dom.Element;
@@ -51,13 +57,21 @@ import org.worldwindearth.WWEPlugin;
  *
  * @author sbodmer
  */
-public class JWMSWWEPlugin extends JPanel implements WWEPlugin, ActionListener, ItemListener, WMSServer.WMSServerListener, ListSelectionListener {
+public class JWMSWWEPlugin extends JPanel implements WWEPlugin, ActionListener, ItemListener, WMSServer.WMSServerListener, ListSelectionListener, TableModelListener, ChangeListener {
 
     App app = null;
     WWEFactory factory = null;
     WorldWindow ww = null;
 
-    WrappedWMSTiledImageLayer layer = null;
+    /**
+     * The empty layer
+     */
+    WrappedWMSTiledImageLayer dummy = null;
+
+    /**
+     * The current valid layer
+     */
+    WMSTiledImageLayer layer = null;
 
     /**
      * Creates new form WMS layer
@@ -104,7 +118,7 @@ public class JWMSWWEPlugin extends JPanel implements WWEPlugin, ActionListener, 
         TB_Layers.getColumnModel().getColumn(1).setCellRenderer(new WMSLayerCapabilitiesCellRenderer());
         TB_Layers.getSelectionModel().addListSelectionListener(this);
         TB_Layers.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        
+        TB_Layers.getModel().addTableModelListener(this);
         /*
         //--- Create layer form defaut config
         BasicLayerFactory bl = new BasicLayerFactory();
@@ -112,23 +126,16 @@ public class JWMSWWEPlugin extends JPanel implements WWEPlugin, ActionListener, 
         layer.setName("Generic WMS");
         layer.setValue(AVKEY_WORLDWIND_LAYER_PLUGIN, this);
          */
-        AVListImpl av = new AVListImpl();
-        av.setValue(AVKey.NUM_LEVELS, 19);
-        av.setValue(AVKey.LEVEL_ZERO_TILE_DELTA, LatLon.fromDegrees(90, 180));
-        av.setValue(AVKey.SECTOR, Sector.FULL_SPHERE);
-        av.setValue(AVKey.TILE_WIDTH, 256);
-        av.setValue(AVKey.TILE_HEIGHT, 256);
-        av.setValue(AVKey.FORMAT_SUFFIX, ".png");
-        av.setValue(AVKey.DATA_CACHE_NAME, "WMS");
-        av.setValue(AVKey.DATASET_NAME, "generic");
-        LevelSet.SectorResolution[] sectorLimits = {
-            new LevelSet.SectorResolution(Sector.FULL_SPHERE, 19)
-        };
-        av.setValue(AVKey.SECTOR_RESOLUTION_LIMITS, sectorLimits);
-        layer = new WrappedWMSTiledImageLayer(av);
-        layer.setEnabled(false);
-        layer.setValue(WWEPlugin.AVKEY_WORLDWIND_LAYER_PLUGIN, this);
+        //--- For debug purpose, use the wrapper one as first instance
+        dummy = new WrappedWMSTiledImageLayer();
+        dummy.setEnabled(false);
+        dummy.setValue(WWEPlugin.AVKEY_WORLDWIND_LAYER_PLUGIN, this);
         CMB_Server.addItemListener(this);
+        layer = dummy;
+
+        CMB_ImageFormat.setEnabled(false);
+        
+        SL_Opacity.addChangeListener(this);
     }
 
     @Override
@@ -138,27 +145,37 @@ public class JWMSWWEPlugin extends JPanel implements WWEPlugin, ActionListener, 
         try {
             // CMB_Server.addItem(new WMSServer("<none>", null, null));
             CMB_Server.addItem(new WMSServer("Switzerland / BGDI", new URI("http://wms.geo.admin.ch/"), this));// ?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetCapabilities")));
-            CMB_Server.addItem(new WMSServer("Switzerland / Geneva / Orthophoto 2011", new  URI("http://ge.ch/ags2/services/Orthophotos_2011/MapServer/WMSServer"), this));
+            CMB_Server.addItem(new WMSServer("Switzerland / Geneva / Orthophoto 2011", new URI("http://ge.ch/ags2/services/Orthophotos_2011/MapServer/WMSServer"), this));
             CMB_Server.addItem(new WMSServer("Switzerland / Geneva / Plan", new URI("http://ge.ch/ags2/services/Plan_Officiel/MapServer/WMSServer"), this));
+            CMB_Server.addItem(new WMSServer("World / OpenStreetMap (http://www.osm-wms.de)", new URI("http://129.206.228.72/cached/osm"), this));
             //--- Select first one
             CMB_Server.getItemAt(0).fetch();
 
+            int opacity = Integer.parseInt(config.getAttribute("opacity"));
+            SL_Opacity.setValue(opacity);
+            layer.setOpacity((double) (opacity/100d));
+            
         } catch (Exception ex) {
             ex.printStackTrace();
-
+    
         }
         CMB_Server.addItemListener(this);
+        
+        
     }
 
     @Override
     public void cleanup() {
+        dummy.dispose();
         layer.dispose();
 
     }
 
     @Override
     public void saveConfig(Element config) {
-        //---
+        if (config == null) return;
+        
+        config.setAttribute("opacity", ""+SL_Opacity.getValue());
     }
 
     @Override
@@ -191,7 +208,7 @@ public class JWMSWWEPlugin extends JPanel implements WWEPlugin, ActionListener, 
 
     @Override
     public JToggleButton getLayerButton() {
-        return null;
+        return BT_Layer;
     }
 
     //**************************************************************************
@@ -207,13 +224,31 @@ public class JWMSWWEPlugin extends JPanel implements WWEPlugin, ActionListener, 
     //**************************************************************************
     @Override
     public void itemStateChanged(ItemEvent e) {
-        if (e.getStateChange() == ItemEvent.SELECTED) {
-            PB_Waiting.setIndeterminate(true);
+        if (e.getSource() == CMB_Server) {
+            if (e.getStateChange() == ItemEvent.SELECTED) {
+                //--- A new WMS Server was selected
+                PB_Waiting.setIndeterminate(true);
 
-            WMSServer w = (WMSServer) CMB_Server.getSelectedItem();
-            w.fetch();
+                DefaultTableModel model = (DefaultTableModel) TB_Layers.getModel();
+                model.setRowCount(0);
+                TA_Abstract.setText("");
+                TA_Layer.setText("");
 
-            /*
+                CMB_ImageFormat.removeItemListener(this);
+                CMB_ImageFormat.removeAllItems();
+                CMB_ImageFormat.setEnabled(false);
+                
+                //--- Set the dummy layer to clear the tiles
+                int index = ww.getModel().getLayers().indexOf(layer, 0);
+                //--- Replace old layer
+                Layer old = ww.getModel().getLayers().set(index, dummy);
+                if (old != dummy) old.dispose();
+                layer = dummy;
+
+                WMSServer w = (WMSServer) CMB_Server.getSelectedItem();
+                w.fetch();
+
+                /*
             try {
                 AVListImpl av = new AVListImpl();
                 av.setValue(AVKey.SERVICE_NAME, "WMS");
@@ -235,7 +270,12 @@ public class JWMSWWEPlugin extends JPanel implements WWEPlugin, ActionListener, 
                 
             }
             PB_Waiting.setIndeterminate(false);
-             */
+                 */
+            }
+            
+        } else if (e.getSource() == CMB_ImageFormat) {
+            apply();
+            
         }
     }
 
@@ -254,6 +294,8 @@ public class JWMSWWEPlugin extends JPanel implements WWEPlugin, ActionListener, 
 
     @Override
     public void wmsCapabilitiesLoaded(final WMSServer wms, final WMSCapabilities caps) {
+        final ItemListener listener = this;
+
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
@@ -261,27 +303,35 @@ public class JWMSWWEPlugin extends JPanel implements WWEPlugin, ActionListener, 
                 CMB_Server.setEnabled(true);
 
                 TA_Abstract.setText(caps.getServiceInformation().getServiceAbstract());
-                
-                
+
+                //--- Fill the image format
                 Iterator<String> fmts = caps.getImageFormats().iterator();
                 while (fmts.hasNext()) {
                     String prefix = fmts.next();
-                    System.out.println("image:"+prefix);
+
+                    if (prefix.startsWith("image/jpeg")) CMB_ImageFormat.addItem(prefix);
+                    if (prefix.startsWith("image/png")) CMB_ImageFormat.addItem(prefix);
+
                 }
+
+                CMB_ImageFormat.addItemListener(listener);
+                CMB_ImageFormat.setEnabled(true);
                 
-                
+                //--- Fill the exposed layers
                 DefaultTableModel model = (DefaultTableModel) TB_Layers.getModel();
                 model.setRowCount(0);
                 Iterator<WMSLayerCapabilities> it = caps.getNamedLayers().iterator();
                 while (it.hasNext()) {
                     WMSLayerCapabilities l = it.next();
-                    Set<WMSLayerStyle> styles = l.getStyles();
-                    if (styles.size() > 0) {
+                    // System.out.println("L:"+l.getTitle());
+                    if (l.isLeaf()) {
                         Object objs[] = {false, l};
                         model.addRow(objs);
                     }
                     // System.out.println("LAYER:"+l.getTitle());
                 }
+                //--- If empty, try to apply anyway
+                if (TB_Layers.getRowCount() == 0) apply();
             }
         });
 
@@ -308,18 +358,45 @@ public class JWMSWWEPlugin extends JPanel implements WWEPlugin, ActionListener, 
     public void valueChanged(ListSelectionEvent e) {
         if (e.getSource() == TB_Layers.getSelectionModel()) {
             if (e.getValueIsAdjusting() == true) return;
-            
+
             int index = TB_Layers.getSelectedRow();
             if (index != -1) {
+                //--- Display some information about the layer
                 WMSLayerCapabilities l = (WMSLayerCapabilities) TB_Layers.getValueAt(index, 1);
                 TA_Layer.setText(l.getLayerAbstract());
-                
+
             } else {
                 TA_Layer.setText("");
             }
+
         }
     }
-    
+
+    //**************************************************************************
+    //*** TableModelListener
+    //**************************************************************************
+    @Override
+    public void tableChanged(TableModelEvent e) {
+        if (e.getSource() == TB_Layers.getModel()) {
+            if ((e.getColumn() == 0) && (e.getType() == TableModelEvent.UPDATE)) {
+                //--- Selection
+                apply();
+            }
+        }
+    }
+
+    //**************************************************************************
+    //*** ChangeListener
+    //**************************************************************************
+    @Override
+    public void stateChanged(ChangeEvent e) {
+        if (e.getSource() == SL_Opacity) {
+            double alpha = SL_Opacity.getValue()/100d;
+            layer.setOpacity(alpha);
+
+        }
+        ww.redraw();
+    }
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -329,9 +406,11 @@ public class JWMSWWEPlugin extends JPanel implements WWEPlugin, ActionListener, 
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jPanel2 = new javax.swing.JPanel();
-        CMB_Server = new javax.swing.JComboBox<>();
+        BT_Layer = new javax.swing.JToggleButton();
         jPanel3 = new javax.swing.JPanel();
+        jPanel1 = new javax.swing.JPanel();
+        CMB_ImageFormat = new javax.swing.JComboBox<>();
+        jPanel4 = new javax.swing.JPanel();
         PB_Waiting = new javax.swing.JProgressBar();
         TAB_Main = new javax.swing.JTabbedPane();
         PN_Layers = new javax.swing.JPanel();
@@ -339,33 +418,30 @@ public class JWMSWWEPlugin extends JPanel implements WWEPlugin, ActionListener, 
         TB_Layers = new javax.swing.JTable();
         jScrollPane3 = new javax.swing.JScrollPane();
         TA_Layer = new javax.swing.JTextArea();
-        jPanel1 = new javax.swing.JPanel();
+        PN_Abstract = new javax.swing.JPanel();
         jScrollPane2 = new javax.swing.JScrollPane();
         TA_Abstract = new javax.swing.JTextArea();
+        jPanel6 = new javax.swing.JPanel();
+        jPanel5 = new javax.swing.JPanel();
+        SL_Opacity = new javax.swing.JSlider();
+        jPanel2 = new javax.swing.JPanel();
+        CMB_Server = new javax.swing.JComboBox<>();
+
+        BT_Layer.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/wms/Resources/Icons/22x22/wms.png"))); // NOI18N
+        BT_Layer.setPreferredSize(new java.awt.Dimension(32, 32));
 
         setLayout(new java.awt.BorderLayout());
 
-        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
-        jPanel2.setLayout(jPanel2Layout);
-        jPanel2Layout.setHorizontalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel2Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(CMB_Server, 0, 388, Short.MAX_VALUE)
-                .addContainerGap())
-        );
-        jPanel2Layout.setVerticalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel2Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(CMB_Server, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
+        jPanel3.setLayout(new java.awt.BorderLayout());
 
-        add(jPanel2, java.awt.BorderLayout.NORTH);
+        jPanel1.add(CMB_ImageFormat);
 
-        PB_Waiting.setPreferredSize(new java.awt.Dimension(150, 26));
-        jPanel3.add(PB_Waiting);
+        jPanel3.add(jPanel1, java.awt.BorderLayout.EAST);
+
+        PB_Waiting.setPreferredSize(new java.awt.Dimension(100, 26));
+        jPanel4.add(PB_Waiting);
+
+        jPanel3.add(jPanel4, java.awt.BorderLayout.CENTER);
 
         add(jPanel3, java.awt.BorderLayout.PAGE_END);
 
@@ -408,7 +484,7 @@ public class JWMSWWEPlugin extends JPanel implements WWEPlugin, ActionListener, 
 
         TAB_Main.addTab("Layers", PN_Layers);
 
-        jPanel1.setLayout(new java.awt.BorderLayout());
+        PN_Abstract.setLayout(new java.awt.BorderLayout());
 
         TA_Abstract.setColumns(20);
         TA_Abstract.setLineWrap(true);
@@ -416,18 +492,72 @@ public class JWMSWWEPlugin extends JPanel implements WWEPlugin, ActionListener, 
         TA_Abstract.setWrapStyleWord(true);
         jScrollPane2.setViewportView(TA_Abstract);
 
-        jPanel1.add(jScrollPane2, java.awt.BorderLayout.CENTER);
+        PN_Abstract.add(jScrollPane2, java.awt.BorderLayout.CENTER);
 
-        TAB_Main.addTab("Abstract", jPanel1);
+        TAB_Main.addTab("Abstract", PN_Abstract);
 
         add(TAB_Main, java.awt.BorderLayout.CENTER);
+
+        jPanel6.setLayout(new java.awt.BorderLayout());
+
+        SL_Opacity.setFont(new java.awt.Font("Monospaced", 0, 10)); // NOI18N
+        SL_Opacity.setMajorTickSpacing(10);
+        SL_Opacity.setMinorTickSpacing(5);
+        SL_Opacity.setPaintLabels(true);
+        SL_Opacity.setPaintTicks(true);
+        SL_Opacity.setToolTipText("Opacity");
+        SL_Opacity.setValue(100);
+
+        javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
+        jPanel5.setLayout(jPanel5Layout);
+        jPanel5Layout.setHorizontalGroup(
+            jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel5Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(SL_Opacity, javax.swing.GroupLayout.DEFAULT_SIZE, 388, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+        jPanel5Layout.setVerticalGroup(
+            jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel5Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(SL_Opacity, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        jPanel6.add(jPanel5, java.awt.BorderLayout.NORTH);
+
+        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
+        jPanel2.setLayout(jPanel2Layout);
+        jPanel2Layout.setHorizontalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(CMB_Server, 0, 0, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+        jPanel2Layout.setVerticalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(CMB_Server, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        jPanel6.add(jPanel2, java.awt.BorderLayout.CENTER);
+
+        add(jPanel6, java.awt.BorderLayout.NORTH);
     }// </editor-fold>//GEN-END:initComponents
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JToggleButton BT_Layer;
+    private javax.swing.JComboBox<String> CMB_ImageFormat;
     private javax.swing.JComboBox<WMSServer> CMB_Server;
     private javax.swing.JProgressBar PB_Waiting;
+    private javax.swing.JPanel PN_Abstract;
     private javax.swing.JPanel PN_Layers;
+    private javax.swing.JSlider SL_Opacity;
     private javax.swing.JTabbedPane TAB_Main;
     private javax.swing.JTextArea TA_Abstract;
     private javax.swing.JTextArea TA_Layer;
@@ -435,11 +565,55 @@ public class JWMSWWEPlugin extends JPanel implements WWEPlugin, ActionListener, 
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
+    private javax.swing.JPanel jPanel4;
+    private javax.swing.JPanel jPanel5;
+    private javax.swing.JPanel jPanel6;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
     // End of variables declaration//GEN-END:variables
 
-    
+    /**
+     * Apply the selected layers
+     *
+     */
+    private void apply() {
+        //--- Create the new layer
+        String names = "";
+        for (int i = 0;i < TB_Layers.getRowCount();i++) {
+            Boolean selected = (Boolean) TB_Layers.getValueAt(i, 0);
+            if (selected) {
+                WMSLayerCapabilities l = (WMSLayerCapabilities) TB_Layers.getValueAt(i, 1);
+                names += "," + l.getName();
+            }
+        }
 
+        //--- Empty list not permitted
+        if (names.equals("")) return;
+
+        //--- Find index of current layer
+        int index = ww.getModel().getLayers().indexOf(layer, 0);
+
+        WMSServer wms = (WMSServer) CMB_Server.getSelectedItem();
+        AVListImpl params = new AVListImpl();
+        params.setValue(AVKey.LAYER_NAMES, names.substring(1));
+        params.setValue(AVKey.IMAGE_FORMAT, CMB_ImageFormat.getSelectedItem().toString());
+        // params.setValue(AVKey.DATASET_NAME, App.MD5(names));
+
+        wmsGetParamsFromCapsDoc(wms.getCapabilities(), params);
+        layer = new WMSTiledImageLayer(params);
+        layer.setValue(WWEPlugin.AVKEY_WORLDWIND_LAYER_PLUGIN, this);
+        layer.setOpacity(SL_Opacity.getValue()/100d);
+        
+        Iterator<Map.Entry<String, Object>> it = params.getEntries().iterator();
+        while (it.hasNext()) {
+            Map.Entry<String, Object> entry = it.next();
+            System.out.println("" + entry.getKey() + " = " + entry.getValue());
+            // setValue(e.getKey(), e.getValue());
+        }
+        
+        //--- Replace old layer
+        Layer old = ww.getModel().getLayers().set(index, layer);
+        if (old != dummy) old.dispose();
+    }
 }

@@ -33,7 +33,7 @@
     <!--The image format to use when requesting image tiles from the WMS. Tiles are downloaded in this format, but-->
     <!--their format in the WorldWind data cache is specified by the FormatSuffix element. Replace this with an image-->
     <!--format accepted by your WMS, if necessary.-->
-    <ImageFormat>image/png</ImageFormat>
+    <ImageFormat>{IMAGE_FORMAT}</ImageFormat>
     <!--The list of image formats supported by your WMS, ordered by decreasing preference (the preferred format is on-->
     <!--top). This list is used by the layer's image composition feature to determine the image format to use when-->
     <!--composing an image from one or more WMS layers. Replace this with a list of image formats supported by your-->

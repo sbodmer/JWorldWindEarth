@@ -49,6 +49,14 @@ public class WMSServer implements Runnable {
     }
 
     /**
+     * Returned the fetched capabilities or null if not yet fetched
+     * 
+     * @return 
+     */
+    public WMSCapabilities getCapabilities() {
+        return caps;
+    }
+    /**
      * Fetch the capabilities in i't onw thread, use listener to receive feed-back
      */
     public void fetch() {
