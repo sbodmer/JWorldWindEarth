@@ -7,22 +7,10 @@ package org.worldwindearth.wms;
 
 import gov.nasa.worldwind.WorldWindow;
 import gov.nasa.worldwind.avlist.AVKey;
-import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.avlist.AVListImpl;
-import gov.nasa.worldwind.geom.LatLon;
-import gov.nasa.worldwind.geom.Sector;
-import gov.nasa.worldwind.layers.BasicLayerFactory;
 import gov.nasa.worldwind.layers.Layer;
-import gov.nasa.worldwind.layers.TiledImageLayer;
-import gov.nasa.worldwind.ogc.OGCCapabilities;
 import gov.nasa.worldwind.ogc.wms.WMSCapabilities;
-import gov.nasa.worldwind.ogc.wms.WMSCapabilityInformation;
 import gov.nasa.worldwind.ogc.wms.WMSLayerCapabilities;
-import gov.nasa.worldwind.ogc.wms.WMSLayerStyle;
-import gov.nasa.worldwind.util.DataConfigurationUtils;
-import gov.nasa.worldwind.util.LevelSet;
-import gov.nasa.worldwind.wms.Capabilities;
-import gov.nasa.worldwind.wms.CapabilitiesRequest;
 import gov.nasa.worldwind.wms.WMSTiledImageLayer;
 import static gov.nasa.worldwind.wms.WMSTiledImageLayer.wmsGetParamsFromCapsDoc;
 import java.awt.event.ActionEvent;
@@ -30,11 +18,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.net.URI;
-import java.net.URL;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JToggleButton;
@@ -134,7 +119,7 @@ public class JWMSWWEPlugin extends JPanel implements WWEPlugin, ActionListener, 
         layer = dummy;
 
         CMB_ImageFormat.setEnabled(false);
-        
+
         SL_Opacity.addChangeListener(this);
     }
 
@@ -147,21 +132,23 @@ public class JWMSWWEPlugin extends JPanel implements WWEPlugin, ActionListener, 
             CMB_Server.addItem(new WMSServer("Switzerland / BGDI", new URI("http://wms.geo.admin.ch/"), this));// ?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetCapabilities")));
             CMB_Server.addItem(new WMSServer("Switzerland / Geneva / Orthophoto 2011", new URI("http://ge.ch/ags2/services/Orthophotos_2011/MapServer/WMSServer"), this));
             CMB_Server.addItem(new WMSServer("Switzerland / Geneva / Plan", new URI("http://ge.ch/ags2/services/Plan_Officiel/MapServer/WMSServer"), this));
-            CMB_Server.addItem(new WMSServer("World / OpenStreetMap (http://www.osm-wms.de)", new URI("http://129.206.228.72/cached/osm"), this));
+            CMB_Server.addItem(new WMSServer("World / OpenStreetMap (www.osm-wms.de)", new URI("http://129.206.228.72/cached/osm"), this));
+            // CMB_Server.addItem(new WMSServer("World / NASA", new URI("http://neowms.sci"), this));
             //--- Select first one
             CMB_Server.getItemAt(0).fetch();
 
-            int opacity = Integer.parseInt(config.getAttribute("opacity"));
-            SL_Opacity.setValue(opacity);
-            layer.setOpacity((double) (opacity/100d));
+            if (config != null) {
+                int opacity = Integer.parseInt(config.getAttribute("opacity"));
+                SL_Opacity.setValue(opacity);
+                layer.setOpacity((double) (opacity / 100d));
+            }
             
         } catch (Exception ex) {
             ex.printStackTrace();
-    
+
         }
         CMB_Server.addItemListener(this);
-        
-        
+
     }
 
     @Override
@@ -174,8 +161,8 @@ public class JWMSWWEPlugin extends JPanel implements WWEPlugin, ActionListener, 
     @Override
     public void saveConfig(Element config) {
         if (config == null) return;
-        
-        config.setAttribute("opacity", ""+SL_Opacity.getValue());
+
+        config.setAttribute("opacity", "" + SL_Opacity.getValue());
     }
 
     @Override
@@ -189,7 +176,7 @@ public class JWMSWWEPlugin extends JPanel implements WWEPlugin, ActionListener, 
     }
 
     @Override
-    public Object doAction(String action, Object argument) {
+    public Object doAction(String action, Object argument, Object subject) {
         return null;
     }
 
@@ -207,8 +194,8 @@ public class JWMSWWEPlugin extends JPanel implements WWEPlugin, ActionListener, 
     }
 
     @Override
-    public JToggleButton getLayerButton() {
-        return BT_Layer;
+    public boolean hasLayerButton() {
+        return true;
     }
 
     //**************************************************************************
@@ -237,7 +224,7 @@ public class JWMSWWEPlugin extends JPanel implements WWEPlugin, ActionListener, 
                 CMB_ImageFormat.removeItemListener(this);
                 CMB_ImageFormat.removeAllItems();
                 CMB_ImageFormat.setEnabled(false);
-                
+
                 //--- Set the dummy layer to clear the tiles
                 int index = ww.getModel().getLayers().indexOf(layer, 0);
                 //--- Replace old layer
@@ -272,10 +259,10 @@ public class JWMSWWEPlugin extends JPanel implements WWEPlugin, ActionListener, 
             PB_Waiting.setIndeterminate(false);
                  */
             }
-            
+
         } else if (e.getSource() == CMB_ImageFormat) {
             apply();
-            
+
         }
     }
 
@@ -316,7 +303,7 @@ public class JWMSWWEPlugin extends JPanel implements WWEPlugin, ActionListener, 
 
                 CMB_ImageFormat.addItemListener(listener);
                 CMB_ImageFormat.setEnabled(true);
-                
+
                 //--- Fill the exposed layers
                 DefaultTableModel model = (DefaultTableModel) TB_Layers.getModel();
                 model.setRowCount(0);
@@ -391,12 +378,13 @@ public class JWMSWWEPlugin extends JPanel implements WWEPlugin, ActionListener, 
     @Override
     public void stateChanged(ChangeEvent e) {
         if (e.getSource() == SL_Opacity) {
-            double alpha = SL_Opacity.getValue()/100d;
+            double alpha = SL_Opacity.getValue() / 100d;
             layer.setOpacity(alpha);
 
         }
         ww.redraw();
     }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -406,7 +394,6 @@ public class JWMSWWEPlugin extends JPanel implements WWEPlugin, ActionListener, 
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        BT_Layer = new javax.swing.JToggleButton();
         jPanel3 = new javax.swing.JPanel();
         jPanel1 = new javax.swing.JPanel();
         CMB_ImageFormat = new javax.swing.JComboBox<>();
@@ -426,9 +413,6 @@ public class JWMSWWEPlugin extends JPanel implements WWEPlugin, ActionListener, 
         SL_Opacity = new javax.swing.JSlider();
         jPanel2 = new javax.swing.JPanel();
         CMB_Server = new javax.swing.JComboBox<>();
-
-        BT_Layer.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/wms/Resources/Icons/22x22/wms.png"))); // NOI18N
-        BT_Layer.setPreferredSize(new java.awt.Dimension(32, 32));
 
         setLayout(new java.awt.BorderLayout());
 
@@ -551,7 +535,6 @@ public class JWMSWWEPlugin extends JPanel implements WWEPlugin, ActionListener, 
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JToggleButton BT_Layer;
     private javax.swing.JComboBox<String> CMB_ImageFormat;
     private javax.swing.JComboBox<WMSServer> CMB_Server;
     private javax.swing.JProgressBar PB_Waiting;
@@ -580,7 +563,7 @@ public class JWMSWWEPlugin extends JPanel implements WWEPlugin, ActionListener, 
     private void apply() {
         //--- Create the new layer
         String names = "";
-        for (int i = 0;i < TB_Layers.getRowCount();i++) {
+        for (int i = 0; i < TB_Layers.getRowCount(); i++) {
             Boolean selected = (Boolean) TB_Layers.getValueAt(i, 0);
             if (selected) {
                 WMSLayerCapabilities l = (WMSLayerCapabilities) TB_Layers.getValueAt(i, 1);
@@ -603,15 +586,15 @@ public class JWMSWWEPlugin extends JPanel implements WWEPlugin, ActionListener, 
         wmsGetParamsFromCapsDoc(wms.getCapabilities(), params);
         layer = new WMSTiledImageLayer(params);
         layer.setValue(WWEPlugin.AVKEY_WORLDWIND_LAYER_PLUGIN, this);
-        layer.setOpacity(SL_Opacity.getValue()/100d);
-        
+        layer.setOpacity(SL_Opacity.getValue() / 100d);
+
         Iterator<Map.Entry<String, Object>> it = params.getEntries().iterator();
         while (it.hasNext()) {
             Map.Entry<String, Object> entry = it.next();
             System.out.println("" + entry.getKey() + " = " + entry.getValue());
             // setValue(e.getKey(), e.getValue());
         }
-        
+
         //--- Replace old layer
         Layer old = ww.getModel().getLayers().set(index, layer);
         if (old != dummy) old.dispose();

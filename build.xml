@@ -171,6 +171,11 @@
         <jar destfile="${dist.dir}/lib/ext/layers/WMS.jar" manifest="Manifests/layers/WMS.mf">
             <fileset dir="${build.dir}/classes" includes="org/worldwindearth/wms/**"/>
         </jar>
+        <echo message="[Layer] Nominatim"/>
+        <jar destfile="${dist.dir}/lib/ext/layers/Nominatim.jar" manifest="Manifests/layers/Nominatim.mf">
+            <fileset dir="${build.dir}/classes" includes="org/nominatim/**"/>
+        </jar>
+        
     </target>
     
     <target name="copy_libs">

@@ -21,14 +21,24 @@ public interface WWEPlugin extends TinyPlugin {
      */
     public static final String AVKEY_WORLDWIND_LAYER_PLUGIN = "org.worldwindearth.WWEPlugin";
     
-    
-    
     /**
      * When the viewport should be fetched again if needed<p>
      *
      * No argument
      */
-    public static final String DO_ACTION_VIEWPORT = "viewport";
+    public static final String DO_ACTION_VIEWPORT_NEEDS_REFRESH = "org.worldwindearth.viewportNeedsRefresh";
+    
+    /**
+     * When the old selected layer is not more active, this message is broadcasted
+     * by the framework to the previous selected layer<p>
+     * 
+     */
+    public static final String DO_ACTION_LAYER_UNSELECTED = "org.worldwindearth.layerUnselected";
+    
+    /**
+     * The new selected layer will received this message
+     */
+    public static final String DO_ACTION_LAYER_SELECTED = "org.worldwindearth.layerSelected";
     
     /**
      * Return the ww layer
@@ -38,9 +48,10 @@ public interface WWEPlugin extends TinyPlugin {
     public Layer getLayer();
     
     /**
-     * Returns the layer button (null if no button)<p>
-     *
+     * Returns if this layer exposed a button to select the layer<p>
+     * 
      * @return
      */
-    public JToggleButton getLayerButton();
+    public boolean hasLayerButton();
+    
 }

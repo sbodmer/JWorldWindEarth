@@ -96,7 +96,7 @@ public class JCountriesWWEPlugin extends JPanel implements WWEPlugin, ActionList
     }
 
     @Override
-    public Object doAction(String action, Object argument) {
+    public Object doAction(String action, Object argument, Object subject) {
         return null;
     }
 
@@ -124,8 +124,8 @@ public class JCountriesWWEPlugin extends JPanel implements WWEPlugin, ActionList
     }
     
     @Override
-    public JToggleButton getLayerButton() {
-        return null;
+    public boolean hasLayerButton() {
+        return false;
     }
     
     //**************************************************************************

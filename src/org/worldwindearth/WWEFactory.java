@@ -24,6 +24,7 @@ public interface WWEFactory extends TinyFactory {
     public static final String PLUGIN_FAMILY_WORLDWIND_LAYER_WMS            = "wwe,layer,wms";
     public static final String PLUGIN_FAMILY_WORLDWIND_LAYER_BUILDINGS      = "wwe,layer,buildings";
     public static final String PLUGIN_FAMILY_WORLDWIND_LAYER_GRATICULE      = "wwe,layer,graticule";
+    public static final String PLUGIN_FAMILY_WORLDWIND_LAYER_GEOCODING      = "wwe,layer,geocoding";
     
     
 }

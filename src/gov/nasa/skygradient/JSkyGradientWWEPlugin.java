@@ -112,7 +112,7 @@ public class JSkyGradientWWEPlugin extends JPanel implements WWEPlugin, ActionLi
     }
 
     @Override
-    public Object doAction(String action, Object argument) {
+    public Object doAction(String action, Object argument, Object subject) {
         return null;
     }
 
@@ -125,8 +125,8 @@ public class JSkyGradientWWEPlugin extends JPanel implements WWEPlugin, ActionLi
     }
     
     @Override
-    public JToggleButton getLayerButton() {
-        return null;
+    public boolean hasLayerButton() {
+        return false;
     }
     
     //**************************************************************************

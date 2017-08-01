@@ -116,7 +116,7 @@ public class JOpenstreetmapWWEPlugin extends JPanel implements WWEPlugin, Action
     }
 
     @Override
-    public Object doAction(String action, Object argument) {
+    public Object doAction(String action, Object argument, Object subject) {
         return null;
     }
 
@@ -129,8 +129,8 @@ public class JOpenstreetmapWWEPlugin extends JPanel implements WWEPlugin, Action
     }
     
     @Override
-    public JToggleButton getLayerButton() {
-        return null;
+    public boolean hasLayerButton() {
+        return false;
     }
     
     //**************************************************************************

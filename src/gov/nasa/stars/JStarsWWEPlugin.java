@@ -113,7 +113,7 @@ public class JStarsWWEPlugin extends JPanel implements WWEPlugin, ActionListener
     }
 
     @Override
-    public Object doAction(String action, Object argument) {
+    public Object doAction(String action, Object argument, Object subject) {
         return null;
     }
 
@@ -126,8 +126,8 @@ public class JStarsWWEPlugin extends JPanel implements WWEPlugin, ActionListener
     }
     
     @Override
-    public JToggleButton getLayerButton() {
-        return null;
+    public boolean hasLayerButton() {
+        return false;
     }
     
     //**************************************************************************

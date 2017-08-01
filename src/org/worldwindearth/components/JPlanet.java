@@ -108,6 +108,11 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
     JFrame jframe = null;         //--- Fullscreen frame
 
     /**
+     * The current selected layer
+     */
+    WWEPlugin selected = null;
+    
+    /**
      * Creates new form JTerminals
      */
     public JPlanet() {
@@ -188,7 +193,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
 
         BT_RenameLayer.addActionListener(this);
 
-        DP_Main.add(wwd, JLayeredPane.DEFAULT_LAYER);
+        DP_Main.add(wwd, new Integer(-10)); //--- Lowest priority
         DP_Main.addComponentListener(this);
         // DP_Main.addMouseListener(this);
 
@@ -221,6 +226,8 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         MN_NewLayers.add(jmenu, 4);
         jmenu = app.createFactoryMenus("Graticules", WWEFactory.PLUGIN_CATEGORY_WORLDWIND_LAYER, WWEFactory.PLUGIN_FAMILY_WORLDWIND_LAYER_GRATICULE, this);
         MN_NewLayers.add(jmenu, 5);
+        jmenu = app.createFactoryMenus("Geocoding", WWEFactory.PLUGIN_CATEGORY_WORLDWIND_LAYER, WWEFactory.PLUGIN_FAMILY_WORLDWIND_LAYER_GEOCODING, this);
+        MN_NewLayers.add(jmenu, 6);
 
         //--- Prepare table
         layers = new WorldWindLayersTableModel(m.getLayers());
@@ -466,6 +473,14 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == timer) {
             if (center != null) {
+                //--- First time the window is fully realized with correct size
+                //--- Perform initial broadcast message
+                Iterator<WWEPlugin> it = plugins.values().iterator();
+                while (it.hasNext()) {
+                    WWEPlugin p = it.next();
+                    p.doAction(TinyPlugin.DO_ACTION_NEWSIZE, DP_Main.getSize(), null);
+                }
+                
                 /*
                 //--- Position animator
                 SmoothInterpolator inter = new SmoothInterpolator(5000);
@@ -543,13 +558,11 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
                 // wwd.getView().goTo(eye, eye.elevation);
                 center = null;
 
-                //--- Return because the globe could not yet be created
-                return;
-
             } else {
 
             }
 
+            //--- Display eye position on the bottom of the window
             Position cam = wwd.getView().getEyePosition();
             if (cam != null) {
                 TF_Altitude.setText("" + (int) cam.getElevation());
@@ -559,13 +572,12 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
             }
             // Position ce = wwd.getView().computePositionFromScreenPoint(wwd.getWidth()/2, wwd.getHeight()/2);
             // System.out.println("LAT:"+ce.getLongitude()+" => "+cam.getLongitude());
-
             wwd.redraw();
 
         } else if (e.getSource() == vtimer) {
             //--- Forward to plugin the motion stop
             Iterator<WWEPlugin> it = plugins.values().iterator();
-            while (it.hasNext()) it.next().doAction(WWEPlugin.DO_ACTION_VIEWPORT, null);
+            while (it.hasNext()) it.next().doAction(WWEPlugin.DO_ACTION_VIEWPORT_NEEDS_REFRESH, null, null);
 
         } else if (e.getActionCommand().equals("newPlugin")) {
             JMenuItem ji = (JMenuItem) e.getSource();
@@ -643,14 +655,26 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
 
                 WWEPlugin p = (WWEPlugin) l.getValue(WWEPlugin.AVKEY_WORLDWIND_LAYER_PLUGIN);
                 if (p != null) {
-                    JComponent jcomp = (JComponent) p.getConfigComponent();
+                    //--- Remove the config panel
+                    JComponent jcomp = p.getConfigComponent();
                     if (jcomp != null) PN_LayersData.remove(jcomp);
-                    JToggleButton jbutton = p.getLayerButton();
-                    if (jbutton != null) {
-                        PN_LayersButtons.remove(jbutton);
-                        btgblayers.remove(jbutton);
-                        jbutton.removeActionListener(this);
-
+                    
+                    //--- Remove the main visual on the layered pane
+                    jcomp = p.getVisualComponent();
+                    if (jcomp != null) DP_Main.remove(jcomp);
+                    
+                    //--- Remove the button
+                    if (p.hasLayerButton()) {
+                        for (int i=0;i<PN_LayersButtons.getComponentCount();i++) {
+                            JToggleButton jbutton = (JToggleButton) PN_LayersButtons.getComponent(i);
+                            TinyPlugin tmp =(TinyPlugin) jbutton.getClientProperty("plugin");
+                            if (tmp == p) {
+                                jbutton.removeActionListener(this);
+                                btgblayers.remove(jbutton);
+                                PN_LayersButtons.remove(jbutton);
+                                break;
+                            }
+                        }
                     }
                     PN_LayersButtons.revalidate();
                     
@@ -846,14 +870,19 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
     public void componentResized(ComponentEvent e) {
         //--- Resize the world wind panel
         wwd.setBounds(0, 0, DP_Main.getWidth(), DP_Main.getHeight());
+        
+        //--- Resize the main visual component (at DEFAULT_LAYER)
+        Component comps[] = DP_Main.getComponentsInLayer(JLayeredPane.DEFAULT_LAYER);
+        for (int i=0;i<comps.length;i++) comps[i].setBounds(0, 0, DP_Main.getWidth(), DP_Main.getHeight());
+                
         // LB_Licence.setBounds(0,DP_Main.getHeight()-LB_Licence.getHeight(), DP_Main.getWidth(), LB_Licence.getHeight());
 
         //--- Replace the cameras panel
         PN_Cameras.setBounds(DP_Main.getWidth() - 320, 0, 320, DP_Main.getHeight());
 
-        //--- Forward to plugin the resize
+        //--- Forward to plugin the layer resize
         Iterator<WWEPlugin> it = plugins.values().iterator();
-        while (it.hasNext()) it.next().doAction(WWEPlugin.DO_ACTION_NEWSIZE, getSize());
+        while (it.hasNext()) it.next().doAction(WWEPlugin.DO_ACTION_NEWSIZE, DP_Main.getSize(), null);
     }
 
     @Override
@@ -879,6 +908,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         if (e.getSource() == TB_Layers.getSelectionModel()) {
             if (e.getValueIsAdjusting() == true) return;
 
+            //--- A new layer was selected
             int index = TB_Layers.getSelectedRow();
             if (index != -1) {
                 CardLayout layout = (CardLayout) PN_LayersData.getLayout();
@@ -892,14 +922,26 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
                 btgblayers.clearSelection();
                 WWEPlugin p = (WWEPlugin) l.getValue(WWEPlugin.AVKEY_WORLDWIND_LAYER_PLUGIN);
                 if (p != null) {
+                    //--- Disactive the old one
+                    if (selected != null) selected.doAction(WWEPlugin.DO_ACTION_LAYER_UNSELECTED, null, null);
+                    
                     BT_Configure.setVisible(p.getPluginFactory().getFactoryConfigComponent() != null);
                     BT_Configure.putClientProperty("plugin", p);
 
                     LB_LayerIcon.setIcon(p.getPluginFactory().getFactoryIcon(TinyFactory.ICON_SIZE_NORMAL));
 
-                    JToggleButton jb = p.getLayerButton();
-                    if (jb != null) jb.setSelected(true);
-
+                    //--- Select the layer button if present
+                    if (p.hasLayerButton()) {
+                        for (int i=0;i<PN_LayersButtons.getComponentCount();i++) {
+                            JToggleButton jb = (JToggleButton) PN_LayersButtons.getComponent(i);
+                            TinyPlugin tmp = (TinyPlugin) jb.getClientProperty("plugin");
+                            if (tmp == p) {
+                                jb.setSelected(true);
+                                break;
+                            }
+                        }
+                    }
+                    
                     //--- Find licence
                     String licence = (String) p.getPluginFactory().getProperty(TinyFactory.PROPERTY_COPYRIGHT_TEXT);
                     if (licence != null) {
@@ -909,25 +951,16 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
 
                     layout.show(PN_LayersData, "" + p.hashCode());
 
+                    //--- Select the current plugin
+                    selected = p;
+                    selected.doAction(WWEPlugin.DO_ACTION_LAYER_SELECTED, null, null);
+                    
                 } else {
                     //--- Worldwind layer is not managed by WWE
                     BT_Configure.setVisible(false);
                     LB_LayerIcon.setIcon(null);
                 }
 
-                /*
-                btgblayers.clearSelection();
-                Enumeration<AbstractButton> en = btgblayers.getElements();
-                while (en.hasMoreElements()) {
-                    AbstractButton bt = en.nextElement();
-                    WorldWindLayerPlugin tmp = (WorldWindLayerPlugin) bt.getClientProperty("plugin");
-                    if (tmp.getLayer() == l) {
-                        bt.setSelected(true);
-                        break;
-
-                    }
-                }
-                 */
             }
 
         }
@@ -1521,20 +1554,32 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         }
         // System.out.println("INSTALL LAYER:" + l + " active:" + l.isEnabled() + " class:" + l.getClass().getName());
 
-        //--- Store the hash code of the layer to show the layer config panel
-        JComponent jcomp = (JComponent) p.getConfigComponent();
+        //--- Store the hash code of the plugin to show the layer config panel
+        JComponent jcomp = p.getConfigComponent();
         if (jcomp != null) PN_LayersData.add(jcomp, ""+p.hashCode());
-
-        JToggleButton jbutton = p.getLayerButton();
-        if (jbutton != null) {
+        
+        //--- Check if the layer exposed a visual panel on the map, if so the
+        //--- panel will be addedto the main JDesktop pane with the default
+        //--- priority
+        jcomp = p.getVisualComponent();
+        if (jcomp != null) {
+            DP_Main.add(jcomp, JLayeredPane.DEFAULT_LAYER);
+            jcomp.setBounds(0,0,DP_Main.getWidth(), DP_Main.getHeight());
+        }
+        
+        //--- Get the layer exposed button and register the action
+        if (p.hasLayerButton()) {
+            JToggleButton jbutton = new JToggleButton();
             jbutton.setActionCommand("activeLayer");
             jbutton.putClientProperty("plugin", p);
             jbutton.addActionListener(this);
             jbutton.setToolTipText(l.getName());
+            jbutton.setIcon(p.getPluginFactory().getFactoryIcon(22));
             // jbutton.setText("");
-            // jbutton.setPreferredSize(new Dimension(22, 22));
+            jbutton.setPreferredSize(new Dimension(32, 32));
             btgblayers.add(jbutton);
             PN_LayersButtons.add(jbutton);
+            
 
         }
 

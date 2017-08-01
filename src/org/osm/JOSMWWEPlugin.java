@@ -97,7 +97,7 @@ public class JOSMWWEPlugin extends JPanel implements WWEPlugin, ActionListener, 
     }
 
     @Override
-    public Object doAction(String action, Object argument) {
+    public Object doAction(String action, Object argument, Object subject) {
         return null;
     }
 
@@ -139,8 +139,8 @@ public class JOSMWWEPlugin extends JPanel implements WWEPlugin, ActionListener, 
     }
     
     @Override
-    public JToggleButton getLayerButton() {
-        return BT_Layer;
+    public boolean hasLayerButton() {
+        return true;
     }
     
     
@@ -174,16 +174,8 @@ public class JOSMWWEPlugin extends JPanel implements WWEPlugin, ActionListener, 
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        BT_Layer = new javax.swing.JToggleButton();
         jPanel2 = new javax.swing.JPanel();
         SL_Opacity = new javax.swing.JSlider();
-
-        BT_Layer.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
-        BT_Layer.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/microsoft/virtualearth/Resources/Icons/22x22/virtualearth.png"))); // NOI18N
-        BT_Layer.setMargin(new java.awt.Insets(2, 2, 2, 2));
-        BT_Layer.setMaximumSize(new java.awt.Dimension(22, 22));
-        BT_Layer.setMinimumSize(new java.awt.Dimension(22, 22));
-        BT_Layer.setPreferredSize(new java.awt.Dimension(22, 22));
 
         setLayout(new java.awt.BorderLayout());
 
@@ -217,7 +209,6 @@ public class JOSMWWEPlugin extends JPanel implements WWEPlugin, ActionListener, 
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JToggleButton BT_Layer;
     private javax.swing.JSlider SL_Opacity;
     private javax.swing.JPanel jPanel2;
     // End of variables declaration//GEN-END:variables

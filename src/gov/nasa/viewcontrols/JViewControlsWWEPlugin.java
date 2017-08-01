@@ -100,7 +100,7 @@ public class JViewControlsWWEPlugin extends JPanel implements WWEPlugin, ActionL
     }
 
     @Override
-    public Object doAction(String action, Object argument) {
+    public Object doAction(String action, Object argument, Object subject) {
         return null;
     }
 
@@ -128,8 +128,8 @@ public class JViewControlsWWEPlugin extends JPanel implements WWEPlugin, ActionL
     }
     
     @Override
-    public JToggleButton getLayerButton() {
-        return null;
+    public boolean hasLayerButton() {
+        return false;
     }
     
     //**************************************************************************

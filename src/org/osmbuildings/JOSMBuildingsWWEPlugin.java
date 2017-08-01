@@ -74,8 +74,8 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
     }
 
     @Override
-    public JToggleButton getLayerButton() {
-        return BT_Layer;
+    public boolean hasLayerButton() {
+        return true;
     }
 
     //**************************************************************************
@@ -92,7 +92,7 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
     }
 
     @Override
-    public Object doAction(String message, Object argument) {
+    public Object doAction(String message, Object argument, Object subject) {
         return null;
     }
 
@@ -210,7 +210,6 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        BT_Layer = new javax.swing.JToggleButton();
         jPanel1 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
         SP_DefaultHeight = new javax.swing.JSpinner();
@@ -224,9 +223,6 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
         CB_ApplyRoofTextures = new javax.swing.JCheckBox();
         jPanel2 = new javax.swing.JPanel();
         SP_Opacity = new javax.swing.JSlider();
-
-        BT_Layer.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/osmbuildings/Resources/Icons/22x22/osmbuildings.png"))); // NOI18N
-        BT_Layer.setPreferredSize(new java.awt.Dimension(32, 32));
 
         setLayout(new java.awt.BorderLayout());
 
@@ -357,7 +353,6 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    protected javax.swing.JToggleButton BT_Layer;
     protected javax.swing.JCheckBox CB_ApplyRoofTextures;
     protected javax.swing.JCheckBox CB_DrawOutline;
     protected javax.swing.JCheckBox CB_DrawProcessingBox;

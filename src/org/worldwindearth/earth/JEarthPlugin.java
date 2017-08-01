@@ -155,7 +155,7 @@ public class JEarthPlugin extends JPanel implements TinyPlugin {
     }
 
     @Override
-    public Object doAction(String action, Object argument) {
+    public Object doAction(String action, Object argument, Object subject) {
         return null;
     }
 

@@ -3,38 +3,43 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.microsoft.virtualearth;
+package org.nominatim;
 
+import org.osm.*;
 import gov.nasa.worldwind.WorldWindow;
 import gov.nasa.worldwind.layers.Layer;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.JComponent;
+import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
 import javax.swing.JToggleButton;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import org.tinyrcp.App;
 import org.tinyrcp.TinyFactory;
+import org.tinyrcp.TinyPlugin;
 import org.w3c.dom.Element;
 import org.worldwindearth.WWEPlugin;
 
 /**
- * Stars dome
+ * Nominatim
  * 
  * @author sbodmer
  */
-public class JVirtualearthWWEPlugin extends JPanel implements WWEPlugin, ActionListener, ChangeListener {
+public class JNominatimWWEPlugin extends JLayeredPane implements WWEPlugin, ActionListener, ChangeListener {
     App app = null;
     TinyFactory factory = null;
     WorldWindow ww = null;
     
-    VirtualearthLayer layer = new VirtualearthLayer();
+    NominatimLayer layer = new NominatimLayer();
     
     /**
      * Creates new form JTerminalsLayer
+     * @param factory
      */
-    public JVirtualearthWWEPlugin(TinyFactory factory, WorldWindow ww) {
+    public JNominatimWWEPlugin(TinyFactory factory, WorldWindow ww) {
         super();
         this.factory = factory;
         this.ww = ww;
@@ -62,9 +67,9 @@ public class JVirtualearthWWEPlugin extends JPanel implements WWEPlugin, ActionL
     public void setup(App app, Object arg) {
         this.app = app;
         
-        SL_Alpha.addChangeListener(this);
+        SL_Opacity.addChangeListener(this);
         
-        layer.setName("Microsoft Virtualearth tiles");
+        layer.setName("Nominatim");
         layer.setValue(AVKEY_WORLDWIND_LAYER_PLUGIN, this);
        
         
@@ -80,7 +85,7 @@ public class JVirtualearthWWEPlugin extends JPanel implements WWEPlugin, ActionL
     public void saveConfig(Element config) {
         if (config == null) return;
         
-        config.setAttribute("alpha", ""+SL_Alpha.getValue());
+        config.setAttribute("opacity", ""+SL_Opacity.getValue());
                 
     }
 
@@ -96,6 +101,17 @@ public class JVirtualearthWWEPlugin extends JPanel implements WWEPlugin, ActionL
 
     @Override
     public Object doAction(String action, Object argument, Object subject) {
+        if (action.equals(TinyPlugin.DO_ACTION_NEWSIZE)) {
+            Dimension dim =(Dimension) argument;
+            
+        } else if (action.equals(WWEPlugin.DO_ACTION_LAYER_SELECTED)) {
+            setVisible(true);
+            
+        } else if (action.equals(WWEPlugin.DO_ACTION_LAYER_UNSELECTED)) {
+            setVisible(false);
+            
+        }
+                
         return null;
     }
 
@@ -106,12 +122,12 @@ public class JVirtualearthWWEPlugin extends JPanel implements WWEPlugin, ActionL
 
     @Override
     public JComponent getVisualComponent() {
-        return null;
+        return this;
     }
 
     @Override
     public JComponent getConfigComponent() {
-        return this;
+        return PN_Config;
     }
 
     @Override
@@ -119,9 +135,9 @@ public class JVirtualearthWWEPlugin extends JPanel implements WWEPlugin, ActionL
         if (config == null) return;
         
         try {
-            int alpha = Integer.parseInt(config.getAttribute("alpha"));
-            SL_Alpha.setValue(alpha);
-            layer.setOpacity((double) (alpha/100d));
+            int opacity = Integer.parseInt(config.getAttribute("opacity"));
+            SL_Opacity.setValue(opacity);
+            layer.setOpacity(opacity/100d);
             
         } catch (NumberFormatException ex) {
             //---
@@ -155,8 +171,8 @@ public class JVirtualearthWWEPlugin extends JPanel implements WWEPlugin, ActionL
     //**************************************************************************
     @Override
     public void stateChanged(ChangeEvent e) {
-        if (e.getSource() == SL_Alpha) {
-            double alpha = SL_Alpha.getValue()/100d;
+        if (e.getSource() == SL_Opacity) {
+            double alpha = SL_Opacity.getValue()/100d;
             layer.setOpacity(alpha);
             
         }
@@ -172,18 +188,22 @@ public class JVirtualearthWWEPlugin extends JPanel implements WWEPlugin, ActionL
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        PN_Config = new javax.swing.JPanel();
         jPanel2 = new javax.swing.JPanel();
-        SL_Alpha = new javax.swing.JSlider();
+        SL_Opacity = new javax.swing.JSlider();
+        jInternalFrame1 = new javax.swing.JInternalFrame();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        jList1 = new javax.swing.JList<>();
 
-        setLayout(new java.awt.BorderLayout());
+        PN_Config.setLayout(new java.awt.BorderLayout());
 
-        SL_Alpha.setFont(new java.awt.Font("Arial", 0, 9)); // NOI18N
-        SL_Alpha.setMajorTickSpacing(10);
-        SL_Alpha.setMinorTickSpacing(5);
-        SL_Alpha.setPaintLabels(true);
-        SL_Alpha.setPaintTicks(true);
-        SL_Alpha.setToolTipText("Transparency");
-        SL_Alpha.setValue(100);
+        SL_Opacity.setFont(new java.awt.Font("Monospaced", 0, 10)); // NOI18N
+        SL_Opacity.setMajorTickSpacing(10);
+        SL_Opacity.setMinorTickSpacing(5);
+        SL_Opacity.setPaintLabels(true);
+        SL_Opacity.setPaintTicks(true);
+        SL_Opacity.setToolTipText("Transparency");
+        SL_Opacity.setValue(100);
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -191,24 +211,46 @@ public class JVirtualearthWWEPlugin extends JPanel implements WWEPlugin, ActionL
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(SL_Alpha, javax.swing.GroupLayout.DEFAULT_SIZE, 376, Short.MAX_VALUE)
+                .addComponent(SL_Opacity, javax.swing.GroupLayout.DEFAULT_SIZE, 376, Short.MAX_VALUE)
                 .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(SL_Alpha, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(SL_Opacity, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(195, Short.MAX_VALUE))
         );
 
-        add(jPanel2, java.awt.BorderLayout.NORTH);
+        PN_Config.add(jPanel2, java.awt.BorderLayout.NORTH);
+
+        jInternalFrame1.setClosable(true);
+        jInternalFrame1.setDefaultCloseOperation(javax.swing.WindowConstants.HIDE_ON_CLOSE);
+        jInternalFrame1.setIconifiable(true);
+        jInternalFrame1.setResizable(true);
+        jInternalFrame1.setVisible(true);
+
+        jList1.setModel(new javax.swing.AbstractListModel<String>() {
+            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
+            public int getSize() { return strings.length; }
+            public String getElementAt(int i) { return strings[i]; }
+        });
+        jScrollPane1.setViewportView(jList1);
+
+        jInternalFrame1.getContentPane().add(jScrollPane1, java.awt.BorderLayout.CENTER);
+
+        add(jInternalFrame1);
+        jInternalFrame1.setBounds(0, 0, 340, 230);
     }// </editor-fold>//GEN-END:initComponents
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JSlider SL_Alpha;
+    private javax.swing.JPanel PN_Config;
+    private javax.swing.JSlider SL_Opacity;
+    private javax.swing.JInternalFrame jInternalFrame1;
+    private javax.swing.JList<String> jList1;
     private javax.swing.JPanel jPanel2;
+    private javax.swing.JScrollPane jScrollPane1;
     // End of variables declaration//GEN-END:variables
 
     

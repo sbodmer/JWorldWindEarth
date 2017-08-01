@@ -89,7 +89,7 @@ public class JPlacenamesWWEPlugin extends JPanel implements WWEPlugin, ActionLis
     }
 
     @Override
-    public Object doAction(String action, Object argument) {
+    public Object doAction(String action, Object argument, Object subject) {
         return null;
     }
 
@@ -122,8 +122,8 @@ public class JPlacenamesWWEPlugin extends JPanel implements WWEPlugin, ActionLis
     }
     
     @Override
-    public JToggleButton getLayerButton() {
-        return null;
+    public boolean hasLayerButton() {
+        return false;
     }
     
     
