@@ -71,7 +71,7 @@ public class WorldWindLayersTableModel extends AbstractTableModel {
         if (columnIndex == 0) {
             Boolean b = (Boolean) aValue;
             l.setEnabled(b.booleanValue());          
-            
+            fireTableCellUpdated(rowIndex, columnIndex);
         }
         
     }

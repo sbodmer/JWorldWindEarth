@@ -41,6 +41,16 @@ public interface WWEPlugin extends TinyPlugin {
     public static final String DO_ACTION_LAYER_SELECTED = "org.worldwindearth.layerSelected";
     
     /**
+     * When the layer was enabled
+     */
+    public static final String DO_ACTION_LAYER_ENBLED = "org.worldwindearth.layerEnabled";
+    
+    /**
+     * When the layer was disabled
+     */
+    public static final String DO_ACTION_LAYER_DISABLED = "org.worldwindearth.layerDisabled";
+    
+    /**
      * Return the ww layer
      * 
      * @return 

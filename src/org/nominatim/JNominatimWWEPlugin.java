@@ -5,7 +5,6 @@
  */
 package org.nominatim;
 
-import org.osm.*;
 import gov.nasa.worldwind.WorldWindow;
 import gov.nasa.worldwind.layers.Layer;
 import java.awt.Dimension;
@@ -13,8 +12,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.JComponent;
 import javax.swing.JLayeredPane;
-import javax.swing.JPanel;
-import javax.swing.JToggleButton;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import org.tinyrcp.App;
@@ -46,6 +43,8 @@ public class JNominatimWWEPlugin extends JLayeredPane implements WWEPlugin, Acti
         
         initComponents();
         
+        //--- Default to be hidden
+        setVisible(false);
     }
 
     
@@ -230,11 +229,6 @@ public class JNominatimWWEPlugin extends JLayeredPane implements WWEPlugin, Acti
         jInternalFrame1.setResizable(true);
         jInternalFrame1.setVisible(true);
 
-        jList1.setModel(new javax.swing.AbstractListModel<String>() {
-            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
-            public int getSize() { return strings.length; }
-            public String getElementAt(int i) { return strings[i]; }
-        });
         jScrollPane1.setViewportView(jList1);
 
         jInternalFrame1.getContentPane().add(jScrollPane1, java.awt.BorderLayout.CENTER);
