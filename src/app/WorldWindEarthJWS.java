@@ -42,6 +42,7 @@ public class WorldWindEarthJWS {
         "-factory", "gov.nasa.openstreetmap.JOpenstreetmapWWEFactory",
         "-factory", "gov.nasa.countries.JCountriesWWEFactory",
         "-factory", "gov.nasa.landsat.JLandsatWWEFactory",
+        "-factory", "gov.nasa.wms.JWMSWWEFactory",
         "-factory", "org.osmbuildings.JOSMBuildingsWWEFactory",
         "-main", "org.worldwindearth.JWorldWindEarth"
     };

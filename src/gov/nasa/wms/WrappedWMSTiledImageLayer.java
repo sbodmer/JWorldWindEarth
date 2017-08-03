@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.worldwindearth.wms;
+package gov.nasa.wms;
 
 import com.jogamp.opengl.util.texture.TextureData;
 import gov.nasa.worldwind.avlist.AVKey;

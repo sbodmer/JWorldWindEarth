@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.worldwindearth.wms;
+package gov.nasa.wms;
 
 import gov.nasa.worldwind.ogc.wms.WMSLayerCapabilities;
 import java.awt.Component;

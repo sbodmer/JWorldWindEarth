@@ -159,6 +159,10 @@
         <jar destfile="${dist.dir}/lib/ext/layers/ViewControls.jar" manifest="Manifests/layers/ViewControls.mf">
             <fileset dir="${build.dir}/classes" includes="gov/nasa/viewcontrols/**"/>
         </jar>
+        <echo message="[Layer] WMS"/>
+        <jar destfile="${dist.dir}/lib/ext/layers/WMS.jar" manifest="Manifests/layers/WMS.mf">
+            <fileset dir="${build.dir}/classes" includes="gov/nasa/wms/**"/>
+        </jar>
         <echo message="[Layer] OSM"/>
         <jar destfile="${dist.dir}/lib/ext/layers/OSM.jar" manifest="Manifests/layers/OSM.mf">
             <fileset dir="${build.dir}/classes" includes="org/osm/**"/>
@@ -166,10 +170,6 @@
         <echo message="[Layer] OSMBuildings"/>
         <jar destfile="${dist.dir}/lib/ext/layers/OSMBuildings.jar" manifest="Manifests/layers/OSMBuildings.mf">
             <fileset dir="${build.dir}/classes" includes="org/osmbuildings/**"/>
-        </jar>
-        <echo message="[Layer] WMS"/>
-        <jar destfile="${dist.dir}/lib/ext/layers/WMS.jar" manifest="Manifests/layers/WMS.mf">
-            <fileset dir="${build.dir}/classes" includes="org/worldwindearth/wms/**"/>
         </jar>
         <echo message="[Layer] Nominatim"/>
         <jar destfile="${dist.dir}/lib/ext/layers/Nominatim.jar" manifest="Manifests/layers/Nominatim.mf">

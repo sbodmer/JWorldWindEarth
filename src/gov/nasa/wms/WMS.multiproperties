@@ -9,13 +9,13 @@
             <Width>150</Width>
         </Key>
         <Column>
-            <Width>75</Width>
+            <Width>267</Width>
             <Name>en</Name>
             <Description/>
             <HandlerConfiguration>./WMS.properties|false|true|true|false</HandlerConfiguration>
         </Column>
         <Column>
-            <Width>75</Width>
+            <Width>298</Width>
             <Name>fr</Name>
             <Description/>
             <HandlerConfiguration>./WMS_fr.properties|false|true|true|false</HandlerConfiguration>

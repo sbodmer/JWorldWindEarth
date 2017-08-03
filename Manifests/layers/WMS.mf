@@ -1,1 +1,1 @@
-Tiny-Factory: org.worldwindearth.wms.JWMSWWEFactory
+Tiny-Factory: gov.nasa.wms.JWMSWWEFactory

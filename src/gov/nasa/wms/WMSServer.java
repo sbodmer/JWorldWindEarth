@@ -3,37 +3,29 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.worldwindearth.wms;
+package gov.nasa.wms;
 
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVListImpl;
-import gov.nasa.worldwind.geom.LatLon;
-import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.ogc.wms.WMSCapabilities;
-import gov.nasa.worldwind.ogc.wms.WMSCapabilityInformation;
-import gov.nasa.worldwind.util.DataConfigurationUtils;
-import gov.nasa.worldwind.util.LevelSet;
 import gov.nasa.worldwind.wms.Capabilities;
-import gov.nasa.worldwind.wms.CapabilitiesRequest;
 import java.net.URI;
-import java.net.URL;
 
 /**
  * Simple WMS container
  *
  * @author sbodmer
  */
-public class WMSServer implements Runnable {
+public class WMSServer {
 
-    String name = "";
+    String title = "";
     URI api = null;
     WMSCapabilities caps = null;
-    WMSServerListener listener = null;
     
-    public WMSServer(String name, URI api, WMSServerListener listener) {
-        this.name = name;
+    public WMSServer(String title, URI api) {
+        this.title = title;
         this.api = api;
-        this.listener = listener;
+        
     }
 
     //**************************************************************************
@@ -41,62 +33,96 @@ public class WMSServer implements Runnable {
     //**************************************************************************
     @Override
     public String toString() {
-        return name;
+        return title;
     }
 
     public URI getApi() {
         return api;
     }
 
+    public void setApi(URI api) {
+        this.api = api;
+    } 
+    
+    public String getTitle() {
+        return title;
+    }
+    
+    public void setTitle(String title) {
+        this.title = title;
+    }
+    
     /**
      * Returned the fetched capabilities or null if not yet fetched
-     * 
-     * @return 
+     *
+     * @return
      */
     public WMSCapabilities getCapabilities() {
         return caps;
     }
+
     /**
-     * Fetch the capabilities in i't onw thread, use listener to receive feed-back
+     * Fetch the capabilities in it's own thread, use listener to receive
+     * feed-back
+     * @param listener
      */
-    public void fetch() {
-        Thread t = new Thread(this);
+    public void fetch(WMSServerListener listener) {
+        Fetch t = new Fetch(this, listener);
         t.start();
     }
-    @Override
-    public void run() {
-        //--- Fetch the capabilities
-        if (listener != null) listener.wmsCapabilitiesLoading(this);
-        try {
-            // AVListImpl av = new AVListImpl();
-            // av.setValue(AVKey.SERVICE_NAME, "OGC:WMS");
-            // av.setValue(AVKey.GET_CAPABILITIES_URL, api);
-            // CapabilitiesRequest request = new CapabilitiesRequest(uri, "WMS");
-            // System.out.println("URI:"+request.getUri());
-            // cap = Capabilities.retrieve(api, "WMS", 60000, 60000);
-            
-            caps = WMSCapabilities.retrieve(api);
-            caps.parse();
-            
-            // System.out.println("CAP:" + (cap == null ? "NULL" : "NOT NULL"));
-            // System.out.println("FORMAT:" + cap.getImageFormats());
-            // WMSCapabilityInformation info = cap.
-            // System.out.println("CAP:"+cap.getRequestURL("GetCapabilities", "1.1.1", "GET"));
-            // WMSCapabilityInformation info = cap.getCapabilityInformation();
-            // System.out.println("INFO:" + info.getImageFormats());
-            if (listener != null) listener.wmsCapabilitiesLoaded(this, caps);
-            
-        } catch (Exception ex) {
-            if (listener != null) listener.wmsCapabilitiesFailed(this, ex.getMessage());
-        }
-        
-    }
-    
+
     public interface WMSServerListener {
+
         public void wmsCapabilitiesLoading(WMSServer wms);
+
         public void wmsCapabilitiesLoaded(WMSServer wms, WMSCapabilities cap);
+
         public void wmsCapabilitiesFailed(WMSServer wms, String message);
-        
+
+    }
+
+    //**************************************************************************
+    //*** Private
+    //**************************************************************************
+    private class Fetch extends Thread {
+
+        WMSServer server = null;
+        WMSServerListener listener = null;
+
+        private Fetch(WMSServer server, WMSServerListener listener) {
+            super("Fetch_"+server.getTitle());
+            this.server = server;
+            this.listener = listener;
+
+        }
+
+        @Override
+        public void run() {
+            //--- Fetch the capabilities
+            if (listener != null) listener.wmsCapabilitiesLoading(server);
+            try {
+                // AVListImpl av = new AVListImpl();
+                // av.setValue(AVKey.SERVICE_NAME, "OGC:WMS");
+                // av.setValue(AVKey.GET_CAPABILITIES_URL, api);
+                // CapabilitiesRequest request = new CapabilitiesRequest(uri, "WMS");
+                // System.out.println("URI:"+request.getUri());
+                // cap = Capabilities.retrieve(api, "WMS", 60000, 60000);
+
+                caps = WMSCapabilities.retrieve(api);
+                caps.parse();
+
+                // System.out.println("CAP:" + (cap == null ? "NULL" : "NOT NULL"));
+                // System.out.println("FORMAT:" + cap.getImageFormats());
+                // WMSCapabilityInformation info = cap.
+                // System.out.println("CAP:"+cap.getRequestURL("GetCapabilities", "1.1.1", "GET"));
+                // WMSCapabilityInformation info = cap.getCapabilityInformation();
+                // System.out.println("INFO:" + info.getImageFormats());
+                if (listener != null) listener.wmsCapabilitiesLoaded(server, caps);
+
+            } catch (Exception ex) {
+                if (listener != null) listener.wmsCapabilitiesFailed(server, ex.getMessage());
+            }
+        }
     }
     
     public static void main(String args[]) {
@@ -130,8 +156,8 @@ public class WMSServer implements Runnable {
             // CapabilitiesRequest request = new CapabilitiesRequest(uri, "WMS");
             // System.out.println("URI:"+request.getUri());
             Capabilities cap = Capabilities.retrieve(uri, "WMS", 60000, 60000);
-            System.out.println("CAP:"+cap);
-            System.out.println("PERSON:"+cap.getContactPerson());
+            System.out.println("CAP:" + cap);
+            System.out.println("PERSON:" + cap.getContactPerson());
             // WMSCapabilities wms = new WMSCapabilities(request);
             // System.out.println("CAP:" + (cap == null ? "NULL" : "NOT NULL"));
             // System.out.println("FORMAT:" + cap.getImageFormats());
@@ -139,9 +165,10 @@ public class WMSServer implements Runnable {
             // System.out.println("CAP:"+cap.getRequestURL("GetCapabilities", "1.1.1", "GET"));
             // WMSCapabilityInformation info = cap.getCapabilityInformation();
             // System.out.println("INFO:" + info.getImageFormats());
-            
         } catch (Exception ex) {
             ex.printStackTrace();
         }
     }
+
+    
 }

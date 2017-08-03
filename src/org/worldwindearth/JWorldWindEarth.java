@@ -404,6 +404,12 @@ public class JWorldWindEarth extends javax.swing.JFrame implements ActionListene
             //--- Close without saving
         }
 
+        jsettings.setVisible(false);
+        jsettings.dispose();
+        
+        jplugins.setVisible(false);
+        jplugins.dispose();
+        
         setVisible(false);
         dispose();
 

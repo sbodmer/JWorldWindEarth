@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.worldwindearth.wms;
+package gov.nasa.wms;
 
 import gov.nasa.worldwind.WorldWindow;
 import gov.nasa.worldwind.avlist.AVKey;
@@ -20,6 +20,7 @@ import java.awt.event.ItemListener;
 import java.net.URI;
 import java.util.Iterator;
 import java.util.Map;
+import javax.swing.ComboBoxModel;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JToggleButton;
@@ -62,14 +63,17 @@ public class JWMSWWEPlugin extends JPanel implements WWEPlugin, ActionListener, 
      * Creates new form WMS layer
      *
      * @param factory
+     * @param ww
+     * @param list
      */
-    public JWMSWWEPlugin(WWEFactory factory, WorldWindow ww) {
+    public JWMSWWEPlugin(WWEFactory factory, WorldWindow ww, ComboBoxModel<WMSServer> list) {
         super();
         this.factory = factory;
         this.ww = ww;
 
         initComponents();
 
+        CMB_Server.setModel(list);
     }
 
     //**************************************************************************
@@ -127,20 +131,13 @@ public class JWMSWWEPlugin extends JPanel implements WWEPlugin, ActionListener, 
     public void configure(Element config) {
         //--- Load the stored WMS server list
         CMB_Server.removeItemListener(this);
+        if (CMB_Server.getItemCount() > 0) CMB_Server.getItemAt(0).fetch(this);
         try {
-            // CMB_Server.addItem(new WMSServer("<none>", null, null));
-            CMB_Server.addItem(new WMSServer("Switzerland / BGDI", new URI("http://wms.geo.admin.ch/"), this));// ?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetCapabilities")));
-            CMB_Server.addItem(new WMSServer("Switzerland / Geneva / Orthophoto 2011", new URI("http://ge.ch/ags2/services/Orthophotos_2011/MapServer/WMSServer"), this));
-            CMB_Server.addItem(new WMSServer("Switzerland / Geneva / Plan", new URI("http://ge.ch/ags2/services/Plan_Officiel/MapServer/WMSServer"), this));
-            CMB_Server.addItem(new WMSServer("World / OpenStreetMap (www.osm-wms.de)", new URI("http://129.206.228.72/cached/osm"), this));
-            // CMB_Server.addItem(new WMSServer("World / NASA", new URI("http://neowms.sci"), this));
             //--- Select first one
-            CMB_Server.getItemAt(0).fetch();
-
             if (config != null) {
                 int opacity = Integer.parseInt(config.getAttribute("opacity"));
                 SL_Opacity.setValue(opacity);
-                layer.setOpacity((double) (opacity / 100d));
+                layer.setOpacity(opacity / 100d);
             }
             
         } catch (Exception ex) {
@@ -233,7 +230,7 @@ public class JWMSWWEPlugin extends JPanel implements WWEPlugin, ActionListener, 
                 layer = dummy;
 
                 WMSServer w = (WMSServer) CMB_Server.getSelectedItem();
-                w.fetch();
+                w.fetch(this);
 
                 /*
             try {
