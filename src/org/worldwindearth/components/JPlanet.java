@@ -10,6 +10,7 @@ import gov.nasa.worldwind.WorldWind;
 import gov.nasa.worldwind.awt.WorldWindowGLJPanel;
 import gov.nasa.worldwind.event.InputHandler;
 import gov.nasa.worldwind.geom.Angle;
+import gov.nasa.worldwind.geom.Line;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.layers.LayerList;
@@ -987,8 +988,9 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
             if (e.getClickCount() >= 2) {
                 Point pt = e.getPoint();
                 Position pos = wwd.getView().computePositionFromScreenPoint(pt.x, pt.y);
-                System.out.println("POS:" + pos);
-
+                System.out.println("POS :" + pos);
+                
+                
             }
 
         }

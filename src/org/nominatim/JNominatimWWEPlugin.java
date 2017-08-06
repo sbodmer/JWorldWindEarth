@@ -6,8 +6,19 @@
 package org.nominatim;
 
 import gov.nasa.worldwind.WorldWindow;
+import gov.nasa.worldwind.geom.Angle;
+import gov.nasa.worldwind.geom.LatLon;
+import gov.nasa.worldwind.geom.Position;
+import gov.nasa.worldwind.geom.Vec4;
+import gov.nasa.worldwind.globes.Globe;
 import gov.nasa.worldwind.layers.Layer;
+import gov.nasa.worldwind.view.orbit.BasicOrbitView;
+import java.awt.BasicStroke;
+import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Stroke;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.JComponent;
@@ -26,6 +37,9 @@ import org.worldwindearth.WWEPlugin;
  * @author sbodmer
  */
 public class JNominatimWWEPlugin extends JLayeredPane implements WWEPlugin, ActionListener, ChangeListener {
+    static final Stroke STROKE1 = new BasicStroke(1);
+    static final Stroke STROKE2 = new BasicStroke(2);
+    
     App app = null;
     TinyFactory factory = null;
     WorldWindow ww = null;
@@ -47,7 +61,37 @@ public class JNominatimWWEPlugin extends JLayeredPane implements WWEPlugin, Acti
         setVisible(false);
     }
 
-    
+    //**************************************************************************
+    //*** Swing
+    //**************************************************************************
+    @Override
+    public void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        
+        Graphics2D g2 = (Graphics2D) g;
+        
+        // ww.getView().
+        
+        BasicOrbitView view = (BasicOrbitView) ww.getView();
+        Position pos = view.getCenterPosition();
+        // Vec4 c = view.getCenterPoint();
+        // System.out.println("POS:"+pos+" VEC4:"+c.getX()+" "+c.);
+        // Vec4 vec4 = Vec4.fromArray2(new double[] { 6.1529, 46,1591 }, 0);
+        // Vec4 proj = view.project(c);
+        // System.out.println("VEC4:"+c+" PROJ:"+proj);
+                
+        Globe globe = ww.getModel().getGlobe();
+        Position lsi = new Position(LatLon.fromDegrees(46.1931, 6.129162), 360d);
+        Vec4 v = globe.computePointFromLocation(lsi);
+        Vec4 proj = view.project(v);
+        // System.out.println("VEC4:"+v+" PROJ:"+proj);
+        
+        g2.setColor(Color.RED);
+        g2.setStroke(STROKE2);
+        g2.drawLine(getWidth()/2,getHeight()/2, (int) proj.getX(), getHeight()-(int) proj.getY());
+        
+        g2.setStroke(STROKE1);
+    }
     
     //**************************************************************************
     //*** Plugin
@@ -176,6 +220,9 @@ public class JNominatimWWEPlugin extends JLayeredPane implements WWEPlugin, Acti
             
         }
     }
+    
+    
+    
     
     
     /**
