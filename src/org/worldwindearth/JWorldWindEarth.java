@@ -19,7 +19,10 @@ import java.util.Iterator;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.WindowConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.OutputKeys;
@@ -58,7 +61,12 @@ public class JWorldWindEarth extends javax.swing.JFrame implements ActionListene
 
     JPluginsFrame jplugins = null;
     JSettingsFrame jsettings = null;
-    
+
+    /**
+     * Currently open frames
+     */
+    ArrayList<JFrame> frames = new ArrayList<>();
+
     /**
      * Creates new form JWorldWindEarth
      */
@@ -74,16 +82,19 @@ public class JWorldWindEarth extends javax.swing.JFrame implements ActionListene
         MN_Settings.addActionListener(this);
         MN_Exit.addActionListener(this);
 
+        MN_Windows.add(app.createFactoryMenus("Panels", TinyFactory.PLUGIN_CATEGORY_PANEL, TinyFactory.PLUGIN_FAMILY_PANEL, this), 0);
+        MN_Windows.add(app.createFactoryMenus("Containers", TinyFactory.PLUGIN_CATEGORY_PANEL, TinyFactory.PLUGIN_FAMILY_CONTAINER, this), 1);
+
         MN_Plugins.addActionListener(this);
-        
+
         jplugins = new JPluginsFrame();
         jplugins.initialize(app);
-        
+
         jsettings = new JSettingsFrame();
         jsettings.initialize(app);
-        
+
         app.addActionListener(this);
-        
+
         setIconImage(((ImageIcon) LB_Title.getIcon()).getImage());
     }
 
@@ -123,11 +134,10 @@ public class JWorldWindEarth extends javax.swing.JFrame implements ActionListene
 
         //--- Open it before loading the config, so the panels have the correct size
         setVisible(true);
-        
+
         //--- Load the configuration
         load(file);
 
-        
     }
 
     @Override
@@ -139,7 +149,7 @@ public class JWorldWindEarth extends javax.swing.JFrame implements ActionListene
             jsettings.setLocationRelativeTo(this);
             jsettings.select(f);
             jsettings.setVisible(true);
-            
+
         } else if (e.getActionCommand().equals("new")) {
             remove(main.getVisualComponent());
             main.cleanup();
@@ -149,6 +159,46 @@ public class JWorldWindEarth extends javax.swing.JFrame implements ActionListene
             main.setup(app, null);
             main.configure(null);
             repaint();
+
+        } else if (e.getActionCommand().equals("newPlugin")) {
+
+            String title = JOptionPane.showInputDialog(this, "Title");
+            if (title == null) return;
+
+            JMenuItem ji = (JMenuItem) e.getSource();
+            TinyFactory factory = (TinyFactory) ji.getClientProperty("factory");
+            TinyPlugin p = factory.newPlugin(null);
+            p.setup(app, null);
+            p.configure(null);
+            JComponent jcomp = p.getVisualComponent();
+            jcomp.putClientProperty("plugin", p);
+
+            JFrame jframe = new JFrame(title);
+            jframe.getContentPane().add(jcomp);
+            jframe.setSize(640, 480);
+            jframe.setLocationRelativeTo(this);
+            jframe.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+            jframe.addWindowListener(new java.awt.event.WindowAdapter() {
+                @Override
+                public void windowClosing(java.awt.event.WindowEvent evt) {
+                    JFrame jframe = (JFrame) evt.getWindow();
+                    int rep = JOptionPane.showConfirmDialog(jframe, "Do you really want to close this window ?");
+                    if (rep == JOptionPane.YES_OPTION) {
+                        JComponent jcomp = (JComponent) jframe.getContentPane().getComponent(0);
+                        jframe.remove(jcomp);
+
+                        TinyPlugin p = (TinyPlugin) jcomp.getClientProperty("plugin");
+                        p.cleanup();
+
+                        jframe.setVisible(false);
+                        jframe.dispose();
+
+                        frames.remove(jframe);
+                    }
+                }
+            });
+            jframe.setVisible(true);
+            frames.add(jframe);
 
         } else if (e.getActionCommand().equals("load")) {
             JFileChooser jf = new JFileChooser(file);
@@ -174,14 +224,14 @@ public class JWorldWindEarth extends javax.swing.JFrame implements ActionListene
         } else if (e.getActionCommand().equals("plugins")) {
             jplugins.setLocationRelativeTo(this);
             jplugins.setVisible(true);
-            
+
         } else if (e.getActionCommand().equals("settings")) {
             jsettings.setLocationRelativeTo(this);
             jsettings.setVisible(true);
-            
+
         } else if (e.getActionCommand().equals("exit")) {
             close();
-    
+
         }
     }
 
@@ -207,6 +257,7 @@ public class JWorldWindEarth extends javax.swing.JFrame implements ActionListene
         MN_Exit = new javax.swing.JMenuItem();
         MN_Tools = new javax.swing.JMenu();
         MN_Plugins = new javax.swing.JMenuItem();
+        MN_Windows = new javax.swing.JMenu();
         MN_Help = new javax.swing.JMenu();
 
         LB_Title.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/22x22/WorldWindEarth.png"))); // NOI18N
@@ -258,6 +309,9 @@ public class JWorldWindEarth extends javax.swing.JFrame implements ActionListene
 
         MB_Topbar.add(MN_Tools);
 
+        MN_Windows.setText("Windows");
+        MB_Topbar.add(MN_Windows);
+
         MN_Help.setText("About");
         MB_Topbar.add(MN_Help);
 
@@ -286,6 +340,7 @@ public class JWorldWindEarth extends javax.swing.JFrame implements ActionListene
     protected javax.swing.JMenuItem MN_SaveAs;
     protected javax.swing.JMenuItem MN_Settings;
     protected javax.swing.JMenu MN_Tools;
+    protected javax.swing.JMenu MN_Windows;
     protected javax.swing.JPopupMenu.Separator jSeparator1;
     protected javax.swing.JPopupMenu.Separator jSeparator2;
     // End of variables declaration//GEN-END:variables
@@ -300,11 +355,34 @@ public class JWorldWindEarth extends javax.swing.JFrame implements ActionListene
             root.setAttribute("width", "" + getWidth());
             root.setAttribute("height", "" + getHeight());
             app.store(root);
+            
+            //--- Store the main GUI
             Element m = document.createElement("Main");
             main.saveConfig(m);
             root.appendChild(m);
-            document.appendChild(root);
+            
+            //--- Store the open frames
+            for (int i = 0; i < frames.size(); i++) {
+                JFrame jframe = frames.get(i);
+                Element f = document.createElement("Frame");
+                f.setAttribute("title", jframe.getTitle());
+                f.setAttribute("x", "" + jframe.getX());
+                f.setAttribute("y", "" + jframe.getY());
+                f.setAttribute("width", "" + jframe.getWidth());
+                f.setAttribute("height", "" + jframe.getHeight());
 
+                JComponent jcomp = (JComponent) jframe.getContentPane().getComponent(0);
+                TinyPlugin p = (TinyPlugin) jcomp.getClientProperty("plugin");
+                Element c = document.createElement("Content");
+                c.setAttribute("factory", p.getPluginFactory().getClass().getName());
+                p.saveConfig(c);
+                f.appendChild(c);
+
+                root.appendChild(f);
+            }
+            
+            document.appendChild(root);
+            
             TransformerFactory tfactory = TransformerFactory.newInstance();
             Transformer transformer = tfactory.newTransformer();
             transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
@@ -345,10 +423,10 @@ public class JWorldWindEarth extends javax.swing.JFrame implements ActionListene
 
             //--- The key is the factory class name
             HashMap<String, Element> confs = new HashMap<>();
+            ArrayList<Element> windowConfs = new ArrayList<>();
             Element mainNode = null;
-
+            
             NodeList nl = root.getChildNodes();
-
             //--- Store the configuration nodes
             for (int i = 0; i < nl.getLength(); i++) {
                 if (nl.item(i).getNodeName().equals("Main")) {
@@ -358,10 +436,13 @@ public class JWorldWindEarth extends javax.swing.JFrame implements ActionListene
                     Element e = (Element) nl.item(i);
                     confs.put(e.getAttribute("class"), e);
 
+                } else if (nl.item(i).getNodeName().equals("Frame")) {
+                    windowConfs.add((Element) nl.item(i));
+                    
                 }
             }
 
-            //--- Configure all the factories
+            //--- Configure all the factories firstt
             ArrayList<TinyFactory> facs = app.getFactories(null);
             for (int i = 0; i < facs.size(); i++) {
                 TinyFactory fac = facs.get(i);
@@ -384,6 +465,63 @@ public class JWorldWindEarth extends javax.swing.JFrame implements ActionListene
             setLocation(Integer.parseInt(root.getAttribute("x")), Integer.parseInt(root.getAttribute("y")));
             setSize(Integer.parseInt(root.getAttribute("width")), Integer.parseInt(root.getAttribute("height")));
 
+            //--- Open the frames
+            for (int i = 0; i < windowConfs.size(); i++) {
+                Element e = windowConfs.get(i);
+
+                //--- Find the content config
+                Element c = (Element) e.getElementsByTagName("Content").item(0);
+                TinyFactory fac = app.getFactory(c.getAttribute("factory"));
+                if (fac != null) {
+                    TinyPlugin p = fac.newPlugin(null);
+                    p.setup(app, null);
+                    p.configure(c);
+                    jcomp = p.getVisualComponent();
+                    jcomp.putClientProperty("plugin", p);
+
+                    int x = 100;
+                    int y = 100;
+                    int width = 640;
+                    int height = 480;
+                    try {
+                        x = Integer.parseInt(e.getAttribute("x"));
+                        y = Integer.parseInt(e.getAttribute("y"));
+                        width = Integer.parseInt(e.getAttribute("width"));
+                        height = Integer.parseInt(e.getAttribute("height"));
+
+                    } catch (NumberFormatException ex) {
+                        //---
+                    }
+                    JFrame jframe = new JFrame(e.getAttribute("title"));
+                    jframe.getContentPane().add(jcomp);
+                    jframe.setSize(width, height);
+                    jframe.setLocation(x, y);
+                    jframe.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+                    jframe.addWindowListener(new java.awt.event.WindowAdapter() {
+                        @Override
+                        public void windowClosing(java.awt.event.WindowEvent evt) {
+                            JFrame jframe = (JFrame) evt.getWindow();
+                            int rep = JOptionPane.showConfirmDialog(jframe, "Do you really want to close this window ?");
+                            if (rep == JOptionPane.YES_OPTION) {
+                                JComponent jcomp = (JComponent) jframe.getContentPane().getComponent(0);
+                                jframe.remove(jcomp);
+
+                                TinyPlugin p = (TinyPlugin) jcomp.getClientProperty("plugin");
+                                p.cleanup();
+
+                                jframe.setVisible(false);
+                                jframe.dispose();
+
+                                frames.remove(jframe);
+                            }
+                        }
+                    });
+                    jframe.setVisible(true);
+                    frames.add(jframe);
+                }
+
+            }
+
         } catch (Exception ex) {
             ex.printStackTrace();
 
@@ -404,29 +542,31 @@ public class JWorldWindEarth extends javax.swing.JFrame implements ActionListene
             //--- Close without saving
         }
 
+        //--- Clear  all opened frames
+        for (int i = 0; i < frames.size(); i++) {
+            JFrame jframe = frames.get(i);
+            JComponent jcomp = (JComponent) jframe.getContentPane().getComponent(0);
+            jframe.remove(jcomp);
+
+            TinyPlugin p = (TinyPlugin) jcomp.getClientProperty("plugin");
+            p.cleanup();
+
+            jframe.setVisible(false);
+            jframe.dispose();
+        }
+        frames.clear();
+
         jsettings.setVisible(false);
         jsettings.dispose();
-        
+
         jplugins.setVisible(false);
         jplugins.dispose();
-        
+
         setVisible(false);
         dispose();
 
-        /*
-        //--- Clear all opened frames
-        Window frames[] = Window.getWindows();
-        for (int i = 0; i < frames.length; i++) {
-            if (frames[i] == this) continue;
-            //--- Sent to all frames the closing event
-            System.out.println("(I) Send closing event to frame :" + frames[i].getName() + " (" + frames[i].getClass().getName() + ")");
-            frames[i].dispatchEvent(new WindowEvent(frames[i], WindowEvent.WINDOW_CLOSING));
-
-        }
-         */
-        
         main.cleanup();
-        
+
         app.destroy();
 
         System.runFinalization();
@@ -471,7 +611,6 @@ public class JWorldWindEarth extends javax.swing.JFrame implements ActionListene
                         loader.addJar("lib/ext");
                         loader.addJar(System.getProperty("user.home") + File.separator + ".WorldWindEarth");
                     }
-                    
 
                 }
 
@@ -508,7 +647,6 @@ public class JWorldWindEarth extends javax.swing.JFrame implements ActionListene
                     ex.printStackTrace();
                 }
 
-                
                 //--- Prepare main resource singleton
                 App app = new App(loader, "WorldWindEarth", mfac);
                 app.initialize();

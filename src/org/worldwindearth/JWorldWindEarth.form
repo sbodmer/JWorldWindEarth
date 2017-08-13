@@ -72,6 +72,11 @@
             </MenuItem>
           </SubComponents>
         </Menu>
+        <Menu class="javax.swing.JMenu" name="MN_Windows">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Windows"/>
+          </Properties>
+        </Menu>
         <Menu class="javax.swing.JMenu" name="MN_Help">
           <Properties>
             <Property name="text" type="java.lang.String" value="About"/>

@@ -705,6 +705,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
             for (int i = 0; i < TB_Layers.getRowCount(); i++) {
                 Layer tmp = (Layer) TB_Layers.getValueAt(i, 1);
                 if (tmp == p.getLayer()) {
+                    TB_Layers.getSelectionModel().removeSelectionInterval(i, i);
                     TB_Layers.getSelectionModel().addSelectionInterval(i, i);
                     break;
                 }
@@ -984,6 +985,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
                 }
 
             }
+            
         } else if (e.getSource() == wwd) {
             if (e.getClickCount() >= 2) {
                 Point pt = e.getPoint();

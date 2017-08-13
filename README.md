@@ -38,6 +38,58 @@ To run the application cd in the newly created dist dir
     cd dist
     java -jar WWEarth.jar
 
+
 ## Features
 TODO
 
+# Adding new layer
+## Files
+To add a new WorldWind layer you have to create a .jar which contains the the
+classes and resources for your layer.
+
+The manifest of the jar must be
+
+    Tiny-Factory: {full qualified class name of the factory}
+
+The jar itself should be placed in the WorldWindEarth lib folder
+
+    {wwe}/lib/layers
+
+## Classes
+Your layer must be composed of
+
+- A factory instance
+- A plugin instance produced by the factory
+- A WorldWind layer returned by the plugin instance
+
+### Plugin factory
+Your factory class must implement the tiny rcp framework factory
+
+    org.tinyrcp.PluginFactory
+
+See the available code for example, the important method to implement
+is
+
+    public TinyPlugin newPlugin(Object argument);
+
+The passed argument will be an instance of a world wind window
+
+    gov.nas.worldwind.WorldWindow
+
+### Plugin
+The plugin instance returned by the factory will be used for handling by
+the WorldWindEarth and TinyTCP frameworks.
+
+The important method to implement is
+
+    public Layer getLayer();
+    
+The returned layer must be a  WorldWind layer instance and a reference to the plugin
+which produced it must be passed as a layer value so the frame work knows the
+origin of the layer
+
+    mylayer.setValue(WWEPlugin.AVKEY_WORLDWIND_LAYER_PLUGIN, myplugin)
+
+The main JDesktopPane is passed as the argument in the method
+
+    public void setup(Object argument);

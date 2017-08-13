@@ -20,10 +20,12 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.Stroke;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.JComponent;
+import javax.swing.JDesktopPane;
 import javax.swing.JLayeredPane;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -38,17 +40,20 @@ import org.worldwindearth.WWEPlugin;
  *
  * @author sbodmer
  */
-public class JNominatimWWEPlugin extends JLayeredPane implements WWEPlugin, ActionListener, ChangeListener {
+public class JNominatimWWEPlugin extends JLayeredPane implements WWEPlugin, ActionListener, ChangeListener, ScreenPoint.ScreenPointListener {
 
     static final Stroke STROKE1 = new BasicStroke(1);
-    static final Stroke STROKE2 = new BasicStroke(2);
+    static final Stroke STROKE3 = new BasicStroke(3);
 
     App app = null;
     TinyFactory factory = null;
     WorldWindow ww = null;
-
+    JDesktopPane jdesktop = null;
+    
     NominatimLayer layer = new NominatimLayer();
 
+    Point screen = null;
+    
     /**
      * Creates new form JTerminalsLayer
      *
@@ -75,6 +80,7 @@ public class JNominatimWWEPlugin extends JLayeredPane implements WWEPlugin, Acti
 
         Graphics2D g2 = (Graphics2D) g;
 
+        /*
         // ww.getView().
         BasicOrbitView view = (BasicOrbitView) ww.getView();
         Position pos = view.getCenterPosition();
@@ -90,15 +96,17 @@ public class JNominatimWWEPlugin extends JLayeredPane implements WWEPlugin, Acti
         Vec4 v = globe.computePointFromLocation(lsi);
         Vec4 proj = view.project(v);
         // System.out.println("VEC4:"+v+" PROJ:"+proj);
-
-        g2.setColor(Color.RED);
-        g2.setStroke(STROKE2);
-        g2.drawLine(getWidth() / 2, getHeight() / 2, (int) proj.getX(), getHeight() - (int) proj.getY());
-
+        */
+        Rectangle rec = IF_Names.getBounds();
+        
+        g2.setColor(Color.BLACK);
+        g2.setStroke(STROKE3);
+        g2.drawLine(rec.x+(rec.width/2), rec.y+(rec.height/2), (int) screen.getX(), getHeight() - (int) screen.getY());
         g2.setStroke(STROKE1);
 
     }
-
+    
+    
     //**************************************************************************
     //*** Plugin
     //**************************************************************************
@@ -115,16 +123,24 @@ public class JNominatimWWEPlugin extends JLayeredPane implements WWEPlugin, Acti
     @Override
     public void setup(App app, Object arg) {
         this.app = app;
-
+        jdesktop = (JDesktopPane) arg;
+        
         SL_Opacity.addChangeListener(this);
 
         layer.setName("Nominatim");
         layer.setValue(AVKEY_WORLDWIND_LAYER_PLUGIN, this);
-
+        layer.addRenderable(new ScreenPoint(Position.fromDegrees(46.1935, 6.1291), this));
+        
+        // jdesktop.add(IF_Names, JDesktopPane.PALETTE_LAYER);
+        // IF_Names.setBounds(100,100, 320, 200);
+        IF_Names.setVisible(false);
     }
+    
 
     @Override
     public void cleanup() {
+        // jdesktop.remove(IF_Names);
+        
         layer.dispose();
 
     }
@@ -153,11 +169,12 @@ public class JNominatimWWEPlugin extends JLayeredPane implements WWEPlugin, Acti
             Dimension dim = (Dimension) argument;
 
         } else if (action.equals(WWEPlugin.DO_ACTION_LAYER_SELECTED)) {
+            IF_Names.setVisible(true);
             setVisible(true);
-
+            
         } else if (action.equals(WWEPlugin.DO_ACTION_LAYER_UNSELECTED)) {
+            IF_Names.setVisible(false);
             setVisible(false);
-
         }
 
         return null;
@@ -237,7 +254,7 @@ public class JNominatimWWEPlugin extends JLayeredPane implements WWEPlugin, Acti
         PN_Config = new javax.swing.JPanel();
         jPanel2 = new javax.swing.JPanel();
         SL_Opacity = new javax.swing.JSlider();
-        jInternalFrame1 = new javax.swing.JInternalFrame();
+        IF_Names = new javax.swing.JInternalFrame();
         jScrollPane1 = new javax.swing.JScrollPane();
         jList1 = new javax.swing.JList<>();
 
@@ -270,37 +287,34 @@ public class JNominatimWWEPlugin extends JLayeredPane implements WWEPlugin, Acti
 
         PN_Config.add(jPanel2, java.awt.BorderLayout.NORTH);
 
-        jInternalFrame1.setClosable(true);
-        jInternalFrame1.setDefaultCloseOperation(javax.swing.WindowConstants.HIDE_ON_CLOSE);
-        jInternalFrame1.setIconifiable(true);
-        jInternalFrame1.setResizable(true);
-        jInternalFrame1.setVisible(true);
+        IF_Names.setClosable(true);
+        IF_Names.setDefaultCloseOperation(javax.swing.WindowConstants.HIDE_ON_CLOSE);
+        IF_Names.setIconifiable(true);
+        IF_Names.setResizable(true);
+        IF_Names.setVisible(true);
 
         jScrollPane1.setViewportView(jList1);
 
-        jInternalFrame1.getContentPane().add(jScrollPane1, java.awt.BorderLayout.CENTER);
+        IF_Names.getContentPane().add(jScrollPane1, java.awt.BorderLayout.CENTER);
 
-        add(jInternalFrame1);
-        jInternalFrame1.setBounds(0, 0, 340, 230);
+        add(IF_Names);
+        IF_Names.setBounds(100, 100, 340, 120);
     }// </editor-fold>//GEN-END:initComponents
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JInternalFrame IF_Names;
     private javax.swing.JPanel PN_Config;
     private javax.swing.JSlider SL_Opacity;
-    private javax.swing.JInternalFrame jInternalFrame1;
     private javax.swing.JList<String> jList1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane1;
     // End of variables declaration//GEN-END:variables
 
-    public Point getPoint(DrawContext dc, Position pos) {
-        Vec4 loc = null;
-        if (pos.getElevation() < dc.getGlobe().getMaxElevation()) loc = dc.getSurfaceGeometry().getSurfacePoint(pos);
-        if (loc == null) loc = dc.getGlobe().computePointFromPosition(pos);
-        Vec4 screenPoint = dc.getView().project(loc);
-        return new Point((int) screenPoint.x, (int) screenPoint.y);
-        
+    @Override
+    public void projectedScreenPoint(Position world, Point screen) {
+        this.screen = screen;
+        // System.out.println("SCREEN:"+screen);
     }
 
 }

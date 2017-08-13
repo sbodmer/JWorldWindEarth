@@ -5,7 +5,11 @@
  */
 package org.nominatim;
 
+import gov.nasa.worldwind.geom.Position;
+import gov.nasa.worldwind.geom.Vec4;
 import gov.nasa.worldwind.layers.RenderableLayer;
+import gov.nasa.worldwind.render.DrawContext;
+import java.awt.Point;
 
 /**
  *
@@ -15,6 +19,8 @@ public class NominatimLayer extends RenderableLayer {
     public NominatimLayer() {
         super();
     }
+    
+ 
     
     
 }

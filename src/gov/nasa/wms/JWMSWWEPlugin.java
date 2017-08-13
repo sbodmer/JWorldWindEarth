@@ -17,13 +17,12 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.net.URI;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
 import javax.swing.ComboBoxModel;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
-import javax.swing.JToggleButton;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
@@ -53,12 +52,17 @@ public class JWMSWWEPlugin extends JPanel implements WWEPlugin, ActionListener, 
      * The empty layer
      */
     WrappedWMSTiledImageLayer dummy = null;
-
+    
     /**
      * The current valid layer
      */
     WMSTiledImageLayer layer = null;
 
+    /**
+     * The WMS layers selected
+     */
+    String selectedLayers = ""; 
+    
     /**
      * Creates new form WMS layer
      *
@@ -109,12 +113,13 @@ public class JWMSWWEPlugin extends JPanel implements WWEPlugin, ActionListener, 
         TB_Layers.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         TB_Layers.getModel().addTableModelListener(this);
         /*
-        //--- Create layer form defaut config
+        //--- Create layer from defaut config
         BasicLayerFactory bl = new BasicLayerFactory();
         layer = (TiledImageLayer) bl.createFromConfigSource("config/WMSLayerTemplate.xml", null);
         layer.setName("Generic WMS");
         layer.setValue(AVKEY_WORLDWIND_LAYER_PLUGIN, this);
          */
+        
         //--- For debug purpose, use the wrapper one as first instance
         dummy = new WrappedWMSTiledImageLayer();
         dummy.setEnabled(false);
@@ -131,18 +136,29 @@ public class JWMSWWEPlugin extends JPanel implements WWEPlugin, ActionListener, 
     public void configure(Element config) {
         //--- Load the stored WMS server list
         CMB_Server.removeItemListener(this);
-        if (CMB_Server.getItemCount() > 0) CMB_Server.getItemAt(0).fetch(this);
         try {
-            //--- Select first one
             if (config != null) {
+                //--- Set opacity
                 int opacity = Integer.parseInt(config.getAttribute("opacity"));
                 SL_Opacity.setValue(opacity);
                 layer.setOpacity(opacity / 100d);
+                
+                //--- Check the last selected one
+                int index = Integer.parseInt(config.getAttribute("selectedIndex"));
+                CMB_Server.setSelectedIndex(index);
+                
+                //--- Store the last selected WMS layers
+                selectedLayers = config.getAttribute("selectedLayers");
+                
             }
             
         } catch (Exception ex) {
             ex.printStackTrace();
 
+        }
+        if (CMB_Server.getItemCount() > 0) {
+            WMSServer wms = (WMSServer) CMB_Server.getSelectedItem();
+            wms.fetch(this, selectedLayers);
         }
         CMB_Server.addItemListener(this);
 
@@ -160,6 +176,9 @@ public class JWMSWWEPlugin extends JPanel implements WWEPlugin, ActionListener, 
         if (config == null) return;
 
         config.setAttribute("opacity", "" + SL_Opacity.getValue());
+        config.setAttribute("selectedIndex", ""+CMB_Server.getSelectedIndex());
+        config.setAttribute("selectedLayers", selectedLayers);
+        
     }
 
     @Override
@@ -230,31 +249,31 @@ public class JWMSWWEPlugin extends JPanel implements WWEPlugin, ActionListener, 
                 layer = dummy;
 
                 WMSServer w = (WMSServer) CMB_Server.getSelectedItem();
-                w.fetch(this);
+                w.fetch(this, "");
 
                 /*
-            try {
-                AVListImpl av = new AVListImpl();
-                av.setValue(AVKey.SERVICE_NAME, "WMS");
-                av.setValue(AVKey.GET_CAPABILITIES_URL, w.getApi().toString());
-                // this.setParms(AVKey.R"REQUEST", "GetCapabilities");
-                // this.setParam("VERSION", "1.3.0");
-                URL url = DataConfigurationUtils.getOGCGetCapabilitiesURL(av);
-                System.out.println("URL:"+url);
-                WMSCapabilities cap = WMSCapabilities.retrieve(w.getApi());
-                System.out.println("CAP:"+(cap==null?"NULL":"NOT NULL"));
-                System.out.println("FORMAT:"+cap.getImageFormats());
-                
-                // System.out.println("CAP:"+cap.getRequestURL("GetCapabilities", "1.1.1", "GET"));
-                WMSCapabilityInformation info = cap.getCapabilityInformation();
-                System.out.println("INFO:"+info.getImageFormats());
-                
-            } catch (Exception ex) {
-                ex.printStackTrace();
-                
-            }
-            PB_Waiting.setIndeterminate(false);
-                 */
+                try {
+                    AVListImpl av = new AVListImpl();
+                    av.setValue(AVKey.SERVICE_NAME, "WMS");
+                    av.setValue(AVKey.GET_CAPABILITIES_URL, w.getApi().toString());
+                    // this.setParms(AVKey.R"REQUEST", "GetCapabilities");
+                    // this.setParam("VERSION", "1.3.0");
+                    URL url = DataConfigurationUtils.getOGCGetCapabilitiesURL(av);
+                    System.out.println("URL:"+url);
+                    WMSCapabilities cap = WMSCapabilities.retrieve(w.getApi());
+                    System.out.println("CAP:"+(cap==null?"NULL":"NOT NULL"));
+                    System.out.println("FORMAT:"+cap.getImageFormats());
+
+                    // System.out.println("CAP:"+cap.getRequestURL("GetCapabilities", "1.1.1", "GET"));
+                    WMSCapabilityInformation info = cap.getCapabilityInformation();
+                    System.out.println("INFO:"+info.getImageFormats());
+
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+
+                }
+                PB_Waiting.setIndeterminate(false);
+                */
             }
 
         } else if (e.getSource() == CMB_ImageFormat) {
@@ -277,7 +296,7 @@ public class JWMSWWEPlugin extends JPanel implements WWEPlugin, ActionListener, 
     }
 
     @Override
-    public void wmsCapabilitiesLoaded(final WMSServer wms, final WMSCapabilities caps) {
+    public void wmsCapabilitiesLoaded(final WMSServer wms, final WMSCapabilities caps, final String defaultLayers) {
         final ItemListener listener = this;
 
         SwingUtilities.invokeLater(new Runnable() {
@@ -301,6 +320,10 @@ public class JWMSWWEPlugin extends JPanel implements WWEPlugin, ActionListener, 
                 CMB_ImageFormat.addItemListener(listener);
                 CMB_ImageFormat.setEnabled(true);
 
+                String tokens[] = defaultLayers.split(",");
+                ArrayList<String> selectedLayers = new ArrayList<>();
+                for (int i=0;i<tokens.length;i++) selectedLayers.add(tokens[i]);
+                
                 //--- Fill the exposed layers
                 DefaultTableModel model = (DefaultTableModel) TB_Layers.getModel();
                 model.setRowCount(0);
@@ -309,13 +332,13 @@ public class JWMSWWEPlugin extends JPanel implements WWEPlugin, ActionListener, 
                     WMSLayerCapabilities l = it.next();
                     // System.out.println("L:"+l.getTitle());
                     if (l.isLeaf()) {
-                        Object objs[] = {false, l};
+                        Object objs[] = {selectedLayers.contains(l.getName()), l};
                         model.addRow(objs);
                     }
                     // System.out.println("LAYER:"+l.getTitle());
                 }
                 //--- If empty, try to apply anyway
-                if (TB_Layers.getRowCount() == 0) apply();
+                apply();
             }
         });
 
@@ -559,24 +582,26 @@ public class JWMSWWEPlugin extends JPanel implements WWEPlugin, ActionListener, 
      */
     private void apply() {
         //--- Create the new layer
-        String names = "";
+        selectedLayers = "";
         for (int i = 0; i < TB_Layers.getRowCount(); i++) {
             Boolean selected = (Boolean) TB_Layers.getValueAt(i, 0);
             if (selected) {
                 WMSLayerCapabilities l = (WMSLayerCapabilities) TB_Layers.getValueAt(i, 1);
-                names += "," + l.getName();
+                selectedLayers += "," + l.getName();
             }
         }
 
         //--- Empty list not permitted
-        if (names.equals("")) return;
-
+        if (selectedLayers.equals("")) return;
+        selectedLayers = selectedLayers.substring(1);
+        
         //--- Find index of current layer
         int index = ww.getModel().getLayers().indexOf(layer, 0);
 
         WMSServer wms = (WMSServer) CMB_Server.getSelectedItem();
+        
         AVListImpl params = new AVListImpl();
-        params.setValue(AVKey.LAYER_NAMES, names.substring(1));
+        params.setValue(AVKey.LAYER_NAMES, selectedLayers);
         params.setValue(AVKey.IMAGE_FORMAT, CMB_ImageFormat.getSelectedItem().toString());
         // params.setValue(AVKey.DATASET_NAME, App.MD5(names));
 
@@ -584,16 +609,19 @@ public class JWMSWWEPlugin extends JPanel implements WWEPlugin, ActionListener, 
         layer = new WMSTiledImageLayer(params);
         layer.setValue(WWEPlugin.AVKEY_WORLDWIND_LAYER_PLUGIN, this);
         layer.setOpacity(SL_Opacity.getValue() / 100d);
-
+        
+        /*
         Iterator<Map.Entry<String, Object>> it = params.getEntries().iterator();
         while (it.hasNext()) {
             Map.Entry<String, Object> entry = it.next();
             System.out.println("" + entry.getKey() + " = " + entry.getValue());
             // setValue(e.getKey(), e.getValue());
         }
-
+        */
+        
         //--- Replace old layer
         Layer old = ww.getModel().getLayers().set(index, layer);
+        layer.setEnabled(old.isEnabled());
         if (old != dummy) old.dispose();
     }
 }

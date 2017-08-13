@@ -66,8 +66,8 @@ public class WMSServer {
      * feed-back
      * @param listener
      */
-    public void fetch(WMSServerListener listener) {
-        Fetch t = new Fetch(this, listener);
+    public void fetch(WMSServerListener listener, String defaultLayers) {
+        Fetch t = new Fetch(this, listener, defaultLayers);
         t.start();
     }
 
@@ -75,7 +75,7 @@ public class WMSServer {
 
         public void wmsCapabilitiesLoading(WMSServer wms);
 
-        public void wmsCapabilitiesLoaded(WMSServer wms, WMSCapabilities cap);
+        public void wmsCapabilitiesLoaded(WMSServer wms, WMSCapabilities cap, String defaultLayers);
 
         public void wmsCapabilitiesFailed(WMSServer wms, String message);
 
@@ -87,13 +87,14 @@ public class WMSServer {
     private class Fetch extends Thread {
 
         WMSServer server = null;
+        String defaultLayers = "";
         WMSServerListener listener = null;
 
-        private Fetch(WMSServer server, WMSServerListener listener) {
+        private Fetch(WMSServer server, WMSServerListener listener, String defaultLayers) {
             super("Fetch_"+server.getTitle());
             this.server = server;
             this.listener = listener;
-
+            this.defaultLayers = defaultLayers;
         }
 
         @Override
@@ -117,7 +118,7 @@ public class WMSServer {
                 // System.out.println("CAP:"+cap.getRequestURL("GetCapabilities", "1.1.1", "GET"));
                 // WMSCapabilityInformation info = cap.getCapabilityInformation();
                 // System.out.println("INFO:" + info.getImageFormats());
-                if (listener != null) listener.wmsCapabilitiesLoaded(server, caps);
+                if (listener != null) listener.wmsCapabilitiesLoaded(server, caps, defaultLayers);
 
             } catch (Exception ex) {
                 if (listener != null) listener.wmsCapabilitiesFailed(server, ex.getMessage());
