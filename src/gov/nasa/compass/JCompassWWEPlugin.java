@@ -68,7 +68,7 @@ public class JCompassWWEPlugin extends JPanel implements WWEPlugin, ActionListen
         this.app = app;
         
         layer.setName("Compass");
-        layer.setValue(AVKEY_WORLDWIND_LAYER_PLUGIN, this);
+        
     }
 
     @Override

@@ -48,6 +48,7 @@ import org.worldwindearth.WWEPlugin;
 import org.tinyrcp.TinyPlugin;
 import org.worldwindearth.JWWEPluginCellRenderer;
 import org.worldwindearth.WWEFactory;
+import static org.worldwindearth.WWEPlugin.AVKEY_WORLDWIND_LAYER_PLUGIN;
 import org.worldwindearth.WorldWindLayersTableModel;
 import org.worldwindearth.components.renderers.JCameraCellRenderer;
 
@@ -324,6 +325,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
                             p.setup(app, DP_Main);
                             p.configure(e);
                             Layer l = p.getLayer();
+                            l.setValue(AVKEY_WORLDWIND_LAYER_PLUGIN, p);
                             l.setName(e.getAttribute("name"));
                             Boolean b = Boolean.valueOf(e.getAttribute("active"));
                             l.setEnabled(b);
@@ -597,6 +599,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
                     p.setup(app, DP_Main);
                     p.configure(null);
                     Layer l = p.getLayer();
+                    l.setValue(AVKEY_WORLDWIND_LAYER_PLUGIN, p);
                     l.setName(name);
                     l.setEnabled(true);
                     plugins.put("" + p.hashCode(), p);
@@ -1580,6 +1583,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         //--- Add layer
         LayerList ll = m.getLayers();
         Layer l = p.getLayer();
+        l.setValue(AVKEY_WORLDWIND_LAYER_PLUGIN, p);
         if (index == -1) {
             ll.add(l);
 

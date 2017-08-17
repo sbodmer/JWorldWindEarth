@@ -68,7 +68,7 @@ public class JWorldmapWWEPlugin extends JPanel implements WWEPlugin, ActionListe
         this.app = app;
         
         layer.setName("World map");
-        layer.setValue(AVKEY_WORLDWIND_LAYER_PLUGIN, this);
+        
     }
 
     @Override

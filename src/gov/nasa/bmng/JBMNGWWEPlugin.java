@@ -78,7 +78,7 @@ public class JBMNGWWEPlugin extends JPanel implements WWEPlugin, ActionListener 
         BasicLayerFactory bl = new BasicLayerFactory();
         layer = (TiledImageLayer) bl.createFromConfigSource("config/Earth/BMNGWMSLayer2.xml", null);
         layer.setName("Blue Marble (2004)");
-        layer.setValue(AVKEY_WORLDWIND_LAYER_PLUGIN, this);
+        
     }
 
     @Override

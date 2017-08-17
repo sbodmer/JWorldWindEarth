@@ -78,7 +78,7 @@ public class JLatLonGraticuleWWEPlugin extends JPanel implements WWEPlugin, Acti
         
         //--- Create layer form defaut config/Earth/BMNGWMSLayer2.xml
         layer.setName("Latitude Longitude graticule");
-        layer.setValue(AVKEY_WORLDWIND_LAYER_PLUGIN, this);
+        
     }
 
     @Override

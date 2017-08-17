@@ -67,8 +67,6 @@ public class JOSMWWEPlugin extends JPanel implements WWEPlugin, ActionListener, 
         SL_Opacity.addChangeListener(this);
         
         layer.setName("OSM");
-        layer.setValue(AVKEY_WORLDWIND_LAYER_PLUGIN, this);
-       
         
     }
 

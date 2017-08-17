@@ -65,8 +65,6 @@ public class JVirtualearthWWEPlugin extends JPanel implements WWEPlugin, ActionL
         SL_Alpha.addChangeListener(this);
         
         layer.setName("Microsoft Virtualearth tiles");
-        layer.setValue(AVKEY_WORLDWIND_LAYER_PLUGIN, this);
-       
         
     }
 

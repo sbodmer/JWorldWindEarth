@@ -70,7 +70,7 @@ public class JViewControlsWWEPlugin extends JPanel implements WWEPlugin, ActionL
         this.app = app;
         
         layer.setName("View controls");
-        layer.setValue(AVKEY_WORLDWIND_LAYER_PLUGIN, this);
+        
         clistener = new ViewControlsSelectListener(ww, layer);
         ww.addSelectListener(clistener);
         

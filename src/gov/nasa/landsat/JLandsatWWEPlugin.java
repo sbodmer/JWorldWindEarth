@@ -72,7 +72,7 @@ public class JLandsatWWEPlugin extends JPanel implements WWEPlugin, ActionListen
         BasicLayerFactory bl = new BasicLayerFactory();
         layer = (TiledImageLayer) bl.createFromConfigSource("config/Earth/LandsatI3WMSLayer2.xml", null);
         layer.setName("Landsat");
-        layer.setValue(AVKEY_WORLDWIND_LAYER_PLUGIN, this);
+        
     }
 
     @Override

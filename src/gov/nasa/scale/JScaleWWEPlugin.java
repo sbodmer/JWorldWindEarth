@@ -64,7 +64,6 @@ public class JScaleWWEPlugin extends JPanel implements WWEPlugin, ActionListener
         this.app = app;
         
         layer.setName("Scale");
-        layer.setValue(AVKEY_WORLDWIND_LAYER_PLUGIN, this);
         
     }
 

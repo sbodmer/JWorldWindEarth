@@ -72,7 +72,7 @@ public class JOSMMapnikWWEPlugin extends JPanel implements WWEPlugin, ActionList
         SL_Opacity.addChangeListener(this);
         
         layer.setName("OSM Mapnik tiles");
-        layer.setValue(AVKEY_WORLDWIND_LAYER_PLUGIN, this);
+        
         // layer.setDrawTileBoundaries(true);
         // layer.setDrawTileIDs(true);
         // layer.setDrawBoundingVolumes(true);

@@ -71,7 +71,7 @@ public class JCountriesWWEPlugin extends JPanel implements WWEPlugin, ActionList
         this.app = app;
      
         layer.setName("Countries boundaries");
-        layer.setValue(AVKEY_WORLDWIND_LAYER_PLUGIN, this);
+        
     }
 
     @Override

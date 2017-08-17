@@ -64,7 +64,7 @@ public class JPlacenamesWWEPlugin extends JPanel implements WWEPlugin, ActionLis
         this.app = app;
         
         layer.setName("Place names");
-        layer.setValue(AVKEY_WORLDWIND_LAYER_PLUGIN, this);
+        
     }
 
     @Override

@@ -78,6 +78,7 @@ public class JWMSWWEPlugin extends JPanel implements WWEPlugin, ActionListener, 
         initComponents();
 
         CMB_Server.setModel(list);
+        
     }
 
     //**************************************************************************
@@ -245,6 +246,7 @@ public class JWMSWWEPlugin extends JPanel implements WWEPlugin, ActionListener, 
                 int index = ww.getModel().getLayers().indexOf(layer, 0);
                 //--- Replace old layer
                 Layer old = ww.getModel().getLayers().set(index, dummy);
+                dummy.setEnabled(old.isEnabled());
                 if (old != dummy) old.dispose();
                 layer = dummy;
 

@@ -82,7 +82,7 @@ public class JStarsWWEPlugin extends JPanel implements WWEPlugin, ActionListener
         this.app = app;
         
         layer.setName("Stars");
-        layer.setValue(AVKEY_WORLDWIND_LAYER_PLUGIN, this);
+        
     }
 
     @Override

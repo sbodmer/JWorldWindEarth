@@ -5,6 +5,7 @@
  */
 package org.nominatim;
 
+import org.worldwindearth.components.ScreenPoint;
 import gov.nasa.worldwind.WorldWindow;
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.LatLon;
@@ -128,7 +129,6 @@ public class JNominatimWWEPlugin extends JLayeredPane implements WWEPlugin, Acti
         SL_Opacity.addChangeListener(this);
 
         layer.setName("Nominatim");
-        layer.setValue(AVKEY_WORLDWIND_LAYER_PLUGIN, this);
         layer.addRenderable(new ScreenPoint(Position.fromDegrees(46.1935, 6.1291), this));
         
         // jdesktop.add(IF_Names, JDesktopPane.PALETTE_LAYER);
@@ -256,7 +256,7 @@ public class JNominatimWWEPlugin extends JLayeredPane implements WWEPlugin, Acti
         SL_Opacity = new javax.swing.JSlider();
         IF_Names = new javax.swing.JInternalFrame();
         jScrollPane1 = new javax.swing.JScrollPane();
-        jList1 = new javax.swing.JList<>();
+        LI_Results = new javax.swing.JList<>();
 
         PN_Config.setLayout(new java.awt.BorderLayout());
 
@@ -293,7 +293,8 @@ public class JNominatimWWEPlugin extends JLayeredPane implements WWEPlugin, Acti
         IF_Names.setResizable(true);
         IF_Names.setVisible(true);
 
-        jScrollPane1.setViewportView(jList1);
+        LI_Results.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        jScrollPane1.setViewportView(LI_Results);
 
         IF_Names.getContentPane().add(jScrollPane1, java.awt.BorderLayout.CENTER);
 
@@ -304,9 +305,9 @@ public class JNominatimWWEPlugin extends JLayeredPane implements WWEPlugin, Acti
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JInternalFrame IF_Names;
+    private javax.swing.JList<String> LI_Results;
     private javax.swing.JPanel PN_Config;
     private javax.swing.JSlider SL_Opacity;
-    private javax.swing.JList<String> jList1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane1;
     // End of variables declaration//GEN-END:variables

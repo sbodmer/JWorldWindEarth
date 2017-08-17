@@ -106,7 +106,6 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
         // InputStream in = app.getLoader().getResourceAsStream("org/osmbuildings/Resources/Config/OSMBuildings.xml");
         layer = (OSMBuildingsLayer) bl.createFromConfigSource(in, null);
         layer.setName("OSMBuildings");
-        layer.setValue(AVKEY_WORLDWIND_LAYER_PLUGIN, this);
         layer.setExpiryTime(((JOSMBuildingsWWEFactory) factory).getExpireDays()*24L*60L*60L*1000L);
         
         SP_DefaultHeight.addChangeListener(this);

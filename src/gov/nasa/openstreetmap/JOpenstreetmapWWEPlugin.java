@@ -91,7 +91,7 @@ public class JOpenstreetmapWWEPlugin extends JPanel implements WWEPlugin, Action
         BasicLayerFactory bl = new BasicLayerFactory();
         layer = (TiledImageLayer) bl.createFromConfigSource("config/Earth/OpenStreetMap.xml", null);
         layer.setName("Open street map");
-        layer.setValue(AVKEY_WORLDWIND_LAYER_PLUGIN, this);
+        
     }
 
     @Override

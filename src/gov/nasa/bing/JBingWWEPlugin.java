@@ -72,8 +72,7 @@ public class JBingWWEPlugin extends JPanel implements WWEPlugin, ActionListener,
         BasicLayerFactory bl = new BasicLayerFactory();
         layer = (TiledImageLayer) bl.createFromConfigSource("config/Earth/BingImagery.xml", null);
         layer.setName("Bing sat images");
-        layer.setValue(AVKEY_WORLDWIND_LAYER_PLUGIN, this);
-
+        
         SP_Opacity.addChangeListener(this);
         CB_DrawTileIds.addActionListener(this);
         CB_DrawTileBoundaries.addActionListener(this);

@@ -81,7 +81,7 @@ public class JSkyGradientWWEPlugin extends JPanel implements WWEPlugin, ActionLi
         this.app = app;
         
         layer.setName("Atmosphere");
-        layer.setValue(AVKEY_WORLDWIND_LAYER_PLUGIN, this);
+        
     }
 
     @Override
