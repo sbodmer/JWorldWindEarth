@@ -13,9 +13,11 @@ A Java Web Start app is available to start the application without installation
 ![New York](https://user-images.githubusercontent.com/18146968/29412234-243faed8-8358-11e7-9e26-3675b769c608.jpg)
 
 ## Architecture
-The project is base on a Java Swing framework called [TinyRCP](https://github.com/lsimedia/TinyRCP)
+The project is base on a Java Swing framework called [TinyRCP](https://github.com/lsimedia/TinyRCP).
 
-The system is complelty modular and plugin based
+The projet is a Netbeans project.
+
+The system is completely modular and plugin based.
 
 Each world wind layer is stored in a jar file with a specific manifest entry
     
