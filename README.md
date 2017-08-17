@@ -31,6 +31,8 @@ The layers are recursively loaded from file system in the default folders
 ## Release
 Work in progress, alpha quality for the moment...
 
+**The API is not yet stable, use it with caution for the moment**
+
 ## Building
 The project is a Netbeans project, for manual compiling, use the ant build.xml
 
