@@ -73,6 +73,9 @@ public class JWorldWindEarth extends javax.swing.JFrame implements ActionListene
     public JWorldWindEarth(App app) {
         this.app = app;
 
+        //--- To avoid some exception width JDK8 new order implementation
+        System.setProperty("java.util.Arrays.useLegacyMergeSort", "true");
+        
         initComponents();
 
         MN_New.addActionListener(this);

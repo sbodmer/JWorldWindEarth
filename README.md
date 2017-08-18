@@ -90,12 +90,13 @@ The important method to implement is
 
     public Layer getLayer();
     
-The returned layer must be a  WorldWind layer instance and a reference to the plugin
-which produced it must be passed as a layer value so the frame work knows the
-origin of the layer
+The returned layer must be a  WorldWind layer instance. A reference to the plugin
+which produced it must will be added by the framework, but if the layer is changed
+outise of it's control, you have to set the reference with the setValue() call
 
-    mylayer.setValue(WWEPlugin.AVKEY_WORLDWIND_LAYER_PLUGIN, myplugin)
+    mylayer.setValue(WWEPlugin.AVKEY_WORLDWIND_LAYER_PLUGIN, myplugin);
 
-The main JDesktopPane is passed as the argument in the method
+The main JDesktopPane on which the world wind window is used is passed as the
+argument in the setup method.
 
     public void setup(Object argument);
