@@ -11,6 +11,7 @@ import gov.nasa.worldwind.layers.ScalebarLayer;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JToggleButton;
@@ -126,6 +127,10 @@ public class JScaleWWEPlugin extends JPanel implements WWEPlugin, ActionListener
         return false;
     }
     
+    @Override
+    public void layerMouseClicked(MouseEvent e, gov.nasa.worldwind.geom.Position pos) {
+        //---
+    }
     
     //**************************************************************************
     //*** ActionListener

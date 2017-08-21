@@ -10,6 +10,7 @@ import gov.nasa.worldwind.layers.BasicLayerFactory;
 import gov.nasa.worldwind.layers.Layer;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
 import java.io.InputStream;
 import javax.swing.JComponent;
 import javax.swing.JToggleButton;
@@ -78,6 +79,11 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
         return true;
     }
 
+    @Override
+    public void layerMouseClicked(MouseEvent e, gov.nasa.worldwind.geom.Position pos) {
+        //---
+    }
+    
     //**************************************************************************
     //*** WWEPlugin
     //**************************************************************************

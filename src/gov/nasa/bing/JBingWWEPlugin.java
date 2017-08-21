@@ -11,6 +11,7 @@ import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.layers.TiledImageLayer;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JToggleButton;
@@ -72,31 +73,31 @@ public class JBingWWEPlugin extends JPanel implements WWEPlugin, ActionListener,
         BasicLayerFactory bl = new BasicLayerFactory();
         layer = (TiledImageLayer) bl.createFromConfigSource("config/Earth/BingImagery.xml", null);
         layer.setName("Bing sat images");
-        
+
         SP_Opacity.addChangeListener(this);
         CB_DrawTileIds.addActionListener(this);
         CB_DrawTileBoundaries.addActionListener(this);
         CB_DrawTileVolume.addActionListener(this);
-        
+
     }
 
     @Override
     public void configure(Element config) {
         if (config == null) return;
-        
+
         try {
             SP_Opacity.setValue(Integer.parseInt(config.getAttribute("opacity")));
             CB_DrawTileIds.setSelected(config.getAttribute("drawTileIds").equals("true"));
             CB_DrawTileBoundaries.setSelected(config.getAttribute("drawTileBoundaries").equals("true"));
             CB_DrawTileVolume.setSelected(config.getAttribute("drawTileVolume").equals("true"));
-            
-            layer.setOpacity(SP_Opacity.getValue()/100d);
+
+            layer.setOpacity(SP_Opacity.getValue() / 100d);
             layer.setDrawTileIDs(CB_DrawTileIds.isSelected());
             layer.setDrawTileBoundaries(CB_DrawTileBoundaries.isSelected());
             layer.setDrawBoundingVolumes(CB_DrawTileVolume.isSelected());
-            
+
         } catch (NumberFormatException ex) {
-           //--- 
+            //--- 
         }
     }
 
@@ -109,12 +110,12 @@ public class JBingWWEPlugin extends JPanel implements WWEPlugin, ActionListener,
     @Override
     public void saveConfig(Element config) {
         if (config == null) return;
-        
-        config.setAttribute("opacity", ""+SP_Opacity.getValue());
-        config.setAttribute("drawTileIds", ""+CB_DrawTileIds.isSelected());
-        config.setAttribute("drawTileBoundaries", ""+CB_DrawTileBoundaries.isSelected());
-        config.setAttribute("drawTileVolume", ""+CB_DrawTileVolume.isSelected());
-        
+
+        config.setAttribute("opacity", "" + SP_Opacity.getValue());
+        config.setAttribute("drawTileIds", "" + CB_DrawTileIds.isSelected());
+        config.setAttribute("drawTileBoundaries", "" + CB_DrawTileBoundaries.isSelected());
+        config.setAttribute("drawTileVolume", "" + CB_DrawTileVolume.isSelected());
+
     }
 
     @Override
@@ -155,6 +156,11 @@ public class JBingWWEPlugin extends JPanel implements WWEPlugin, ActionListener,
         return false;
     }
 
+    @Override
+    public void layerMouseClicked(MouseEvent e, gov.nasa.worldwind.geom.Position pos) {
+        //---
+    }
+
     //**************************************************************************
     //*** ActionListener
     //**************************************************************************
@@ -163,11 +169,11 @@ public class JBingWWEPlugin extends JPanel implements WWEPlugin, ActionListener,
         if (e.getActionCommand().equals("drawTileIds")) {
             layer.setDrawTileIDs(CB_DrawTileIds.isSelected());
             ww.redraw();
-            
+
         } else if (e.getActionCommand().equals("drawTileBoundaries")) {
             layer.setDrawTileBoundaries(CB_DrawTileBoundaries.isSelected());
             ww.redraw();
-            
+
         } else if (e.getActionCommand().equals("drawTileVolume")) {
             layer.setDrawBoundingVolumes(CB_DrawTileVolume.isSelected());
             ww.redraw();
@@ -180,7 +186,7 @@ public class JBingWWEPlugin extends JPanel implements WWEPlugin, ActionListener,
     @Override
     public void stateChanged(ChangeEvent e) {
         if (e.getSource() == SP_Opacity) {
-            layer.setOpacity(SP_Opacity.getValue()/100d);
+            layer.setOpacity(SP_Opacity.getValue() / 100d);
             ww.redraw();
         }
     }

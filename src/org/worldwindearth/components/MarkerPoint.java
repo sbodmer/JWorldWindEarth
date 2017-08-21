@@ -43,21 +43,35 @@ import javax.imageio.ImageIO;
  *
  * @author sbodmer
  */
-public class ScreenPoint implements Renderable {
+public class MarkerPoint implements Renderable {
 
     Position world = null;
     Point screen = null;
     ScreenPointListener listener = null;
+
     Cylinder cursor = null;
     BasicMarker marker = null;
     GlobeAnnotationBalloon balloon = null;
     PointPlacemark point = null;
     ScreenAnnotationBalloon sballoon = null;
+
+    public MarkerPoint(Position world) {
+        this(world, null, "", null);
+    }
+
+    public MarkerPoint(Position world, ScreenPointListener listener) {
+        this(world, listener, "", null);
+    }
     
-    public ScreenPoint(Position world, ScreenPointListener listener) {
+    public MarkerPoint(Position world, ScreenPointListener listener, String label) {
+        this(world, listener, label, null);
+    }
+
+    public MarkerPoint(Position world, ScreenPointListener listener, String label, URL icon) {
         this.world = world;
         this.listener = listener;
 
+        /*
         ShapeAttributes attrs = new BasicShapeAttributes();
         attrs.setInteriorMaterial(Material.YELLOW);
         attrs.setInteriorOpacity(0.7);
@@ -72,7 +86,8 @@ public class ScreenPoint implements Renderable {
         cursor.setAttributes(attrs);
         cursor.setVisible(true);
         cursor.setValue(AVKey.DISPLAY_NAME, "Cursor");
-
+         */
+ /*
         BasicBalloonAttributes ba = new BasicBalloonAttributes();
         ba.setOutlineMaterial(Material.WHITE);
         // ba.setInteriorMaterial(Material.WHITE);
@@ -96,15 +111,18 @@ public class ScreenPoint implements Renderable {
         balloon = new GlobeAnnotationBalloon("???", world);
         balloon.setAltitudeMode(WorldWind.CLAMP_TO_GROUND);
         balloon.setAttributes(ba);
-        
+         */
         PointPlacemarkAttributes pa = new PointPlacemarkAttributes();
-        try {
-            pa.setImage(ImageIO.read(getClass().getResource("/org/nominatim/Resources/Icons/64x64/Balloon.png")));
-            pa.setDrawImage(true);
-            pa.setImageOffset(new Offset(32d,0d,AVKey.PIXELS,AVKey.PIXELS));
-            // pa.setImageAddress(getClass().getResource("/org/nominatim/Resources/Icons/64x64/Balloon.png").toString());
-        } catch (IOException ex) {
-
+        if (icon != null) {
+            try {
+                // getClass().getResource("/org/nominatim/Resources/Icons/64x64/Balloon.png")
+                pa.setImage(ImageIO.read(icon));
+                pa.setDrawImage(true);
+                pa.setImageOffset(new Offset(32d, 0d, AVKey.PIXELS, AVKey.PIXELS));
+                // pa.setImageAddress(getClass().getResource("/org/nominatim/Resources/Icons/64x64/Balloon.png").toString());
+            } catch (IOException ex) {
+                //---
+            }
         }
         pa.setLineMaterial(Material.YELLOW);
         pa.setLineWidth(2d);
@@ -112,18 +130,35 @@ public class ScreenPoint implements Renderable {
         pa.setDrawLabel(true);
         pa.setUsePointAsDefaultImage(true);
         // pa.setLabelOffset(new Offset(100d,100d,AVKey.PIXELS,AVKey.PIXELS));
-        
+
         point = new PointPlacemark(world);
         point.setAltitudeMode(WorldWind.CLAMP_TO_GROUND);
-        point.setLabelText("HERE IS THE TEXT");
+        point.setLabelText(label);
         point.setAttributes(pa);
         point.setLineEnabled(true);
-        
-        sballoon = new ScreenAnnotationBalloon("???", new Point(0,0));
-        sballoon.setAttributes(ba);
+
+        // sballoon = new ScreenAnnotationBalloon("???", new Point(0,0));
+        // sballoon.setAttributes(ba);
     }
 
+    //**************************************************************************
+    //*** API
+    //**************************************************************************
+    public void setVisible(boolean visible) {
+        point.setVisible(visible);
+    }
 
+    public void setPosition(Position pos) {
+        point.setPosition(pos);
+    }
+
+    public Point getScreenPosition() {
+        return screen;
+    }
+
+    //**************************************************************************
+    //*** Renderable
+    //**************************************************************************
     @Override
     public void render(DrawContext dc) {
         Vec4 loc = null;
@@ -131,6 +166,7 @@ public class ScreenPoint implements Renderable {
         if (loc == null) loc = dc.getGlobe().computePointFromPosition(world);
         Vec4 screenPoint = dc.getView().project(loc);
         screen = new Point((int) screenPoint.x, (int) screenPoint.y);
+
         Rectangle vp = dc.getView().getViewport();
         // cursor.render(dc);
         // marker.render(dc, loc, 10);
@@ -138,7 +174,7 @@ public class ScreenPoint implements Renderable {
         point.render(dc);
         // sballoon.setScreenLocation(new Point(screen.x, vp.height-screen.y));
         // sballoon.render(dc);
-        
+
         if (listener != null) listener.projectedScreenPoint(world, screen);
     }
 

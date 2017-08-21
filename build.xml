@@ -96,9 +96,8 @@
             <fileset dir="${build.dir}/classes" includes="org/worldwindearth/**"/>
         </jar>
         
-        <mkdir dir="${dist.dir}/lib/ext/layers"/>
-        
         <!-- Layers -->
+        <mkdir dir="${dist.dir}/lib/ext/layers"/>
         <echo message="[Layer] Blue Marble NG"/>
         <jar destfile="${dist.dir}/lib/ext/layers/BMNG.jar" manifest="Manifests/layers/BMNG.mf">
             <fileset dir="${build.dir}/classes" includes="gov/nasa/bmng/**"/>
@@ -171,9 +170,20 @@
         <jar destfile="${dist.dir}/lib/ext/layers/OSMBuildings.jar" manifest="Manifests/layers/OSMBuildings.mf">
             <fileset dir="${build.dir}/classes" includes="org/osmbuildings/**"/>
         </jar>
-        <echo message="[Layer] Nominatim"/>
-        <jar destfile="${dist.dir}/lib/ext/layers/Nominatim.jar" manifest="Manifests/layers/Nominatim.mf">
+        <echo message="[Layer] Geocode"/>
+        <jar destfile="${dist.dir}/lib/ext/layers/Geocode.jar" manifest="Manifests/layers/Geocode.mf">
+            <fileset dir="${build.dir}/classes" includes="org/worldwindearth/geocode/**"/>
+        </jar>
+        
+        <!-- Geocode -->
+        <mkdir dir="${dist.dir}/lib/ext/geocode"/>
+        <echo message="[Geocode] Nominatim"/>
+        <jar destfile="${dist.dir}/lib/ext/geocode/Nominatim.jar" manifest="Manifests/geocode/Nominatim.mf">
             <fileset dir="${build.dir}/classes" includes="org/nominatim/**"/>
+        </jar>
+        <echo message="[Geocode] Geonames"/>
+        <jar destfile="${dist.dir}/lib/ext/geocode/Geonames.jar" manifest="Manifests/geocode/Geonames.mf">
+            <fileset dir="${build.dir}/classes" includes="org/geonames/**"/>
         </jar>
         
     </target>

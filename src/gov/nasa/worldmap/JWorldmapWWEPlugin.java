@@ -10,6 +10,7 @@ import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.layers.WorldMapLayer;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JToggleButton;
@@ -125,6 +126,10 @@ public class JWorldmapWWEPlugin extends JPanel implements WWEPlugin, ActionListe
         return false;
     }
     
+    @Override
+    public void layerMouseClicked(MouseEvent e, gov.nasa.worldwind.geom.Position pos) {
+        //---
+    }
     
     //**************************************************************************
     //*** ActionListener

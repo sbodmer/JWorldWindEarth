@@ -6,6 +6,7 @@
 package org.worldwindearth;
 
 import gov.nasa.worldwind.layers.Layer;
+import java.awt.event.MouseEvent;
 import javax.swing.JToggleButton;
 import org.tinyrcp.TinyPlugin;
 
@@ -63,5 +64,12 @@ public interface WWEPlugin extends TinyPlugin {
      * @return
      */
     public boolean hasLayerButton();
+    
+    /**
+     * Called when the plugin is selected and a mouse click occured on the World wind window
+     * @param evt
+     * @return 
+     */
+    public void layerMouseClicked(MouseEvent evt, gov.nasa.worldwind.geom.Position pos);
     
 }

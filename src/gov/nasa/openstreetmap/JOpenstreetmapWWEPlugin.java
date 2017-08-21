@@ -13,6 +13,7 @@ import gov.nasa.worldwind.layers.TiledImageLayer;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
 import javax.swing.Icon;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
@@ -131,6 +132,11 @@ public class JOpenstreetmapWWEPlugin extends JPanel implements WWEPlugin, Action
     @Override
     public boolean hasLayerButton() {
         return false;
+    }
+    
+    @Override
+    public void layerMouseClicked(MouseEvent e, gov.nasa.worldwind.geom.Position pos) {
+        //---
     }
     
     //**************************************************************************

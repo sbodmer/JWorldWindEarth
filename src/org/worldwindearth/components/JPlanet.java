@@ -5,10 +5,12 @@
  */
 package org.worldwindearth.components;
 
+import org.worldwindearth.WWEInputHandler;
 import gov.nasa.worldwind.Model;
 import gov.nasa.worldwind.WorldWind;
 import gov.nasa.worldwind.awt.WorldWindowGLJPanel;
 import gov.nasa.worldwind.event.InputHandler;
+import gov.nasa.worldwind.event.NoOpInputHandler;
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.Line;
 import gov.nasa.worldwind.geom.Position;
@@ -174,7 +176,8 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
 
         wwd = new WorldWindowGLJPanel();
         wwd.setModel(m);
-
+        wwd.setInputHandler(new WWEInputHandler());
+        
         LI_Cameras.setCellRenderer(new JCameraCellRenderer(app));
         LI_Cameras.addMouseListener(this);
         BT_Cameras.addActionListener(this);
@@ -210,7 +213,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         ih.addKeyListener(this);
         ih.addMouseListener(this);
         ih.addMouseWheelListener(this);
-
+        
     }
 
     public void configure(Element config) {
@@ -230,7 +233,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         MN_NewLayers.add(jmenu, 4);
         jmenu = app.createFactoryMenus("Graticules", WWEFactory.PLUGIN_CATEGORY_WORLDWIND_LAYER, WWEFactory.PLUGIN_FAMILY_WORLDWIND_LAYER_GRATICULE, this);
         MN_NewLayers.add(jmenu, 5);
-        jmenu = app.createFactoryMenus("Geocoding", WWEFactory.PLUGIN_CATEGORY_WORLDWIND_LAYER, WWEFactory.PLUGIN_FAMILY_WORLDWIND_LAYER_GEOCODING, this);
+        jmenu = app.createFactoryMenus("Search", WWEFactory.PLUGIN_CATEGORY_WORLDWIND_LAYER, WWEFactory.PLUGIN_FAMILY_WORLDWIND_LAYER_SEARCH, this);
         MN_NewLayers.add(jmenu, 6);
 
         //--- Prepare table
@@ -990,14 +993,8 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
             }
             
         } else if (e.getSource() == wwd) {
-            if (e.getClickCount() >= 2) {
-                Point pt = e.getPoint();
-                Position pos = wwd.getView().computePositionFromScreenPoint(pt.x, pt.y);
-                System.out.println("POS :" + pos);
-                
-                
-            }
-
+            //--- Forward to selected layed
+            if (selected != null) selected.layerMouseClicked(e, wwd.getCurrentPosition());
         }
 
     }
