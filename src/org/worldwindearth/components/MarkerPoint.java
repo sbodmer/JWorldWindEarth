@@ -38,16 +38,17 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URL;
 import javax.imageio.ImageIO;
+import org.worldwindearth.components.layers.ScreenProjectionLayer;
 
 /**
  *
  * @author sbodmer
  */
-public class MarkerPoint implements Renderable {
+public class MarkerPoint implements Renderable, ScreenProjectionLayer.ScreenProjectable {
 
     Position world = null;
     Point screen = null;
-    ScreenPointListener listener = null;
+    MarkerPointScreenListener listener = null;
 
     Cylinder cursor = null;
     BasicMarker marker = null;
@@ -59,15 +60,15 @@ public class MarkerPoint implements Renderable {
         this(world, null, "", null);
     }
 
-    public MarkerPoint(Position world, ScreenPointListener listener) {
+    public MarkerPoint(Position world, MarkerPointScreenListener listener) {
         this(world, listener, "", null);
     }
-    
-    public MarkerPoint(Position world, ScreenPointListener listener, String label) {
+
+    public MarkerPoint(Position world, MarkerPointScreenListener listener, String label) {
         this(world, listener, label, null);
     }
 
-    public MarkerPoint(Position world, ScreenPointListener listener, String label, URL icon) {
+    public MarkerPoint(Position world, MarkerPointScreenListener listener, String label, URL icon) {
         this.world = world;
         this.listener = listener;
 
@@ -128,7 +129,7 @@ public class MarkerPoint implements Renderable {
         pa.setLineWidth(2d);
         pa.setLabelMaterial(Material.WHITE);
         pa.setDrawLabel(true);
-        pa.setUsePointAsDefaultImage(true);
+        // pa.setUsePointAsDefaultImage(true);
         // pa.setLabelOffset(new Offset(100d,100d,AVKey.PIXELS,AVKey.PIXELS));
 
         point = new PointPlacemark(world);
@@ -175,11 +176,20 @@ public class MarkerPoint implements Renderable {
         // sballoon.setScreenLocation(new Point(screen.x, vp.height-screen.y));
         // sballoon.render(dc);
 
-        if (listener != null) listener.projectedScreenPoint(world, screen);
+        if (listener != null) listener.projectedScreenMarkerPoint(this, world, screen);
     }
 
-    public interface ScreenPointListener {
+    @Override
+    public Position getProjectablePosition() {
+        return world;
+    }
 
-        public void projectedScreenPoint(Position world, Point screen);
+    public String getProjectableName() {
+        return "";
+    }
+    
+    public interface MarkerPointScreenListener {
+
+        public void projectedScreenMarkerPoint(MarkerPoint m, Position world, Point screen);
     }
 }

@@ -21,10 +21,12 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.HashMap;
 import javax.swing.DefaultListModel;
 import javax.swing.JComponent;
 import javax.swing.JDesktopPane;
 import javax.swing.JLayeredPane;
+import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -36,13 +38,16 @@ import org.tinyrcp.TinyPlugin;
 import org.w3c.dom.Element;
 import org.worldwindearth.WWEFactory;
 import org.worldwindearth.WWEPlugin;
+import org.worldwindearth.components.layers.ScreenProjectionLayer;
 
 /**
  * Geocode main layer
  *
  * @author sbodmer
  */
-public class JGeocodeWWEPlugin extends JLayeredPane implements WWEPlugin, ActionListener, ChangeListener, MarkerPoint.ScreenPointListener, ReverseFetcher.ReverseFetcherListener, ListSelectionListener {
+public class JGeocodeWWEPlugin extends JLayeredPane implements WWEPlugin, ActionListener, ChangeListener, ScreenProjectionLayer.ScreenProjectionListener, ReverseFetcher.ReverseFetcherListener, ListSelectionListener, ScreenProjectionLayer.ScreenProjectable, MarkerPoint.MarkerPointScreenListener {
+
+    public static final int MARKER_LAYER = new Integer(10);
 
     static final Stroke STROKE1 = new BasicStroke(1);
     static final Stroke STROKE3 = new BasicStroke(3);
@@ -52,22 +57,25 @@ public class JGeocodeWWEPlugin extends JLayeredPane implements WWEPlugin, Action
     WorldWindow ww = null;
     JDesktopPane jdesktop = null;
 
-    GeocodeLayer layer = new GeocodeLayer();
+    ScreenProjectionLayer layer = new ScreenProjectionLayer();
 
-    Point screen = null;
-    MarkerPoint cursor = null;
-    
+    Position cursor = Position.ZERO;
+
     /**
-     * The list of results
+     * The cursor balloon
      */
-    ArrayList<MarkerPoint> points = new ArrayList<>();
-    
+    JBalloon jballoon = null;
+    MarkerPoint m = null;
+    Point screen = new Point(0, 0);
     /**
      * The list of geocoder
      */
     ArrayList<WWEGeocodePlugin> geocoders = new ArrayList<>();
 
-    DefaultListModel<Reverse> reverse = new DefaultListModel<>();
+    /**
+     * The list of results
+     */
+    DefaultListModel<JBalloon> reverse = new DefaultListModel<>();
 
     /**
      * Creates new form JTerminalsLayer
@@ -83,6 +91,9 @@ public class JGeocodeWWEPlugin extends JLayeredPane implements WWEPlugin, Action
         initComponents();
 
         LI_Reverse.setModel(reverse);
+        LI_Top.setModel(reverse);
+        
+        PN_Top.setVisible(false);
     }
 
     //**************************************************************************
@@ -136,31 +147,43 @@ public class JGeocodeWWEPlugin extends JLayeredPane implements WWEPlugin, Action
     @Override
     public void setup(App app, Object arg) {
         this.app = app;
-        cursor = new MarkerPoint(Position.fromDegrees(46.1935, 6.1291), this, "", getClass().getResource("/org/worldwindearth/geocode/Resources/Icons/64x64/Balloon.png"));
 
         jdesktop = (JDesktopPane) arg;
 
         SL_Opacity.addChangeListener(this);
 
-        LI_Reverse.setCellRenderer(new JReverseCellRenderer());
+        LI_Reverse.setCellRenderer(new JBalloonCellRenderer());
         LI_Reverse.getSelectionModel().addListSelectionListener(this);
+
+        LI_Top.setCellRenderer(new JBalloonCellRenderer());
+        LI_Top.getSelectionModel().addListSelectionListener(this);
         
+        jdesktop.add(PN_Top, JLayeredPane.POPUP_LAYER);
+        
+        jballoon = new JBalloon(this, getClass().getResource("/org/worldwindearth/geocode/Resources/Icons/32x32/Balloon.png"));
+        jdesktop.add(jballoon, JLayeredPane.PALETTE_LAYER);
+        jballoon.setSize(jballoon.getPreferredSize());
+        jballoon.setVisible(false);
+
+        //--- For debug
+        // m = new MarkerPoint(Position.fromDegrees(46.1935, 6.1291));
+        // layer.addRenderable(m);
+
+        layer.setScreenProjectionListener(this);
         layer.setName("Geocode");
-        layer.addRenderable(cursor);
-        cursor.setVisible(false);
+        layer.addProjectable(jballoon);
 
         // jdesktop.add(IF_Names, JDesktopPane.PALETTE_LAYER);
         // IF_Names.setBounds(100,100, 320, 200);
         IF_Names.setVisible(false);
 
         //--- Default to be hidden
-        setVisible(false);
-
+        // setVisible(false);
         //--- Create the geocode plugin
         ArrayList<TinyFactory> facs = app.getFactories(WWEFactory.PLUGIN_CATEGORY_WORLDWIND_GEOCODER);
         for (TinyFactory f : facs) {
             WWEGeocodePlugin p = (WWEGeocodePlugin) f.newPlugin(null);
-            p.setup(app, null);
+            p.setup(app, ww);
             geocoders.add(p);
 
         }
@@ -169,10 +192,24 @@ public class JGeocodeWWEPlugin extends JLayeredPane implements WWEPlugin, Action
 
     @Override
     public void cleanup() {
+        jdesktop.remove(PN_Top);
+        layer.removeProjectable(this);
+        
+        jdesktop.remove(jballoon);
+        layer.removeProjectable(jballoon);
+        
+        for (int i=0;i<reverse.getSize();i++) {
+            JBalloon jb = reverse.get(i);
+            jdesktop.remove(jb);
+            layer.removeProjectable(jb);
+        }
+        reverse.clear();
+        
         // jdesktop.remove(IF_Names);
         for (WWEGeocodePlugin p : geocoders) p.cleanup();
         geocoders.clear();
 
+        
         layer.dispose();
 
     }
@@ -199,14 +236,26 @@ public class JGeocodeWWEPlugin extends JLayeredPane implements WWEPlugin, Action
     public Object doAction(String action, Object argument, Object subject) {
         if (action.equals(TinyPlugin.DO_ACTION_NEWSIZE)) {
             Dimension dim = (Dimension) argument;
-
+            PN_Top.setBounds(300, 0, dim.width-600, 96);
+            
         } else if (action.equals(WWEPlugin.DO_ACTION_LAYER_SELECTED)) {
             IF_Names.setVisible(true);
+            PN_Top.setVisible(true);
             setVisible(true);
 
         } else if (action.equals(WWEPlugin.DO_ACTION_LAYER_UNSELECTED)) {
             IF_Names.setVisible(false);
+            PN_Top.setVisible(false);
             setVisible(false);
+            
+        } else if (action.equals(WWEPlugin.DO_ACTION_LAYER_ENABLED)) {
+            // PN_Top.setVisible(true);
+            
+        } else if (action.equals(WWEPlugin.DO_ACTION_LAYER_DISABLED)) {
+            PN_Top.setVisible(false);
+            jballoon.setVisible(false);
+            for (int i=0;i<reverse.getSize();i++) reverse.get(i).setVisible(false);
+            
         }
 
         return null;
@@ -219,7 +268,7 @@ public class JGeocodeWWEPlugin extends JLayeredPane implements WWEPlugin, Action
 
     @Override
     public JComponent getVisualComponent() {
-        return this;
+        return null;
     }
 
     @Override
@@ -262,8 +311,12 @@ public class JGeocodeWWEPlugin extends JLayeredPane implements WWEPlugin, Action
     @Override
     public void layerMouseClicked(MouseEvent e, Position pos) {
         if (e.getClickCount() >= 2) {
-            cursor.setVisible(true);
-            cursor.setPosition(pos);
+            //--- Set the elevation to zero so the projection is correct
+            cursor = new Position(pos, 0);
+            
+            // jballoon.setLocation(e.getX()-32, e.getY()-jballoon.getHeight());
+            jballoon.setVisible(true);
+
             e.consume();
 
             //--- fetch
@@ -310,23 +363,48 @@ public class JGeocodeWWEPlugin extends JLayeredPane implements WWEPlugin, Action
 
     public void reverseFetchedEL(ArrayList<Reverse> result) {
         for (Reverse r : result) {
-            reverse.addElement(r);
-            
-            MarkerPoint m = new MarkerPoint(Position.fromDegrees(r.latitude, r.longitude), this, r.summary, getClass().getResource("/org/worldwindearth/geocode/Resources/Icons/64x64/BalloonBlue.png"));
-            m.setVisible(true);
-            layer.addRenderable(m);
-            
-            points.add(m);
+            JBalloon jb = new JBalloon(r, getClass().getResource("/org/worldwindearth/geocode/Resources/Icons/32x32/BalloonBlue.png"));
+            jb.setSize(jb.getPreferredSize());
+            layer.addProjectable(jb);
+            reverse.addElement(jb);
+            jdesktop.add(jb, JLayeredPane.PALETTE_LAYER);
+
         }
     }
 
     //**************************************************************************
-    //*** ScreenPointListener
+    //*** ScreenProjectionListener
     //**************************************************************************
     @Override
-    public void projectedScreenPoint(Position world, Point screen) {
+    public void screenProjectedPoint(ScreenProjectionLayer.ScreenProjectable obj, Point screen) {
+        //--- If it's a ballon, replace it
+        if (obj == jballoon) {
+            jballoon.setLocation(screen.x - 16, jdesktop.getHeight() - screen.y - jballoon.getHeight());
+            
+        } else if (obj instanceof JBalloon) {
+            JBalloon jb = (JBalloon) obj;
+            jb.setLocation(screen.x - 16, jdesktop.getHeight() - screen.y - jb.getHeight());
+            jb.setVisible(true);
+
+        } else if (obj == m) {
+            /*
+            jballoon.setLocation(screen.x, jdesktop.getHeight() - screen.y);
+            jballoon.setVisible(true);
+             */
+        }
+        // jballoon.setLocation(screen.x-32, jdesktop.getHeight() - screen.y - jballoon.getHeight());
+        // jballoon.setVisible(true);
+
+    }
+
+    @Override
+    public void projectedScreenMarkerPoint(MarkerPoint m, Position world, Point screen) {
         this.screen = screen;
-        // System.out.println("SCREEN:"+screen);
+
+        /*
+        jballoon.setLocation(screen.x-32, getHeight()-screen.y-64);
+        jballoon.setVisible(true);
+         */
     }
 
     //**************************************************************************
@@ -334,18 +412,30 @@ public class JGeocodeWWEPlugin extends JLayeredPane implements WWEPlugin, Action
     //**************************************************************************
     @Override
     public void valueChanged(ListSelectionEvent e) {
-        if (e.getSource() == LI_Reverse.getSelectionModel()) {
+        if (e.getSource() instanceof ListSelectionModel) {
             if (e.getValueIsAdjusting() == true) return;
-            
-            Reverse r = LI_Reverse.getSelectedValue();
+
+            JBalloon r = (e.getSource()==LI_Reverse.getSelectionModel()?LI_Reverse.getSelectedValue():LI_Top.getSelectedValue());
             if (r != null) {
-                ww.getView().goTo(Position.fromDegrees(r.latitude, r.longitude), 200);
+                Position pos = r.getProjectablePosition();
+                ww.getView().goTo(pos, 300);
                 // BasicOrbitView view = (BasicOrbitView) wwd.getView();
                 // view.addPanToAnimator(c.getCenterPosition(), Angle.fromDegrees(c.getHeading()), Angle.fromDegrees(c.getPitch()), c.getZoom());
 
             }
         }
     }
+
+    @Override
+    public Position getProjectablePosition() {
+        return cursor;
+    }
+
+    @Override
+    public String getProjectableName() {
+        return "";
+    }
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -363,6 +453,9 @@ public class JGeocodeWWEPlugin extends JLayeredPane implements WWEPlugin, Action
         LI_Reverse = new javax.swing.JList<>();
         jPanel3 = new javax.swing.JPanel();
         PB_Waiting = new javax.swing.JProgressBar();
+        PN_Top = new javax.swing.JPanel();
+        jScrollPane3 = new javax.swing.JScrollPane();
+        LI_Top = new javax.swing.JList<>();
         IF_Names = new javax.swing.JInternalFrame();
         jScrollPane1 = new javax.swing.JScrollPane();
         LI_Results = new javax.swing.JList<>();
@@ -410,6 +503,13 @@ public class JGeocodeWWEPlugin extends JLayeredPane implements WWEPlugin, Action
 
         PN_Config.add(jPanel3, java.awt.BorderLayout.PAGE_END);
 
+        PN_Top.setLayout(new java.awt.BorderLayout());
+
+        LI_Top.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        jScrollPane3.setViewportView(LI_Top);
+
+        PN_Top.add(jScrollPane3, java.awt.BorderLayout.CENTER);
+
         IF_Names.setClosable(true);
         IF_Names.setDefaultCloseOperation(javax.swing.WindowConstants.HIDE_ON_CLOSE);
         IF_Names.setIconifiable(true);
@@ -429,15 +529,18 @@ public class JGeocodeWWEPlugin extends JLayeredPane implements WWEPlugin, Action
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JInternalFrame IF_Names;
     private javax.swing.JList<String> LI_Results;
-    private javax.swing.JList<Reverse> LI_Reverse;
+    private javax.swing.JList<JBalloon> LI_Reverse;
+    private javax.swing.JList<JBalloon> LI_Top;
     private javax.swing.JProgressBar PB_Waiting;
     private javax.swing.JPanel PN_Config;
+    private javax.swing.JPanel PN_Top;
     private javax.swing.JSlider SL_Opacity;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JScrollPane jScrollPane3;
     // End of variables declaration//GEN-END:variables
 
     //**************************************************************************
@@ -450,10 +553,13 @@ public class JGeocodeWWEPlugin extends JLayeredPane implements WWEPlugin, Action
      */
     private void fetchReverse(Position pos) {
         //--- Remove old points
+        for (int i = 0; i < reverse.size(); i++) {
+            JBalloon jb = reverse.get(i);
+            layer.removeProjectable(jb);
+            jdesktop.remove(jb);
+        }
         reverse.clear();
-        for (MarkerPoint m: points) layer.removeRenderable(m);
-        points.clear();
-        
+
         //--- Start the fetchin in parallel
         for (WWEGeocodePlugin p : geocoders) {
             ReverseFetcher fetcher = new ReverseFetcher(this, pos, p);

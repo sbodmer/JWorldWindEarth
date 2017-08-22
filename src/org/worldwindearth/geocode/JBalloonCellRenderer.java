@@ -9,17 +9,18 @@ import java.awt.Color;
 import java.awt.Component;
 import javax.swing.JList;
 import javax.swing.ListCellRenderer;
+import org.worldwindearth.components.layers.ScreenProjectionLayer.ScreenProjectable;
 
 /**
  *
  * @author sbodmer
  */
-public class JReverseCellRenderer extends javax.swing.JPanel implements ListCellRenderer<Reverse> {
+public class JBalloonCellRenderer extends javax.swing.JPanel implements ListCellRenderer<JBalloon> {
 
     /**
      * Creates new form JReverseCellRenderer
      */
-    public JReverseCellRenderer() {
+    public JBalloonCellRenderer() {
         initComponents();
     }
 
@@ -27,13 +28,18 @@ public class JReverseCellRenderer extends javax.swing.JPanel implements ListCell
     //*** ListCellRenderer
     //**************************************************************************
     @Override
-    public Component getListCellRendererComponent(JList<? extends Reverse> list, Reverse value, int index, boolean isSelected, boolean cellHasFocus) {
+    public Component getListCellRendererComponent(JList<? extends JBalloon> list, JBalloon value, int index, boolean isSelected, boolean cellHasFocus) {
         Color fg = isSelected ? list.getSelectionForeground() : list.getForeground();
         setForeground(fg);
 
-        LB_Producer.setIcon(value.producer.getPluginFactory().getFactoryIcon(22));
-        LB_Summary.setText(value.summary);
-
+        ScreenProjectable proj = value.getScreenProjectable();
+        if (proj instanceof Reverse) {
+            Reverse r = (Reverse) proj;
+            
+            LB_Producer.setIcon(r.producer.getPluginFactory().getFactoryIcon(22));
+            LB_Summary.setText(r.summary);
+        }
+        
         if (isSelected) {
             setBackground(list.getSelectionBackground());
 
@@ -70,4 +76,5 @@ public class JReverseCellRenderer extends javax.swing.JPanel implements ListCell
     protected javax.swing.JLabel LB_Producer;
     protected javax.swing.JLabel LB_Summary;
     // End of variables declaration//GEN-END:variables
+
 }

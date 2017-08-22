@@ -6,17 +6,20 @@
 package org.worldwindearth.geocode;
 
 import gov.nasa.worldwind.geom.LatLon;
+import gov.nasa.worldwind.geom.Position;
+import org.worldwindearth.components.layers.ScreenProjectionLayer;
 
 /**
  * The reverse geocode result
  * 
  * @author sbodmer
  */
-public class Reverse {
+public class Reverse implements ScreenProjectionLayer.ScreenProjectable {
     public WWEGeocodePlugin producer = null;
     
     public double latitude = 0.0;
     public double longitude =  0.0;
+    public double elevation = 0.0;
     public String house ="";
     public String street = "";
     public String city = "";
@@ -50,6 +53,10 @@ public class Reverse {
         
     }
     
+    public void setElevation(double elevation) {
+        this.elevation = elevation;
+    }
+    
     public void setHouse(String house) {
         this.house = house;
     }
@@ -76,5 +83,17 @@ public class Reverse {
     
     public void setSummary(String summary) {
         this.summary = summary;
+    }
+
+    //**************************************************************************
+    //*** ScreenProjectable
+    //**************************************************************************
+    @Override
+    public Position getProjectablePosition() {
+        return Position.fromDegrees(latitude, longitude, elevation);
+    }
+    
+    public String getProjectableName() {
+        return summary;
     }
 }

@@ -6,6 +6,7 @@
 package org.nominatim;
 
 import gov.nasa.worldwind.WorldWindow;
+import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.Position;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -40,6 +41,7 @@ public class NominatimPlugin implements WWEGeocodePlugin {
     
     TinyFactory factory = null;
     App app = null;
+    WorldWindow ww = null;
     
     DocumentBuilderFactory docBuilder = null;
     
@@ -54,6 +56,7 @@ public class NominatimPlugin implements WWEGeocodePlugin {
             ex.printStackTrace();
         }
     }
+    
     
     //**************************************************************************
     //*** WWEGeocodePlugin
@@ -141,6 +144,9 @@ public class NominatimPlugin implements WWEGeocodePlugin {
                         }
                     }
                 }
+                //--- No elevation, let the elevation be defined in the display process
+                // r.setElevation(ww.getView().getGlobe().getElevation(Angle.fromDegrees(r.latitude), Angle.fromDegrees(r.longitude)));
+                // System.out.println("ELE:"+r.elevation);
                 list.add(r);
 
             } catch (Exception ex) {
@@ -184,10 +190,16 @@ public class NominatimPlugin implements WWEGeocodePlugin {
         return null;
     }
 
+    /**
+     * The passed object is the world window
+     * 
+     * @param app
+     * @param o 
+     */
     @Override
-    public void setup(App app, Object o) {
+    public void setup(App app, Object obj) {
         this.app = app;
-        
+        ww = (WorldWindow) obj;
     }
 
     @Override

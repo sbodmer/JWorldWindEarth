@@ -487,7 +487,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
                 while (it.hasNext()) {
                     WWEPlugin p = it.next();
                     p.doAction(TinyPlugin.DO_ACTION_NEWSIZE, DP_Main.getSize(), null);
-                    p.doAction(p.getLayer().isEnabled()?WWEPlugin.DO_ACTION_LAYER_ENBLED:WWEPlugin.DO_ACTION_LAYER_DISABLED, null, null);
+                    p.doAction(p.getLayer().isEnabled()?WWEPlugin.DO_ACTION_LAYER_ENABLED:WWEPlugin.DO_ACTION_LAYER_DISABLED, null, null);
              
                 }
 
@@ -662,7 +662,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
                 Layer l = (Layer) TB_Layers.getValueAt(index, 1);
                 LayerList ll = m.getLayers();
                 ll.remove(l);
-
+                
                 WWEPlugin p = (WWEPlugin) l.getValue(WWEPlugin.AVKEY_WORLDWIND_LAYER_PLUGIN);
                 if (p != null) {
                     //--- Remove the config panel
@@ -1049,7 +1049,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
                     int index = e.getFirstRow();
                     Layer l = (Layer) layers.getValueAt(index, 1);
                     WWEPlugin p = (WWEPlugin) l.getValue(WWEPlugin.AVKEY_WORLDWIND_LAYER_PLUGIN);
-                    if (p != null) p.doAction(l.isEnabled() ? WWEPlugin.DO_ACTION_LAYER_ENBLED : WWEPlugin.DO_ACTION_LAYER_DISABLED, null, null);
+                    if (p != null) p.doAction(l.isEnabled() ? WWEPlugin.DO_ACTION_LAYER_ENABLED : WWEPlugin.DO_ACTION_LAYER_DISABLED, null, null);
 
                 }
             }

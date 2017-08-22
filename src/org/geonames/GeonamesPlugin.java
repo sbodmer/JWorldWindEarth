@@ -6,6 +6,7 @@
 package org.geonames;
 
 import gov.nasa.worldwind.WorldWindow;
+import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.Position;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -32,7 +33,8 @@ public class GeonamesPlugin implements WWEGeocodePlugin {
 
     TinyFactory factory = null;
     App app = null;
-
+    WorldWindow ww = null;
+    
     DocumentBuilderFactory docBuilder = null;
 
     public GeonamesPlugin(TinyFactory factory, WorldWindow ww) {
@@ -164,6 +166,9 @@ public class GeonamesPlugin implements WWEGeocodePlugin {
                     }
                 }
                 r.setSummary(general);
+                
+                // r.setElevation(ww.getView().getGlobe().getElevation(Angle.fromDegrees(r.latitude), Angle.fromDegrees(r.longitude)));
+                // System.out.println("ELE:"+r.elevation);
                 list.add(r);
 
             }
@@ -209,9 +214,9 @@ public class GeonamesPlugin implements WWEGeocodePlugin {
     }
 
     @Override
-    public void setup(App app, Object o) {
+    public void setup(App app, Object obj) {
         this.app = app;
-
+        ww = (WorldWindow) obj;
     }
 
     @Override
