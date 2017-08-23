@@ -60,6 +60,7 @@ The manifest of the jar must be
 The jar itself should be placed in the WorldWindEarth lib folder
 
     {wwe}/lib/layers
+    {www}/lib/...
 
 ## Classes
 Your layer must be composed of
@@ -91,8 +92,8 @@ The important method to implement is
     public Layer getLayer();
     
 The returned layer must be a  WorldWind layer instance. A reference to the plugin
-which produced it must will be added by the framework, but if the layer is changed
-outise of it's control, you have to set the reference with the setValue() call
+which produced it will be added by the framework, but if the layer is changed
+outside of it's control, you have to set the reference with the setValue() call
 
     mylayer.setValue(WWEPlugin.AVKEY_WORLDWIND_LAYER_PLUGIN, myplugin);
 
