@@ -1,4 +1,4 @@
-# WorldWindEarth
+# JWorldWindEarth
 Java visual interface for the Nasa WorldWind SDK.
 
 The main purpose of this project is to have a "reference" application using the
