@@ -191,10 +191,8 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         BT_LayerDown.addActionListener(this);
         BT_Configure.addActionListener(this);
 
-        BT_Collapse.addActionListener(this);
         BT_More.addActionListener(this);
-        BT_Sticky.addActionListener(this);
-
+        
         BT_ScrollLeft.addActionListener(this);
         BT_ScrollRight.addActionListener(this);
 
@@ -208,7 +206,8 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         PU_More.add(app.createFactoryMenus(app.getString("word_containers", "App"), TinyFactory.PLUGIN_CATEGORY_PANEL, TinyFactory.PLUGIN_FAMILY_CONTAINER, this), 0);
 
         MN_HideStatusBar.addActionListener(this);
-
+        MN_HideLayers.addActionListener(this);
+        
         InputHandler ih = wwd.getInputHandler();
         ih.addKeyListener(this);
         ih.addMouseListener(this);
@@ -647,6 +646,21 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         } else if (e.getActionCommand().equals("hideStatusBar")) {
             PN_Status.setVisible(!MN_HideStatusBar.isSelected());
 
+        } else if (e.getActionCommand().equals("hideLayers")) {
+            boolean hide = MN_HideLayers.isSelected();
+            if (hide) {
+                SP_Main.setLastDividerLocation(SP_Main.getDividerLocation());
+                PN_Left.setVisible(false);
+                SP_Main.setDividerSize(0);
+                
+            } else {
+                PN_Left.setVisible(true);
+                SP_Main.setDividerLocation(SP_Main.getLastDividerLocation());
+                SP_Main.setDividerSize(10);
+                
+            }
+            SP_Main.revalidate();
+            
         } else if (e.getActionCommand().equals("renameLayer")) {
             int index = TB_Layers.getSelectedRow();
             if (index != -1) {
@@ -696,15 +710,6 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
             }
             layers.fireTableDataChanged();
 
-        } else if (e.getActionCommand().equals("collapse")) {
-            if (SP_Layers.getDividerLocation() == 1) {
-                SP_Layers.setDividerLocation(SP_Layers.getLastDividerLocation());
-
-            } else {
-                SP_Layers.setLastDividerLocation(SP_Layers.getDividerLocation());
-                SP_Layers.setDividerLocation(1);
-            }
-
         } else if (e.getActionCommand().equals("activeLayer")) {
             WWEPlugin p = (WWEPlugin) ((JToggleButton) e.getSource()).getClientProperty("plugin");
 
@@ -723,19 +728,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         } else if (e.getActionCommand().equals("screenIdentifier")) {
             App.showScreenIdentifiers();
 
-        } else if (e.getActionCommand().equals("sticky")) {
-            boolean sticky = BT_Sticky.isSelected();
-            if (sticky) {
-                int old = SP_Main.getLastDividerLocation();
-                SP_Main.setDividerLocation(old);
-                SP_Main.setDividerSize(10);
-
-            } else {
-                int loc = SP_Main.getDividerLocation();
-                SP_Main.setLastDividerLocation(loc);
-                SP_Main.setDividerLocation(0);
-                SP_Main.setDividerSize(0);
-            }
+        
 
         } else if (e.getActionCommand().equals("fullscreen")) {
             if (MN_Fullscreen.isSelected()) {
@@ -861,10 +854,10 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
             actionPerformed(ae);
 
         } else if (e.getKeyCode() == KeyEvent.VK_SPACE) {
-            boolean sticky = BT_Sticky.isSelected();
-            BT_Sticky.setSelected(!sticky);
+            boolean sticky = MN_HideLayers.isSelected();
+            MN_HideLayers.setSelected(!sticky);
 
-            actionPerformed(new ActionEvent(BT_Sticky, ActionEvent.ACTION_PERFORMED, BT_Sticky.getActionCommand()));
+            actionPerformed(new ActionEvent(MN_HideLayers, ActionEvent.ACTION_PERFORMED, MN_HideLayers.getActionCommand()));
 
         }
     }
@@ -1002,9 +995,10 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
     @Override
     public void mousePressed(MouseEvent e) {
         if (e.getSource() == wwd) {
-            if (e.isPopupTrigger() && e.getClickCount() == 2) {
+            if (e.getButton() == MouseEvent.BUTTON2) {
                 PU_More.show(DP_Main, e.getX(), e.getY());
             }
+            
         }
     }
 
@@ -1013,9 +1007,10 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         if (e.getSource() == wwd) {
             vtimer.restart();
 
-            if (e.isPopupTrigger() && e.getClickCount() == 2) {
+            if (e.getButton() == MouseEvent.BUTTON2) {
                 PU_More.show(DP_Main, e.getX(), e.getY());
             }
+            
         }
     }
 
@@ -1074,6 +1069,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         PU_More = new javax.swing.JPopupMenu();
         jSeparator10 = new javax.swing.JPopupMenu.Separator();
         MN_HideStatusBar = new javax.swing.JCheckBoxMenuItem();
+        MN_HideLayers = new javax.swing.JCheckBoxMenuItem();
         jSeparator11 = new javax.swing.JPopupMenu.Separator();
         MN_Screens = new javax.swing.JMenu();
         MN_Fullscreen = new javax.swing.JCheckBoxMenuItem();
@@ -1082,10 +1078,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         btgscreens = new javax.swing.ButtonGroup();
         btgmodel = new javax.swing.ButtonGroup();
         SP_Main = new javax.swing.JSplitPane();
-        jPanel5 = new javax.swing.JPanel();
-        PN_LayersTop = new javax.swing.JPanel();
-        jPanel2 = new javax.swing.JPanel();
-        BT_Collapse = new javax.swing.JButton();
+        PN_Left = new javax.swing.JPanel();
         SP_Layers = new javax.swing.JSplitPane();
         PN_LayersFrame = new javax.swing.JPanel();
         jPanel4 = new javax.swing.JPanel();
@@ -1107,7 +1100,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         LB_Layer = new javax.swing.JLabel();
         jPanel9 = new javax.swing.JPanel();
         BT_Configure = new javax.swing.JButton();
-        jPanel6 = new javax.swing.JPanel();
+        PN_Right = new javax.swing.JPanel();
         PN_Status = new javax.swing.JPanel();
         PB_Downloading = new javax.swing.JProgressBar();
         jlabel1 = new javax.swing.JLabel();
@@ -1138,7 +1131,6 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         BT_Cameras = new javax.swing.JToggleButton();
         jPanel7 = new javax.swing.JPanel();
         BT_More = new javax.swing.JButton();
-        BT_Sticky = new javax.swing.JToggleButton();
 
         MN_NewLayers.setText("New layer");
         PU_Layers.add(MN_NewLayers);
@@ -1157,6 +1149,11 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         MN_HideStatusBar.setText("Hide status bar");
         MN_HideStatusBar.setActionCommand("hideStatusBar");
         PU_More.add(MN_HideStatusBar);
+
+        MN_HideLayers.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_SPACE, 0));
+        MN_HideLayers.setText("Hide layers panel");
+        MN_HideLayers.setActionCommand("hideLayers");
+        PU_More.add(MN_HideLayers);
         PU_More.add(jSeparator11);
 
         MN_Screens.setText("Screens");
@@ -1177,26 +1174,12 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
 
         SP_Main.setDividerLocation(300);
 
-        jPanel5.setLayout(new java.awt.BorderLayout());
-
-        PN_LayersTop.setMaximumSize(new java.awt.Dimension(2147483647, 32));
-        PN_LayersTop.setLayout(new java.awt.BorderLayout());
-
-        jPanel2.setOpaque(false);
-
-        BT_Collapse.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
-        BT_Collapse.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/collapse.png"))); // NOI18N
-        BT_Collapse.setActionCommand("collapse");
-        BT_Collapse.setPreferredSize(new java.awt.Dimension(32, 32));
-        jPanel2.add(BT_Collapse);
-
-        PN_LayersTop.add(jPanel2, java.awt.BorderLayout.WEST);
-
-        jPanel5.add(PN_LayersTop, java.awt.BorderLayout.NORTH);
+        PN_Left.setLayout(new java.awt.BorderLayout());
 
         SP_Layers.setDividerLocation(200);
         SP_Layers.setDividerSize(5);
         SP_Layers.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
+        SP_Layers.setOneTouchExpandable(true);
 
         PN_LayersFrame.setMinimumSize(new java.awt.Dimension(135, 0));
         PN_LayersFrame.setLayout(new java.awt.BorderLayout());
@@ -1300,11 +1283,11 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
 
         SP_Layers.setRightComponent(PN_LayersCenter);
 
-        jPanel5.add(SP_Layers, java.awt.BorderLayout.CENTER);
+        PN_Left.add(SP_Layers, java.awt.BorderLayout.CENTER);
 
-        SP_Main.setLeftComponent(jPanel5);
+        SP_Main.setLeftComponent(PN_Left);
 
-        jPanel6.setLayout(new java.awt.BorderLayout());
+        PN_Right.setLayout(new java.awt.BorderLayout());
 
         PN_Status.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
 
@@ -1345,7 +1328,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         LB_Licence.setText("...");
         PN_Status.add(LB_Licence);
 
-        jPanel6.add(PN_Status, java.awt.BorderLayout.SOUTH);
+        PN_Right.add(PN_Status, java.awt.BorderLayout.SOUTH);
 
         PN_Cameras.setLayout(new java.awt.BorderLayout());
 
@@ -1418,7 +1401,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         DP_Main.add(PN_Cameras);
         PN_Cameras.setBounds(420, 0, 200, 480);
 
-        jPanel6.add(DP_Main, java.awt.BorderLayout.CENTER);
+        PN_Right.add(DP_Main, java.awt.BorderLayout.CENTER);
 
         PN_Topbar.setLayout(new java.awt.BorderLayout());
 
@@ -1476,17 +1459,11 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         BT_More.setPreferredSize(new java.awt.Dimension(32, 32));
         jPanel7.add(BT_More);
 
-        BT_Sticky.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/sticky.png"))); // NOI18N
-        BT_Sticky.setSelected(true);
-        BT_Sticky.setActionCommand("sticky");
-        BT_Sticky.setPreferredSize(new java.awt.Dimension(32, 32));
-        jPanel7.add(BT_Sticky);
-
         PN_Topbar.add(jPanel7, java.awt.BorderLayout.WEST);
 
-        jPanel6.add(PN_Topbar, java.awt.BorderLayout.PAGE_START);
+        PN_Right.add(PN_Topbar, java.awt.BorderLayout.PAGE_START);
 
-        SP_Main.setRightComponent(jPanel6);
+        SP_Main.setRightComponent(PN_Right);
 
         add(SP_Main, java.awt.BorderLayout.CENTER);
     }// </editor-fold>//GEN-END:initComponents
@@ -1495,7 +1472,6 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
     private javax.swing.JButton BT_CameraDown;
     private javax.swing.JButton BT_CameraUp;
     private javax.swing.JToggleButton BT_Cameras;
-    private javax.swing.JButton BT_Collapse;
     private javax.swing.JButton BT_Configure;
     private javax.swing.JButton BT_LayerDown;
     private javax.swing.JButton BT_LayerUp;
@@ -1506,7 +1482,6 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
     private javax.swing.JButton BT_RenameLayer;
     private javax.swing.JButton BT_ScrollLeft;
     private javax.swing.JButton BT_ScrollRight;
-    private javax.swing.JToggleButton BT_Sticky;
     private javax.swing.JButton BT_UpdateCamera;
     private javax.swing.JDesktopPane DP_Main;
     private javax.swing.JLabel LB_Layer;
@@ -1514,6 +1489,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
     private javax.swing.JLabel LB_Licence;
     private javax.swing.JList<Camera> LI_Cameras;
     private javax.swing.JCheckBoxMenuItem MN_Fullscreen;
+    private javax.swing.JCheckBoxMenuItem MN_HideLayers;
     private javax.swing.JCheckBoxMenuItem MN_HideStatusBar;
     private javax.swing.JMenu MN_NewLayers;
     private javax.swing.JMenuItem MN_RemoveLayer;
@@ -1526,7 +1502,8 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
     private javax.swing.JPanel PN_LayersCenter;
     private javax.swing.JPanel PN_LayersData;
     private javax.swing.JPanel PN_LayersFrame;
-    private javax.swing.JPanel PN_LayersTop;
+    private javax.swing.JPanel PN_Left;
+    private javax.swing.JPanel PN_Right;
     private javax.swing.JPanel PN_Status;
     private javax.swing.JPanel PN_Topbar;
     private javax.swing.JPanel PN_Tray;
@@ -1546,11 +1523,8 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
     private javax.swing.ButtonGroup btgscreens;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel11;
-    private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
-    private javax.swing.JPanel jPanel5;
-    private javax.swing.JPanel jPanel6;
     private javax.swing.JPanel jPanel7;
     private javax.swing.JPanel jPanel8;
     private javax.swing.JPanel jPanel9;

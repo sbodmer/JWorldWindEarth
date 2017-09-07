@@ -13,7 +13,6 @@
 <WorldWindConfiguration version="1">
     <!--The initial layer list can be embedded here or linked as below. To change the set of initial layers,-->
     <!--modify the file identified by the href or replace the link with your own-->
-    <!-- <LayerList href="lsimedia/geogeny/application/Resources/Worldwind/worldwind.layers.xml"/ -->
     <!-- LayerList href="worldwind.layers.xml"/ -->
     
     <!-- To avoid file path problem, embed the layer here -->
@@ -50,7 +49,6 @@
         <!-- Layer href="config/Earth/OpenStreetMap.xml" actuate="onRequest"/ -->
         <!-- Layer href="config/Earth/EarthAtNightLayer.xml" actuate="onRequest"/ -->
     
-        <!-- <Layer href="lsimedia/geogeny/gui/layeredworld/worldwind/config/WMS/SITGPlanDeVille.xml" actuate="onLoad"/> -->
         <!-- Layer className="gov.nasa.worldwind.layers.Earth.NASAWFSPlaceNameLayer"/ -->
     
         <!-- Layer className="gov.nasa.worldwind.layers.WorldMapLayer"/ -->

@@ -1,6 +1,5 @@
 package org.geonames;
 
-import org.nominatim.*;
 import gov.nasa.worldwind.WorldWindow;
 import java.util.ResourceBundle;
 import javax.swing.Icon;

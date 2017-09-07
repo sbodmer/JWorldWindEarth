@@ -7,6 +7,9 @@ package org.worldwindearth.geocode;
 
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Position;
+import gov.nasa.worldwind.poi.BasicPointOfInterest;
+import gov.nasa.worldwind.poi.PointOfInterest;
+import org.tinyrcp.TinyPlugin;
 import org.worldwindearth.components.layers.ScreenProjectionLayer;
 
 /**
@@ -14,8 +17,8 @@ import org.worldwindearth.components.layers.ScreenProjectionLayer;
  * 
  * @author sbodmer
  */
-public class Reverse implements ScreenProjectionLayer.ScreenProjectable {
-    public WWEGeocodePlugin producer = null;
+public class Result implements ScreenProjectionLayer.ScreenProjectable {
+    public TinyPlugin producer = null;
     
     public double latitude = 0.0;
     public double longitude =  0.0;
@@ -28,7 +31,7 @@ public class Reverse implements ScreenProjectionLayer.ScreenProjectable {
     public String zip = "";
     public String summary = "";
     
-    public Reverse(WWEGeocodePlugin producer) {
+    public Result(TinyPlugin producer) {
        this.producer = producer; 
     }
     
@@ -85,6 +88,16 @@ public class Reverse implements ScreenProjectionLayer.ScreenProjectable {
         this.summary = summary;
     }
 
+    /**
+     * Return a instant of PointOfInterest with a fixed location
+     * 
+     * @return 
+     */
+    public ReversePointOfInterest getPointOfInterest() {
+        LatLon latlon = LatLon.fromDegrees(latitude, longitude);
+        return new ReversePointOfInterest(this, latlon);
+    }
+    
     //**************************************************************************
     //*** ScreenProjectable
     //**************************************************************************

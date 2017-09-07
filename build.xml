@@ -185,7 +185,14 @@
         <jar destfile="${dist.dir}/lib/ext/geocode/Geonames.jar" manifest="Manifests/geocode/Geonames.mf">
             <fileset dir="${build.dir}/classes" includes="org/geonames/**"/>
         </jar>
-        
+        <echo message="[Geocode] Yahoo"/>
+        <jar destfile="${dist.dir}/lib/ext/geocode/Yahoo.jar" manifest="Manifests/geocode/Yahoo.mf">
+            <fileset dir="${build.dir}/classes" includes="gov/nasa/yahoo/search/**"/>
+        </jar>
+        <echo message="[Geocode] Photon"/>
+        <jar destfile="${dist.dir}/lib/ext/geocode/Photon.jar" manifest="Manifests/geocode/Photon.mf">
+            <fileset dir="${build.dir}/classes" includes="de/komoot/photon/**"/>
+        </jar>
     </target>
     
     <target name="copy_libs">

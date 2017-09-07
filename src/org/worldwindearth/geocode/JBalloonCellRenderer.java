@@ -33,8 +33,8 @@ public class JBalloonCellRenderer extends javax.swing.JPanel implements ListCell
         setForeground(fg);
 
         ScreenProjectable proj = value.getScreenProjectable();
-        if (proj instanceof Reverse) {
-            Reverse r = (Reverse) proj;
+        if (proj instanceof Result) {
+            Result r = (Result) proj;
             
             LB_Producer.setIcon(r.producer.getPluginFactory().getFactoryIcon(22));
             LB_Summary.setText(r.summary);

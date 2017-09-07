@@ -26,12 +26,12 @@ public class ReverseFetcher extends Thread {
 
     @Override
     public void run() {
-        ArrayList<Reverse> list = plugin.reverse(pos);
+        ArrayList<Result> list = plugin.reverse(pos);
         if (listener != null) listener.reverseFetched(list);
     }
 
     public interface ReverseFetcherListener {
 
-        public void reverseFetched(ArrayList<Reverse> result);
+        public void reverseFetched(ArrayList<Result> result);
     }
 }

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<MultiProperties xmlns="hu.skzs.multiproperties">
+    <Version>1.2</Version>
+    <Name>ML</Name>
+    <Description>Yahho gazetteer</Description>
+    <Handler>Java Properties Handler</Handler>
+    <Columns>
+        <Key>
+            <Width>150</Width>
+        </Key>
+        <Column>
+            <Width>267</Width>
+            <Name>en</Name>
+            <Description/>
+            <HandlerConfiguration>./YahooGazetteer.properties|false|true|true|false</HandlerConfiguration>
+        </Column>
+        <Column>
+            <Width>298</Width>
+            <Name>fr</Name>
+            <Description/>
+            <HandlerConfiguration>./YahooGazetteer_fr.properties|false|true|true|false</HandlerConfiguration>
+        </Column>
+    </Columns>
+    <Records>
+        <Property>
+            <Name>factory_name</Name>
+            <Description/>
+            <Disabled>false</Disabled>
+            <MultiLine>true</MultiLine>
+            <DefaultValue>Yahoo gazetteer</DefaultValue>
+            <Value disabled="true" final="false">Yahoo gazetteer</Value>
+            <Value disabled="true" final="false">Yahoo gazetteer</Value>
+        </Property>
+    </Records>
+</MultiProperties>

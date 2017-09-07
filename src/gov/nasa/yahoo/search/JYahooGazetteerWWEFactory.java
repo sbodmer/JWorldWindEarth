@@ -1,13 +1,11 @@
-package org.worldwindearth.geocode;
+package gov.nasa.yahoo.search;
 
 import gov.nasa.worldwind.WorldWindow;
-import java.util.ArrayList;
 import java.util.ResourceBundle;
 import javax.swing.Icon;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import org.tinyrcp.App;
-import org.tinyrcp.TinyFactory;
 import org.tinyrcp.TinyPlugin;
 import org.w3c.dom.Element;
 import org.worldwindearth.WWEFactory;
@@ -16,8 +14,8 @@ import org.worldwindearth.WWEFactory;
  *
  * @author sbodmer
  */
-public class JGeocodeWWEFactory extends JPanel implements WWEFactory {
-    public static final String COPYRIGHT_TEXT = "© LSI Media Sàrl";
+public class JYahooGazetteerWWEFactory extends JPanel implements WWEFactory {
+    public static final String COPYRIGHT_TEXT = "© Yahoo";
     
     ResourceBundle bundle = null;
     App app = null;
@@ -25,8 +23,8 @@ public class JGeocodeWWEFactory extends JPanel implements WWEFactory {
     /**
      * 
      */
-    public JGeocodeWWEFactory() {
-        bundle = ResourceBundle.getBundle("org.worldwindearth.geocode.Geocode");
+    public JYahooGazetteerWWEFactory() {
+        bundle = ResourceBundle.getBundle("gov.nasa.yahoo.search.YahooGazetteer");
 
         initComponents();
 
@@ -36,7 +34,7 @@ public class JGeocodeWWEFactory extends JPanel implements WWEFactory {
     //***************************************************************************
     @Override
     public String getFactoryCategory() {
-        return PLUGIN_CATEGORY_WORLDWIND_LAYER;
+        return PLUGIN_CATEGORY_WORLDWIND_GAZETTEER;
     }
 
     @Override
@@ -77,26 +75,19 @@ public class JGeocodeWWEFactory extends JPanel implements WWEFactory {
      */
     @Override
     public TinyPlugin newPlugin(Object arg) {
-        return new JGeocodeWWEPlugin(this, (WorldWindow) arg);
+        return new YahooGazetteerPlugin(this, (WorldWindow) arg);
         
     }
 
     @Override
     public Object getProperty(String property) {
-        if (property.equals(PROPERTY_COPYRIGHT_TEXT)) {
-            String txt = COPYRIGHT_TEXT;
-            ArrayList<TinyFactory> facs = app.getFactories(WWEFactory.PLUGIN_CATEGORY_WORLDWIND_GEOCODER);
-            for (TinyFactory f: facs) txt +=", "+f.getProperty(PROPERTY_COPYRIGHT_TEXT);
-            facs = app.getFactories(WWEFactory.PLUGIN_CATEGORY_WORLDWIND_GAZETTEER);
-            for (TinyFactory f: facs) txt +=", "+f.getProperty(PROPERTY_COPYRIGHT_TEXT);
-            return txt;
-        }
+        if (property.equals(PROPERTY_COPYRIGHT_TEXT)) return COPYRIGHT_TEXT;
         return null;
     }
 
     @Override
     public String getFactoryFamily() {
-        return PLUGIN_FAMILY_WORLDWIND_LAYER_SEARCH;
+        return PLUGIN_FAMILY_COMPONENT;
     }
 
     @Override
@@ -120,12 +111,12 @@ public class JGeocodeWWEFactory extends JPanel implements WWEFactory {
         LB_Name = new javax.swing.JLabel();
         LB_Description = new javax.swing.JLabel();
 
-        LB_Name.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/geocode/Resources/Icons/22x22/geocode.png"))); // NOI18N
-        java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("org/worldwindearth/geocode/Geocode"); // NOI18N
+        LB_Name.setIcon(new javax.swing.ImageIcon(getClass().getResource("/gov/nasa/yahoo/Resources/Icons/22x22/yahoo.png"))); // NOI18N
+        java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("gov/nasa/yahoo/search/YahooGazetteer"); // NOI18N
         LB_Name.setText(bundle.getString("factory_name")); // NOI18N
 
         LB_Description.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
-        LB_Description.setText("<html><body>\nGeocoding service\n</body></html>");
+        LB_Description.setText("<html><body>\nYahoo gazetteer service\n</body></html>");
         LB_Description.setVerticalAlignment(javax.swing.SwingConstants.TOP);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);

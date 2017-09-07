@@ -14,7 +14,7 @@ import org.tinyrcp.TinyPlugin;
  * 
  * @author sbodmer
  */
-public interface WWEGeocodePlugin extends TinyPlugin {
+public interface WWEGazetteerPlugin extends TinyPlugin {
     
     /**
      * Return the list of location for the passed address
@@ -23,7 +23,5 @@ public interface WWEGeocodePlugin extends TinyPlugin {
      * @return 
      */
     
-    public ArrayList<Result> geocode(String house, String street, String zip, String city, String country);
-    
-    public ArrayList<Result> reverse(Position pos);
+    public ArrayList<Result> findPlaces(String string);
 }

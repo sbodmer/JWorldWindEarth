@@ -6,10 +6,10 @@
 package org.geonames;
 
 import gov.nasa.worldwind.WorldWindow;
-import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.Position;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Locale;
 import javax.swing.JComponent;
@@ -20,7 +20,7 @@ import org.tinyrcp.TinyFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
-import org.worldwindearth.geocode.Reverse;
+import org.worldwindearth.geocode.Result;
 import org.worldwindearth.geocode.WWEGeocodePlugin;
 
 /**
@@ -59,8 +59,8 @@ public class GeonamesPlugin implements WWEGeocodePlugin {
      * @return
      */
     @Override
-    public ArrayList<Reverse> reverse(Position pos) {
-        ArrayList<Reverse> list = new ArrayList<>();
+    public ArrayList<Result> reverse(Position pos) {
+        ArrayList<Result> list = new ArrayList<>();
 
         try {
             //------------------------------------------------------------------
@@ -85,7 +85,7 @@ public class GeonamesPlugin implements WWEGeocodePlugin {
             for (int i = 0; i < nl.getLength(); i++) {
                 Element e = (Element) nl.item(i);
 
-                Reverse r = new Reverse(this);
+                Result r = new Result(this);
                 String general = "";
                 NodeList nl2 = e.getChildNodes();
                 for (int j = 0; j < nl2.getLength(); j++) {
@@ -138,7 +138,7 @@ public class GeonamesPlugin implements WWEGeocodePlugin {
             for (int i = 0; i < nl.getLength(); i++) {
                 Element e = (Element) nl.item(i);
 
-                Reverse r = new Reverse(this);
+                Result r = new Result(this);
                 String general = "";
                 NodeList nl2 = e.getChildNodes();
                 for (int j = 0; j < nl2.getLength(); j++) {
@@ -180,6 +180,87 @@ public class GeonamesPlugin implements WWEGeocodePlugin {
         return list;
     }
 
+    /**
+     * Not supported
+     * 
+     * @param house
+     * @param street
+     * @param city
+     * @param country
+     * @return 
+     */
+    @Override
+    public ArrayList<Result> geocode(String house, String street, String zip, String city, String country) {
+        ArrayList<Result> list = new ArrayList<>();
+        try {
+            DocumentBuilder builder = docBuilder.newDocumentBuilder();
+
+            String s = DEFAULT_URL + "/search?";
+            s += "format=xml";
+            s += "&username=lsimedia";
+            String q = "";
+            if (!house.equals("")) q += "" + house + " ";
+            if (!street.equals("")) q += "" + street + " ";
+            if (!zip.equals("")) q += "" + zip + " ";
+            if (!city.equals("")) q += "" + city + " ";
+            s += "&q=" + URLEncoder.encode(q.trim(), "UTF-8");
+            s += "&lang=" + Locale.getDefault().getLanguage();
+            
+            URL url = new URL(s);
+            HttpURLConnection con = (HttpURLConnection) url.openConnection();
+            con.setReadTimeout(20000);
+            con.setRequestProperty("User-Agent", "WorldWindEarth (support@lsi-media.ch)");
+
+            //--- Parse (create builder, because multi threaded access)
+            Document doc = builder.parse(con.getInputStream());
+            con.disconnect();
+
+            NodeList nl = doc.getElementsByTagName("geoname");
+            for (int i = 0;i < nl.getLength();i++) {
+                Element p = (Element) nl.item(i);
+                
+                Result r = new Result(this);
+
+                String general = "";
+                NodeList nl2 = p.getChildNodes();
+                for (int j = 0;j < nl2.getLength();j++) {
+                    String nn = nl2.item(j).getNodeName();
+                    if (nn.equals("name")) {
+                        if (nl2.item(j).getFirstChild() != null) {
+                            general += "" + nl2.item(j).getFirstChild().getNodeValue();
+                            
+                        } else {
+                            general += "N/A";
+                        }
+
+                    } else if (nn.equals("countryCode")) {
+                        general += " - "+nl2.item(j).getFirstChild().getNodeValue();
+                        r.setCountry(nl2.item(j).getFirstChild().getNodeValue());
+
+                    } else if (nn.equals("lat")) {
+                        r.setLatitude(Double.parseDouble(nl2.item(j).getFirstChild().getNodeValue().replace(',', '.')));
+
+                    } else if (nn.equals("lng")) {
+                        r.setLongitude(Double.parseDouble(nl2.item(j).getFirstChild().getNodeValue().replace(',', '.')));
+
+                    }
+                }
+                // entry.addTag("Street", nl2.item(j).getFirstChild().getNodeValue());
+                // entry.addTag("City", nl2.item(j).getFirstChild().getNodeValue());entry.setTag("State", nl2.item(j).getFirstChild().getNodeValue());
+                // entry.addTag("Zip", nl2.item(j).getFirstChild().getNodeValue());
+                r.setSummary(general);
+                list.add(r);
+
+            }
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+
+       
+        }
+        return list;
+    }
+    
     //**************************************************************************
     //*** TinyPlugin
     //**************************************************************************
@@ -243,5 +324,7 @@ public class GeonamesPlugin implements WWEGeocodePlugin {
     public void setProperty(String string, Object o) {
         //---
     }
+
+    
 
 }

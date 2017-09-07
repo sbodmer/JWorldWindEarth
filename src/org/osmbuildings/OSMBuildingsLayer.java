@@ -169,16 +169,8 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
     }
 
     public void clearTiles() {
-        Iterator<OSMBuildingsTile> it = buildings.values().iterator();
-        while (it.hasNext()) {
-                OSMBuildingsTile tile = it.next();
-                removeRenderable(tile.getTileSurfaceRenderable());
-                //--- Sometime the renerable is not yet received before clearing it
-                if (tile.getRenderable() != null) removeRenderable(tile.getRenderable());
-                
-                
-        }
         buildings.clear();
+        removeAllRenderables();
     }
 
     public void setDrawProcessingBox(boolean draw) {
