@@ -20,12 +20,12 @@ public interface WWEFactory extends TinyFactory {
     public static final String PLUGIN_CATEGORY_WORLDWIND_GAZETTEER          = "wwe,gazetteer";
     public static final String PLUGIN_CATEGORY_WORLDWIND_GEOCODER           = "wwe,geocoder";
     
-    public static final String PLUGIN_FAMILY_WORLDWIND_LAYER_NASA           = "wwe,layer,nasa";
-    public static final String PLUGIN_FAMILY_WORLDWIND_LAYER_WORLDWIND      = "wwe,layer,worldwind";
-    public static final String PLUGIN_FAMILY_WORLDWIND_LAYER_MAPTILES       = "wwe,layer,maptiles";
-    public static final String PLUGIN_FAMILY_WORLDWIND_LAYER_WMS            = "wwe,layer,wms";
-    public static final String PLUGIN_FAMILY_WORLDWIND_LAYER_BUILDINGS      = "wwe,layer,buildings";
-    public static final String PLUGIN_FAMILY_WORLDWIND_LAYER_GRATICULE      = "wwe,layer,graticule";
-    public static final String PLUGIN_FAMILY_WORLDWIND_LAYER_SEARCH         = "wwe,layer,search";
+    public static final String PLUGIN_FAMILY_WORLDWIND_LAYER_NASA           = "nasa";
+    public static final String PLUGIN_FAMILY_WORLDWIND_LAYER_WORLDWIND      = "worldwind";
+    public static final String PLUGIN_FAMILY_WORLDWIND_LAYER_MAPTILES       = "maptiles";
+    public static final String PLUGIN_FAMILY_WORLDWIND_LAYER_WMS            = "wms";
+    public static final String PLUGIN_FAMILY_WORLDWIND_LAYER_BUILDINGS      = "buildings";
+    public static final String PLUGIN_FAMILY_WORLDWIND_LAYER_GRATICULE      = "graticule";
+    public static final String PLUGIN_FAMILY_WORLDWIND_LAYER_SEARCH         = "search";
     
 }
