@@ -73,8 +73,6 @@ public class OSMBuildingsTile {
     /**
      * The tile bounding box
      */
-    Extent bb = null;
-
     ExtrudedPolygon tile = null;
 
     LatLon bl = null;   //--- Bottom left
@@ -130,7 +128,7 @@ public class OSMBuildingsTile {
         tile.setVisible(true);
         tile.setHeight(100d);
         tile.setAltitudeMode(WorldWind.CONSTANT);
-        // tile.setEnableCap(true);
+        tile.setEnableCap(true);
 
         ShapeAttributes att = new BasicShapeAttributes();
         att.setInteriorOpacity(0.1d);
@@ -164,6 +162,16 @@ public class OSMBuildingsTile {
     //*** API
     //**************************************************************************
     /**
+     * Returns the renderable ids
+     * 
+     * @return 
+     */
+    public ArrayList<String> getIds() {
+        if (renderable == null) return new ArrayList<>();
+        return renderable.getIds();
+    }
+    
+    /**
      * Start the data fetch via HTTPRetriever
      */
     public void fetch() {
@@ -183,7 +191,7 @@ public class OSMBuildingsTile {
                     f.delete();
 
                 } else {
-                    // System.out.println("FOUND LOCAL json");
+                    // System.out.println("FOUND LOCAL json:"+f);
                     WorldWind.getTaskService().addTask(lbl);
 
                 }
@@ -367,8 +375,8 @@ public class OSMBuildingsTile {
                 //--- Load the data
                 GeoJSONDoc doc = new GeoJSONDoc(data);
                 doc.parse();
-
-                renderable = new OSMBuildingsRenderable(doc, defaultHeight, defaultAttrs);
+                
+                renderable = new OSMBuildingsRenderable(doc, defaultHeight, defaultAttrs, data.toString(), listener);
                 if (listener != null) listener.osmBuildingsLoaded(ti);
 
                 if (applyRoofTextures) fetchRoofTextures();
@@ -404,7 +412,7 @@ public class OSMBuildingsTile {
                     GeoJSONDoc doc = new GeoJSONDoc(f.toURI().toURL());
                     doc.parse();
 
-                    renderable = new OSMBuildingsRenderable(doc, defaultHeight, defaultAttrs);
+                    renderable = new OSMBuildingsRenderable(doc, defaultHeight, defaultAttrs, f.toString(), listener);
                     if (listener != null) listener.osmBuildingsLoaded(ti);
 
                     if (applyRoofTextures) fetchRoofTextures();

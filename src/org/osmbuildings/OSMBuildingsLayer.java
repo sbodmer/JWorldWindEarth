@@ -14,6 +14,7 @@ import gov.nasa.worldwind.util.Logging;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.logging.Level;
@@ -23,8 +24,7 @@ import java.util.logging.Level;
  *
  * @author sbodmer
  */
-public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTileListener, ActionListener,
-        SelectListener {
+public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTileListener, ActionListener {
 
     public static final String CACHE_FOLDER = "Earth" + File.separatorChar + "OSMBuildings";
 
@@ -33,10 +33,18 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
     public static final double maxX = Math.pow(2, ZOOM);
     public static final double maxY = Math.pow(2, ZOOM);
 
+    public int cols = 3;
+    public int rows = 3;
+    
     // LatLon center = null;
     // SurfacePolygon carpet = null;
     ExtrudedPolygon box = null;
 
+    /**
+     * All the rendered ids (needed for dupilcate check)
+     */
+    ArrayList<String> ids = new ArrayList<>();
+    
     /**
      * The last viewport center postion in world coordinates
      */
@@ -164,12 +172,15 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
     //**************************************************************************
     //*** API
     //*************************************************************************
+    
+    
     public void setDefaultBuildingHeight(double defaultHeight) {
         this.defaultHeight = defaultHeight;
     }
 
     public void clearTiles() {
         buildings.clear();
+        ids.clear();
         removeAllRenderables();
     }
 
@@ -378,12 +389,12 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
             int x = lon2x(center.getLongitude().degrees, ZOOM);
             int y = lat2y(center.getLatitude().degrees, ZOOM);
             // System.out.println("X=" + x + ", Y=" + y);
-
+            
             //--- Take the total of 9 tile
-            x--;
-            y--;
-            for (int i = 0; i < 3; i++) {
-                for (int j = 0; j < 3; j++) {
+            x = x-(rows/2);
+            y = y-(rows/2);
+            for (int i = 0; i < rows; i++) {
+                for (int j = 0; j < cols; j++) {
                     //--- Check if max tiles are reached, if so, remove the oldest one
                     if (buildings.size() > maxTiles) {
                         Iterator<OSMBuildingsTile> it = buildings.values().iterator();
@@ -396,6 +407,9 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
                         Renderable rend = oldest.getRenderable();
                         if (rend != null) removeRenderable(rend);
                         removeRenderable(oldest.getTileSurfaceRenderable());
+                        //--- Remove the ids for removed tile
+                        ArrayList<String> removed = oldest.getIds();
+                        for (int k=0;k<removed.size();k++) ids.remove(removed.get(k));
                         buildings.remove(oldest.toString());
                     }
 
@@ -437,6 +451,20 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
 
     }
 
+    /**
+     * Check if the passed OSM id should be rendered (different border case tile
+     * have the same ids, so duplicate will be rendered, to avoid it store all
+     * the already rendered id in an array for later check)<p>
+     * 
+     * @param id
+     * @return 
+     */
+    @Override
+    public boolean osmBuildingsProduceRenderableForId(String id) {
+        if (ids.contains(id)) return false;
+        ids.add(id);
+        return true;
+    }
     //**************************************************************************
     //*** ActionListener
     //**************************************************************************
@@ -445,17 +473,7 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
         //--- Nothing at the moment
     }
 
-    //**************************************************************************
-    //*** SelectListener
-    //**************************************************************************
-    @Override
-    public void selected(SelectEvent event) {
-        // System.out.println("EVENT:"+event);
-        if (event.isLeftDoubleClick()) {
-            System.out.println("Double click on " + event.getTopPickedObject());
-        }
-    }
-
+    
     //**************************************************************************
     //*** Private
     //**************************************************************************

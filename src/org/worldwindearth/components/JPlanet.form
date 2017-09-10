@@ -599,7 +599,7 @@
                               <Image iconType="3" name="/org/worldwindearth/Resources/Icons/up.png"/>
                             </Property>
                             <Property name="toolTipText" type="java.lang.String" value="move layer up"/>
-                            <Property name="actionCommand" type="java.lang.String" value="upLayer"/>
+                            <Property name="actionCommand" type="java.lang.String" value="cameraUp"/>
                             <Property name="borderPainted" type="boolean" value="false"/>
                             <Property name="focusPainted" type="boolean" value="false"/>
                             <Property name="focusable" type="boolean" value="false"/>
@@ -618,7 +618,7 @@
                               <Image iconType="3" name="/org/worldwindearth/Resources/Icons/down.png"/>
                             </Property>
                             <Property name="toolTipText" type="java.lang.String" value="move layer down"/>
-                            <Property name="actionCommand" type="java.lang.String" value="downLayer"/>
+                            <Property name="actionCommand" type="java.lang.String" value="cameraDown"/>
                             <Property name="borderPainted" type="boolean" value="false"/>
                             <Property name="focusPainted" type="boolean" value="false"/>
                             <Property name="focusable" type="boolean" value="false"/>
@@ -644,6 +644,20 @@
                             <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
                               <Dimension value="[26, 26]"/>
                             </Property>
+                          </Properties>
+                        </Component>
+                        <Component class="javax.swing.JToggleButton" name="BT_SmallCamera">
+                          <Properties>
+                            <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+                              <Image iconType="3" name="/org/worldwindearth/Resources/Icons/collapse.png"/>
+                            </Property>
+                            <Property name="actionCommand" type="java.lang.String" value="smallCamera"/>
+                            <Property name="focusable" type="boolean" value="false"/>
+                            <Property name="horizontalTextPosition" type="int" value="0"/>
+                            <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+                              <Dimension value="[26, 26]"/>
+                            </Property>
+                            <Property name="verticalTextPosition" type="int" value="3"/>
                           </Properties>
                         </Component>
                         <Component class="javax.swing.JToolBar$Separator" name="jSeparator13">

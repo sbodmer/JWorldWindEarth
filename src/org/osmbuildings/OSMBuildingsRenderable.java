@@ -21,11 +21,17 @@ import gov.nasa.worldwind.formats.geojson.GeoJSONObject;
 import gov.nasa.worldwind.formats.geojson.GeoJSONPoint;
 import gov.nasa.worldwind.formats.geojson.GeoJSONPolygon;
 import gov.nasa.worldwind.formats.geojson.GeoJSONPositionArray;
+import gov.nasa.worldwind.geom.Extent;
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.geom.Sector;
+import gov.nasa.worldwind.geom.Sphere;
+import gov.nasa.worldwind.geom.Vec4;
+import gov.nasa.worldwind.pick.PickSupport;
 import gov.nasa.worldwind.render.BasicShapeAttributes;
+import gov.nasa.worldwind.render.Cylinder;
 import gov.nasa.worldwind.render.DrawContext;
+import gov.nasa.worldwind.render.Ellipsoid;
 import gov.nasa.worldwind.render.ExtrudedPolygon;
 import gov.nasa.worldwind.render.Material;
 import gov.nasa.worldwind.render.Path;
@@ -33,11 +39,13 @@ import gov.nasa.worldwind.render.PointPlacemark;
 import gov.nasa.worldwind.render.PointPlacemarkAttributes;
 import gov.nasa.worldwind.render.Polygon;
 import gov.nasa.worldwind.render.PreRenderable;
+import gov.nasa.worldwind.render.Pyramid;
 import gov.nasa.worldwind.render.Renderable;
 import gov.nasa.worldwind.render.ShapeAttributes;
 import gov.nasa.worldwind.render.SurfacePolygon;
 import gov.nasa.worldwind.render.SurfacePolyline;
 import gov.nasa.worldwind.util.Logging;
+import gov.nasa.worldwind.util.WWMath;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -49,29 +57,65 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import org.worldwindearth.WWE;
 
 /**
- * The renderable of the GeoJSONDoc for OSM Buildings
+ * The renderable of the GeoJSONDoc tile for OSM Buildings
+ *
+ * Multiple buildings are stored here
  *
  * @author sbodmer
  */
 public class OSMBuildingsRenderable implements Renderable, PreRenderable, Disposable {
 
+    /**
+     * The tile comment (like the file/url of the tile)
+     */
+    public static String AVKEY_OSMBUILDING_COMMENT = "org.osmbuildings.Comment";
+
+    /**
+     * The feature id which is the parent of the renderable
+     */
+    public static String AVKEY_OSMBUILDING_FEATURE_ID = "org.osmbuildings.featureId";
+
+    /**
+     * The polygin has inner bounds (so texture map should be different)
+     *
+     */
+    public static String AVKEY_OSMBUILDING_HAS_INNER_BOUNDS = "org.osmbuildings.hasInnerBounds";
+
     protected static final Map<String, String> COLORS = new HashMap<String, String>();
 
     protected static Random random = new Random();
-    
+
+    // protected PickSupport pickSupport = new PickSupport();
     /**
      * Default height of buildings
      */
     protected double defaultHeight = 10;
 
+    /**
+     * Some comment (like the x,y value of the tile), useful for debug
+     */
+    protected String comment = "";
     protected ShapeAttributes defaultAttrs = null;
+
+    /**
+     * Listener to check some values before the rendering
+     */
+    protected OSMBuildingsTileListener listener = null;
+
     /**
      * The list of renderable for this GeoJSON object (PointPlacemarks,
      * ExtrudePolygon, ...)
      */
     private List<Renderable> renderables = new ArrayList<Renderable>();
+
+    /**
+     * The list of the osm ids rendered in this object (to avoid multiple
+     * rendering from other tile)
+     */
+    private ArrayList<String> ids = new ArrayList<>();
 
     static {
         COLORS.put("lightbrown", "#ac6b25");
@@ -81,7 +125,7 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
         COLORS.put("cream", "#ffffcc");
         COLORS.put("brickred", "#cb4154");
         COLORS.put("bluegreen", "#0d98ba");
-        
+
     }
 
     /**
@@ -91,9 +135,11 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
      * @param defaultHeight
      * @param opacity
      */
-    public OSMBuildingsRenderable(GeoJSONDoc doc, double defaultHeight, ShapeAttributes defaultAttrs) {
+    public OSMBuildingsRenderable(final GeoJSONDoc doc, final double defaultHeight, final ShapeAttributes defaultAttrs, final String comment, final OSMBuildingsTileListener listener) {
         this.defaultHeight = defaultHeight;
         this.defaultAttrs = defaultAttrs;
+        this.comment = comment;
+        this.listener = listener;
 
         // --- Prepare the renderable
         if (doc.getRootObject() instanceof GeoJSONObject) {
@@ -104,6 +150,7 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
             for (Object o : (Object[]) doc.getRootObject()) {
                 if (o instanceof GeoJSONObject) {
                     prepare((GeoJSONObject) o);
+
                 }
             }
 
@@ -114,7 +161,7 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
 
     @Override
     public String toString() {
-        return "Contains " + renderables.size() + " elements to render";
+        return "Contains " + renderables.size() + " elements to render (" + comment + ")";
     }
 
     // **************************************************************************
@@ -122,6 +169,16 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
     // **************************************************************************
     public void clear() {
         renderables.clear();
+        ids.clear();
+    }
+
+    /**
+     * Return the original list of rendered ids
+     *
+     * @return
+     */
+    public ArrayList<String> getIds() {
+        return ids;
     }
 
     /**
@@ -179,10 +236,11 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
 
     /**
      * Apply the bing roof image to the renderable objects (the passed sector in
-     * the current tile in world coordinate to use for texture mapping)<p>
-     * 
+     * the current tile in world coordinate to use for texture mapping)
+     * <p>
+     *
      * @param tex
-     * @param s 
+     * @param s
      */
     public void applyRoofTexture(BufferedImage tex, Sector sector) {
         for (Renderable renderable : renderables) {
@@ -192,32 +250,37 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
 
             } else if (renderable instanceof ExtrudedPolygon) {
                 ExtrudedPolygon polygon = (ExtrudedPolygon) renderable;
-                Iterator<LatLon> it = (Iterator<LatLon>) polygon.getOuterBoundary().iterator();
-                
-                double dlat = sector.getDeltaLatDegrees();
-                double dlon = sector.getDeltaLonDegrees();
-                ArrayList<Float> texCoord = new ArrayList<>();
-                int cnt = 0;
-                ShapeAttributes att = polygon.getCapAttributes();
-                att.setImageSource(tex);
-                while (it.hasNext()) {
-                    LatLon ll = it.next();
-                    double t = (ll.getLatitude().degrees-sector.getMinLatitude().degrees)/dlat;
-                    double s = (ll.getLongitude().degrees-sector.getMinLongitude().degrees)/dlon;
-                    texCoord.add((float) s);
-                    texCoord.add((float) t);
-                    cnt++;
+                boolean innerBounds = (boolean) polygon.getValue(AVKEY_OSMBUILDING_HAS_INNER_BOUNDS);
+                if (innerBounds) {
+                    //--- Well inner bounds exists, no idea what to do with the roof
+
+                } else {
+                    Iterator<LatLon> it = (Iterator<LatLon>) polygon.getOuterBoundary().iterator();
+                    double dlat = sector.getDeltaLatDegrees();
+                    double dlon = sector.getDeltaLonDegrees();
+                    ArrayList<Float> texCoord = new ArrayList<>();
+                    int cnt = 0;
+                    ShapeAttributes att = polygon.getCapAttributes();
+                    att.setImageSource(tex);
+                    while (it.hasNext()) {
+                        LatLon ll = it.next();
+                        double t = (ll.getLatitude().degrees - sector.getMinLatitude().degrees) / dlat;
+                        double s = (ll.getLongitude().degrees - sector.getMinLongitude().degrees) / dlon;
+                        texCoord.add((float) s);
+                        texCoord.add((float) t);
+                        cnt++;
+                    }
+                    float tc[] = new float[texCoord.size()];
+                    for (int i = 0; i < tc.length; i++) tc[i] = texCoord.get(i);
+                    polygon.setCapImageSource(tex, tc, cnt);
                 }
-                float tc[] = new float[texCoord.size()];
-                for (int i=0;i<tc.length;i++) tc[i] = texCoord.get(i);
-                polygon.setCapImageSource(tex, tc, cnt);
-                
+
             } else {
                 //---
             }
         }
     }
-    
+
     // **************************************************************************
     // *** Renderable
     // **************************************************************************
@@ -226,6 +289,7 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
         for (Renderable r : renderables) {
             r.render(dc);
         }
+
     }
 
     @Override
@@ -252,37 +316,58 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
     // *** Private
     // **************************************************************************
     /**
-     * Create the basic shape for the rendering
+     * Create the basic shape for the rendering<p>
+     *
+     * Check if the feature id is already rendered, if so, do nothing
      *
      * @param object
      */
     public void prepare(GeoJSONObject object) {
+
         if (object.isGeometry()) {
-            fill(object.asGeometry(), null);
+            fill(null, object.asGeometry(), null);
 
         } else if (object.isFeature()) {
             GeoJSONFeature f = object.asFeature();
-            fill(f.getGeometry(), f.getProperties());
+            String id = f.getValue("id").toString();
+            boolean r = listener.osmBuildingsProduceRenderableForId(id);
+            if (r) {
+                fill(f, f.getGeometry(), f.getProperties());
+                ids.add(id);
+            }
 
         } else if (object.isFeatureCollection()) {
             GeoJSONFeatureCollection c = object.asFeatureCollection();
             for (GeoJSONFeature f : c.getFeatures()) {
-                fill(f.getGeometry(), f.getProperties());
+                String id = f.getValue("id").toString();
+                boolean r = listener.osmBuildingsProduceRenderableForId(id);
+                if (r) {
+                    fill(f, f.getGeometry(), f.getProperties());
+                    ids.add(id);
+                }
+
             }
         }
     }
 
-    protected void fill(GeoJSONGeometry geom, AVList properties) {
+    /**
+     * The feature and properties could be null
+     *
+     * @param f
+     * @param geom
+     * @param properties
+     */
+    protected void fill(GeoJSONFeature f, GeoJSONGeometry geom, AVList properties) {
         if (geom.isPoint()) {
             GeoJSONPoint pt = geom.asPoint();
             PointPlacemarkAttributes pa = new PointPlacemarkAttributes();
-            fillRenderablePoint(pt, pt.getPosition(), pa, properties);
+            fillRenderablePoint(f, pt, pt.getPosition(), pa, properties);
 
         } else if (geom.isMultiPoint()) {
             GeoJSONMultiPoint mp = geom.asMultiPoint();
             PointPlacemarkAttributes pa = new PointPlacemarkAttributes();
             for (int i = 0; i < mp.getPointCount(); i++) {
-                fillRenderablePoint(mp.asPoint(), mp.getPosition(i), pa, properties);
+                fillRenderablePoint(f, mp.asPoint(), mp.getPosition(i), pa, properties);
             }
 
         } else if (geom.isLineString()) {
@@ -296,7 +381,7 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
             sa.copy(defaultAttrs);
             fillShapeAttribute(sa, properties);
             for (GeoJSONPositionArray coords : ms.getCoordinates()) {
-                fillRenderablePolyline(geom, coords, sa, properties);
+                fillRenderablePolyline(f, geom, coords, sa, properties);
             }
 
         } else if (geom.isPolygon()) {
@@ -305,7 +390,7 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
             sa.copy(defaultAttrs);
             fillShapeAttribute(sa, properties);
             // dumpAVList(properties);
-            fillRenderablePolygon(poly, poly.getExteriorRing(), poly.getInteriorRings(), sa, properties);
+            fillRenderablePolygon(f, poly, poly.getExteriorRing(), poly.getInteriorRings(), sa, properties);
 
         } else if (geom.isMultiPolygon()) {
             GeoJSONMultiPolygon mpoly = geom.asMultiPolygon();
@@ -313,14 +398,14 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
             sa.copy(defaultAttrs);
             fillShapeAttribute(sa, properties);
             for (int i = 0; i < mpoly.getPolygonCount(); i++) {
-                fillRenderablePolygon(mpoly.asPolygon(), mpoly.getExteriorRing(i), mpoly.getInteriorRings(i), sa, properties);
+                fillRenderablePolygon(f, mpoly.asPolygon(), mpoly.getExteriorRing(i), mpoly.getInteriorRings(i), sa, properties);
             }
 
         } else if (geom.isGeometryCollection()) {
             GeoJSONGeometryCollection c = geom.asGeometryCollection();
             GeoJSONGeometry geos[] = c.getGeometries();
             for (int i = 0; i < geos.length; i++) {
-                fill(geos[i], properties);
+                fill(f, geos[i], properties);
             }
 
         } else {
@@ -334,7 +419,7 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
      *
      * @param properties
      */
-    protected void fillRenderablePoint(GeoJSONPoint owner, Position pos, PointPlacemarkAttributes attrs, AVList properties) {
+    protected void fillRenderablePoint(GeoJSONFeature parent, GeoJSONPoint owner, Position pos, PointPlacemarkAttributes attrs, AVList properties) {
         PointPlacemark p = new PointPlacemark(pos);
         p.setAttributes(attrs);
         if (pos.getAltitude() != 0) {
@@ -345,9 +430,9 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
             p.setAltitudeMode(WorldWind.CLAMP_TO_GROUND);
         }
 
-        if (properties != null)
-            p.setValue(AVKey.PROPERTIES, properties);
-
+        if (properties != null) p.setValue(AVKey.PROPERTIES, properties);
+        p.setValue(AVKEY_OSMBUILDING_COMMENT, comment);
+        p.setValue(AVKEY_OSMBUILDING_FEATURE_ID, parent != null ? parent.getValue("id") : "");
         renderables.add(p);
     }
 
@@ -371,18 +456,20 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
      * @param attrs
      * @param properties
      */
-    protected void fillRenderablePolygon(GeoJSONPolygon owner, Iterable<? extends Position> outerBoundary, Iterable<? extends Position>[] innerBoundaries, ShapeAttributes attrs, AVList properties) {
+    protected void fillRenderablePolygon(GeoJSONFeature parent, GeoJSONPolygon owner, Iterable<? extends Position> outerBoundary, Iterable<? extends Position>[] innerBoundaries, ShapeAttributes attrs, AVList properties) {
         if (hasNonzeroAltitude(outerBoundary)) {
             // --- It's a ploygon with height (not a flat foot print)
             Polygon poly = new Polygon(outerBoundary);
+            poly.setValue(AVKEY_OSMBUILDING_HAS_INNER_BOUNDS, false);
             poly.setAttributes(attrs);
             if (innerBoundaries != null) {
-                for (Iterable<? extends Position> iter : innerBoundaries) {
-                    poly.addInnerBoundary(iter);
-                }
+                for (Iterable<? extends Position> iter : innerBoundaries) poly.addInnerBoundary(iter);
+                poly.setValue(AVKEY_OSMBUILDING_HAS_INNER_BOUNDS, true);
             }
 
             if (properties != null) poly.setValue(AVKey.PROPERTIES, properties);
+            poly.setValue(AVKEY_OSMBUILDING_COMMENT, comment);
+            poly.setValue(AVKEY_OSMBUILDING_FEATURE_ID, parent != null ? parent.getValue("id") : "");
             renderables.add(poly);
 
         } else if (defaultHeight > 0) {
@@ -390,6 +477,7 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
             double height = 0;
             double minHeight = 0;
             double levels = 0;
+            double minLevels = 0;
             String roofColor = "gray";
             String roofShape = "flat";
             double roofHeight = 0;
@@ -419,8 +507,8 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
                 minHeight = 0;
 
             } else if (minHeight >= height) {
-                height = minHeight + 1;
-
+                // height = minHeight + 1;
+                minHeight = 0;
             }
 
             // ShapeAttributes at = new BasicShapeAttributes();
@@ -437,6 +525,7 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
             ra.copy(attrs);
             ra.setInteriorMaterial(new Material(stringToColor(roofColor)));
             ra.setOutlineMaterial(new Material(stringToColor(roofColor)));
+            // ra.setOutlineMaterial(Material.RED);
             // ra.setInteriorOpacity(roofMaterial.equals("glass") ? 0.7 : 1.0d);
             // ra.setOutlineOpacity(roofMaterial.equals("glass") ? 0.7 : 1.0d);
             ra.setDrawInterior(true);
@@ -459,11 +548,10 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
                 System.out.println("LEVELS:" + levels);
                 // ra.setImageSource(tex);
             }
-            */
-            
+             */
             // --- Walls with default cap (flat roof)
             ExtrudedPolygon box = new ExtrudedPolygon(height);
-
+            box.setValue(AVKEY_OSMBUILDING_HAS_INNER_BOUNDS, false);
             box.setAltitudeMode(WorldWind.CONSTANT);
             // box.setAttributes(attrs);
             box.setSideAttributes(attrs);
@@ -476,23 +564,126 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
                 for (Iterable<? extends Position> iter : innerBoundaries) {
                     box.addInnerBoundary(iter);
                 }
+                box.setValue(AVKEY_OSMBUILDING_HAS_INNER_BOUNDS, true);
             }
+
+            //--- FOR DEBUG, DISPLAY ONLY NOT FLAT ROOF
+            // if (roofShape.equals("pyramid") && (minHeight > 100)) renderables.add(box);
             renderables.add(box);
+
+            //--- Handle roof
             if (roofShape.equals("pyramid") || roofShape.equals("pyramidal")) {
-                // --- Flat
+                // System.out.println("ROOF is " + roofShape + " HEIGHT:" + height + " MIN:" + minHeight);
+                roofHeight = roofHeight == 0 ? 2 : roofHeight;
+
+                // --- Pyramid, first and last corner is the same
+                ArrayList<Position> corners = new ArrayList<>();
+                Iterator<? extends Position> it = outerBoundary.iterator();
+                double lats = 0.0;
+                double lons = 0.0;
+                while (it.hasNext()) {
+                    Position p = it.next();
+                    lats += p.latitude.degrees;
+                    lons += p.longitude.degrees;
+                    corners.add(p);
+                }
+
+                //--- Take median values for the center of the pyramid
+                double centerLats = lats / corners.size();
+                double centerLon = lons / corners.size();
+                Position center = Position.fromDegrees(centerLats, centerLon, roofHeight);
+
+                for (int i = 0; i < corners.size(); i++) {
+                    if (i == corners.size() - 1) break;
+
+                    Position p = corners.get(i);
+                    ArrayList<Position> list = new ArrayList<>();
+                    list.add(corners.get(i));
+                    list.add(corners.get(i + 1));
+                    list.add(center);
+                    Polygon polygon = new Polygon(list);
+                    polygon.setAttributes(ra);
+                    polygon.setAltitudeMode(WorldWind.RELATIVE_TO_GROUND);
+                    polygon.move(Position.fromDegrees(0, 0, height));
+
+                    if (properties != null) polygon.setValue(AVKey.PROPERTIES, properties);
+                    polygon.setValue(AVKEY_OSMBUILDING_COMMENT, comment);
+                    polygon.setValue(AVKEY_OSMBUILDING_FEATURE_ID, parent != null ? parent.getValue("id") : "");
+                    renderables.add(polygon);
+                }
+
+                // for (int i=0;i<corners.size();i++) System.out.println("["+i+"] "+corners.get(i));
+
                 /*
                  * Polygon roof = new Polygon(outerBoundary);
                  * Position ref = outerBoundary.iterator().next();
                  * Position nref = Position.fromDegrees(ref.getLatitude().degrees,ref.getLongitude().degrees, height); roof.setReferencePosition(nref); roof.setAttributes(ra); renderables.add(roof);
                  */
+            } else if (roofShape.equals("gabled")) {
+                roofHeight = roofHeight == 0 ? 2 : roofHeight;
+
+            } else if (roofShape.equals("hipped")) {
+
+            } else if (roofShape.equals("flat")) {
+
+            } else if (roofShape.equals("dome")) {
+                roofHeight = (roofHeight == 0 ? 2 : roofHeight);
+
+                //--- Find corners
+                Iterator<? extends Position> it = outerBoundary.iterator();
+                double minLat = 90.0;
+                double minLon = 180.0;
+                double maxLat = -90.0;
+                double maxLon = -180.0;
+                while (it.hasNext()) {
+                    Position p = it.next();
+                    double lat = p.latitude.degrees;
+                    double lon = p.longitude.degrees;
+                    if (lat < minLat) minLat = lat;
+                    if (lat > maxLat) maxLat = lat;
+                    if (lon < minLon) minLon = lon;
+                    if (lon > maxLon) maxLon = lon;
+
+                }
+                double dLat = maxLat - minLat;
+                double dLon = maxLon - minLon;
+                double centerLat = minLat + (dLat / 2);
+                double centerLon = minLon + (dLon / 2);
+                double dX = WWE.getDistance(minLat, minLon, minLat, maxLon);
+                double dY = WWE.getDistance(minLat, minLon, maxLat, minLon);
+                Position center = Position.fromDegrees(centerLat, centerLon);
+                Ellipsoid dome = new Ellipsoid(center, dX/2, roofHeight, dY/2);
+                dome.setAttributes(ra);
+                dome.setAltitudeMode(WorldWind.RELATIVE_TO_GROUND);
+                dome.move(Position.fromDegrees(0, 0, height));
+                if (properties != null) dome.setValue(AVKey.PROPERTIES, properties);
+                dome.setValue(AVKEY_OSMBUILDING_COMMENT, comment);
+                dome.setValue(AVKEY_OSMBUILDING_FEATURE_ID, parent != null ? parent.getValue("id") : "");
+                renderables.add(dome);
+                
+            } else if (roofShape.equals("round")) {
+                /*
+                roofHeight = roofHeight == 0 ? 2 : roofHeight;
+                Iterable<? extends LatLon> iter = box.getOuterBoundary();
+                
+                System.out.println("BOX:"+box);
+                Extent ext = box.getExtent();
+                if (ext != null) {
+                    System.out.println("EXTENT:" + ext);
+                }
+                 */
+                // Cylinder c = new Cylinder();
 
             } else {
-
+                // System.out.println("ROOF is " + roofShape);
             }
 
             if (properties != null) box.setValue(AVKey.PROPERTIES, properties);
+            box.setValue(AVKEY_OSMBUILDING_COMMENT, comment);
+            box.setValue(AVKEY_OSMBUILDING_FEATURE_ID, parent != null ? parent.getValue("id") : "");
 
         } else {
+            //--- Display the foot print
             SurfacePolygon poly = new SurfacePolygon(attrs, outerBoundary);
             if (innerBoundaries != null) {
                 for (Iterable<? extends Position> iter : innerBoundaries) {
@@ -501,11 +692,13 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
             }
 
             if (properties != null) poly.setValue(AVKey.PROPERTIES, properties);
+            poly.setValue(AVKEY_OSMBUILDING_COMMENT, comment);
+            poly.setValue(AVKEY_OSMBUILDING_FEATURE_ID, parent != null ? parent.getValue("id") : "");
             renderables.add(poly);
         }
     }
 
-    protected void fillRenderablePolyline(GeoJSONGeometry owner, Iterable<? extends Position> positions, ShapeAttributes attrs, AVList properties) {
+    protected void fillRenderablePolyline(GeoJSONFeature parent, GeoJSONGeometry owner, Iterable<? extends Position> positions, ShapeAttributes attrs, AVList properties) {
         if (hasNonzeroAltitude(positions)) {
             Path p = new Path();
             p.setPositions(positions);
@@ -513,11 +706,15 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
             p.setAttributes(attrs);
 
             if (properties != null) p.setValue(AVKey.PROPERTIES, properties);
+            p.setValue(AVKEY_OSMBUILDING_COMMENT, comment);
+            p.setValue(AVKEY_OSMBUILDING_FEATURE_ID, parent != null ? parent.getValue("id") : "");
             renderables.add(p);
 
         } else {
             SurfacePolyline sp = new SurfacePolyline(attrs, positions);
             if (properties != null) sp.setValue(AVKey.PROPERTIES, properties);
+            sp.setValue(AVKEY_OSMBUILDING_COMMENT, comment);
+            sp.setValue(AVKEY_OSMBUILDING_FEATURE_ID, parent != null ? parent.getValue("id") : "");
             renderables.add(sp);
 
         }
@@ -563,7 +760,7 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
         //--- Use a default random gray scale
         int r = random.nextInt(16);
         String v = "#";
-        for (int i=0;i<6;i++) v += Integer.toHexString(r);
+        for (int i = 0; i < 6; i++) v += Integer.toHexString(r);
         if (properties != null) {
             v = properties.getStringValue("color");
             String mat = properties.getStringValue("material");
@@ -615,5 +812,11 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
             System.out.println("Color not found:" + value);
             return Color.LIGHT_GRAY;
         }
+    }
+
+    public static final void main(String args[]) {
+        double l1 = -50;
+        double l2 = -100;
+        System.out.println("" + l1 + ">" + l2 + " = " + (l1 > l2));
     }
 }

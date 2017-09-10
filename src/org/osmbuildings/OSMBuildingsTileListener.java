@@ -13,4 +13,11 @@ public interface OSMBuildingsTileListener {
     public void osmBuildingsLoaded(OSMBuildingsTile btile);
     public void osmBuildingsLoading(OSMBuildingsTile btile);
     public void osmBuildingsLoadingFailed(OSMBuildingsTile btile, String reason);
+    
+    /**
+     * 
+     * @param id
+     * @return 
+     */
+    public boolean osmBuildingsProduceRenderableForId(String id);
 }
