@@ -1,6 +1,5 @@
 package de.komoot.photon;
 
-import org.nominatim.*;
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.exception.NoItemException;
 import gov.nasa.worldwind.exception.ServiceException;

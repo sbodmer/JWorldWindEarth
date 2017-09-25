@@ -29,6 +29,10 @@ public class WorldWindEarthJWS {
     static final String ADITIONAL_ARGUMENTS[] = {
         "-factory", "org.worldwindearth.earth.JEarthFactory",
         "-factory", "org.worldwindearth.flatearth.JFlatEarthFactory",
+        "-factory", "org.osmbuildings.JOSMBuildingsWWEFactory",
+        "-factory", "org.worldwindearth.geocode.JGeocodeWWEfactory",
+        "-factory", "org.nominatim.JNominatimWWEFactory",
+        "-factory", "de.komoot.photon.JPhotonGazetteerWWEFactory",
         "-factory", "gov.nasa.skygradient.JSkyGradientWWEFactory",
         "-factory", "gov.nasa.compass.JCompassWWEFactory",
         "-factory", "gov.nasa.bmng.JBMNGWWEFactory",
@@ -43,7 +47,7 @@ public class WorldWindEarthJWS {
         "-factory", "gov.nasa.countries.JCountriesWWEFactory",
         "-factory", "gov.nasa.landsat.JLandsatWWEFactory",
         "-factory", "gov.nasa.wms.JWMSWWEFactory",
-        "-factory", "org.osmbuildings.JOSMBuildingsWWEFactory",
+        "-factory", "gov.nasa.yahoo.search.JYahooGazetteerWWEFactory",
         "-main", "org.worldwindearth.JWorldWindEarth"
     };
 
