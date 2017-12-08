@@ -79,15 +79,23 @@
         </Menu>
         <Menu class="javax.swing.JMenu" name="MN_Help">
           <Properties>
-            <Property name="text" type="java.lang.String" value="About"/>
+            <Property name="text" type="java.lang.String" value="Help"/>
           </Properties>
+          <SubComponents>
+            <MenuItem class="javax.swing.JMenuItem" name="MN_About">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="About"/>
+                <Property name="actionCommand" type="java.lang.String" value="about"/>
+              </Properties>
+            </MenuItem>
+          </SubComponents>
         </Menu>
       </SubComponents>
     </Menu>
   </NonVisualComponents>
   <Properties>
     <Property name="defaultCloseOperation" type="int" value="0"/>
-    <Property name="title" type="java.lang.String" value="WorldWindEarth"/>
+    <Property name="title" type="java.lang.String" value="JWorldWindEarth"/>
   </Properties>
   <SyntheticProperties>
     <SyntheticProperty name="menuBar" type="java.lang.String" value="MB_Topbar"/>

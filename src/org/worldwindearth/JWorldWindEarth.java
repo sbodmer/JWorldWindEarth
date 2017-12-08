@@ -6,6 +6,7 @@
 package org.worldwindearth;
 
 import java.awt.BorderLayout;
+import java.awt.Frame;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -90,6 +91,8 @@ public class JWorldWindEarth extends javax.swing.JFrame implements ActionListene
 
         MN_Plugins.addActionListener(this);
 
+        MN_About.addActionListener(this);
+        
         jplugins = new JPluginsFrame();
         jplugins.initialize(app);
 
@@ -232,6 +235,12 @@ public class JWorldWindEarth extends javax.swing.JFrame implements ActionListene
             jsettings.setLocationRelativeTo(this);
             jsettings.setVisible(true);
 
+        } else if (e.getActionCommand().equals("about")) {
+            JAbout jb = new JAbout((Frame) getParent(), true);
+            jb.setLocationRelativeTo(this);
+            jb.setVisible(true);
+            
+            
         } else if (e.getActionCommand().equals("exit")) {
             close();
 
@@ -262,12 +271,13 @@ public class JWorldWindEarth extends javax.swing.JFrame implements ActionListene
         MN_Plugins = new javax.swing.JMenuItem();
         MN_Windows = new javax.swing.JMenu();
         MN_Help = new javax.swing.JMenu();
+        MN_About = new javax.swing.JMenuItem();
 
         LB_Title.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/22x22/WorldWindEarth.png"))); // NOI18N
         LB_Title.setText("jLabel1");
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
-        setTitle("WorldWindEarth");
+        setTitle("JWorldWindEarth");
         addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowClosing(java.awt.event.WindowEvent evt) {
                 formWindowClosing(evt);
@@ -315,7 +325,12 @@ public class JWorldWindEarth extends javax.swing.JFrame implements ActionListene
         MN_Windows.setText("Windows");
         MB_Topbar.add(MN_Windows);
 
-        MN_Help.setText("About");
+        MN_Help.setText("Help");
+
+        MN_About.setText("About");
+        MN_About.setActionCommand("about");
+        MN_Help.add(MN_About);
+
         MB_Topbar.add(MN_Help);
 
         setJMenuBar(MB_Topbar);
@@ -333,6 +348,7 @@ public class JWorldWindEarth extends javax.swing.JFrame implements ActionListene
     // Variables declaration - do not modify//GEN-BEGIN:variables
     protected javax.swing.JLabel LB_Title;
     protected javax.swing.JMenuBar MB_Topbar;
+    protected javax.swing.JMenuItem MN_About;
     protected javax.swing.JMenuItem MN_Exit;
     protected javax.swing.JMenu MN_File;
     protected javax.swing.JMenu MN_Help;

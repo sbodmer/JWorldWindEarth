@@ -29,7 +29,7 @@ The layers are recursively loaded from file system in the default folders
     {cwd}/lib/ext
 
 ## Release
-Work in progress, alpha quality for the moment...
+Work in progress, but enough for a Preview...
 
 **The API is not yet stable, use it with caution for the moment**
 
