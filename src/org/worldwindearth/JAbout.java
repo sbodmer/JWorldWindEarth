@@ -5,6 +5,15 @@
  */
 package org.worldwindearth;
 
+import gov.nasa.worldwind.WorldWind;
+import gov.nasa.worldwind.cache.FileStore;
+import java.io.File;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.util.List;
+import org.osmbuildings.OSMBuildingsLayer;
+
 /**
  *
  * @author sbodmer
@@ -16,7 +25,23 @@ public class JAbout extends javax.swing.JDialog {
      */
     public JAbout(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
+        
         initComponents();
+        
+        try {
+            FileStore fs = WorldWind.getDataFileStore();
+            List<? extends File> list = fs.getLocations();
+            StringBuilder b = new StringBuilder("");
+            b.append("WorldWind cache paths\n");
+            for (int i = 0;i<list.size();i++) {
+                File files = list.get(i);
+                b.append(" "+files.getPath()+"\n");
+            }
+            TA_Paths.setText(b.toString());
+            
+        } catch (NullPointerException ex) {
+            ex.printStackTrace();
+        }
     }
 
     /**
@@ -30,6 +55,10 @@ public class JAbout extends javax.swing.JDialog {
 
         jPanel1 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
+        jTabbedPane1 = new javax.swing.JTabbedPane();
+        jPanel2 = new javax.swing.JPanel();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        TA_Paths = new javax.swing.JTextArea();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
@@ -37,9 +66,23 @@ public class JAbout extends javax.swing.JDialog {
         jLabel1.setText("<html>\n<b>JWorldWindEarth</b> Preview<br>\n</html>");
         jPanel1.add(jLabel1);
 
-        getContentPane().add(jPanel1, java.awt.BorderLayout.CENTER);
+        getContentPane().add(jPanel1, java.awt.BorderLayout.NORTH);
 
-        pack();
+        jPanel2.setLayout(new java.awt.BorderLayout());
+
+        TA_Paths.setEditable(false);
+        TA_Paths.setColumns(20);
+        TA_Paths.setFont(new java.awt.Font("Monospaced", 0, 11)); // NOI18N
+        TA_Paths.setRows(5);
+        jScrollPane1.setViewportView(TA_Paths);
+
+        jPanel2.add(jScrollPane1, java.awt.BorderLayout.CENTER);
+
+        jTabbedPane1.addTab("Paths", jPanel2);
+
+        getContentPane().add(jTabbedPane1, java.awt.BorderLayout.CENTER);
+
+        setBounds(0, 0, 610, 350);
     }// </editor-fold>//GEN-END:initComponents
 
     /**
@@ -85,7 +128,11 @@ public class JAbout extends javax.swing.JDialog {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JTextArea TA_Paths;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel2;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JTabbedPane jTabbedPane1;
     // End of variables declaration//GEN-END:variables
 }

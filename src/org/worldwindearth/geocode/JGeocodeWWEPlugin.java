@@ -78,8 +78,6 @@ public class JGeocodeWWEPlugin extends JLayeredPane implements WWEPlugin, Action
      * The list of results
      */
     DefaultListModel<JBalloon> results = new DefaultListModel<>();
-    
-    
 
     /**
      * Creates new form JTerminalsLayer
@@ -97,7 +95,6 @@ public class JGeocodeWWEPlugin extends JLayeredPane implements WWEPlugin, Action
         LI_Reverse.setModel(results);
         LI_Top.setModel(results);
 
-        
         IF_Results.setVisible(false);
     }
 
@@ -163,6 +160,7 @@ public class JGeocodeWWEPlugin extends JLayeredPane implements WWEPlugin, Action
         LI_Top.getSelectionModel().addListSelectionListener(this);
 
         BT_Search.addActionListener(this);
+        BT_Clear.addActionListener(this);
 
         TF_Place.addActionListener(this);
 
@@ -188,7 +186,7 @@ public class JGeocodeWWEPlugin extends JLayeredPane implements WWEPlugin, Action
         // setVisible(false);
         //--- Create the reverse plugin
         ArrayList<TinyFactory> facs = app.getFactories(WWEFactory.PLUGIN_CATEGORY_WORLDWIND_GEOCODER);
-        for (TinyFactory f : facs) {
+        for (TinyFactory f:facs) {
             WWEGeocodePlugin p = (WWEGeocodePlugin) f.newPlugin(null);
             p.setup(app, ww);
             geocoders.add(p);
@@ -197,7 +195,7 @@ public class JGeocodeWWEPlugin extends JLayeredPane implements WWEPlugin, Action
 
         //--- Create the geocode plugin
         facs = app.getFactories(WWEFactory.PLUGIN_CATEGORY_WORLDWIND_GAZETTEER);
-        for (TinyFactory f : facs) {
+        for (TinyFactory f:facs) {
             WWEGazetteerPlugin p = (WWEGazetteerPlugin) f.newPlugin(null);
             p.setup(app, ww);
             gazetteers.add(p);
@@ -213,7 +211,7 @@ public class JGeocodeWWEPlugin extends JLayeredPane implements WWEPlugin, Action
         jdesktop.remove(jballoon);
         layer.removeProjectable(jballoon);
 
-        for (int i = 0; i < results.getSize(); i++) {
+        for (int i = 0;i < results.getSize();i++) {
             JBalloon jb = results.get(i);
             jdesktop.remove(jb);
             layer.removeProjectable(jb);
@@ -221,10 +219,10 @@ public class JGeocodeWWEPlugin extends JLayeredPane implements WWEPlugin, Action
         results.clear();
 
         // jdesktop.remove(IF_Names);
-        for (WWEGeocodePlugin p : geocoders) p.cleanup();
+        for (WWEGeocodePlugin p:geocoders) p.cleanup();
         geocoders.clear();
 
-        for (WWEGazetteerPlugin p : gazetteers) p.cleanup();
+        for (WWEGazetteerPlugin p:gazetteers) p.cleanup();
         gazetteers.clear();
 
         layer.dispose();
@@ -269,7 +267,7 @@ public class JGeocodeWWEPlugin extends JLayeredPane implements WWEPlugin, Action
         } else if (action.equals(WWEPlugin.DO_ACTION_LAYER_DISABLED)) {
             IF_Results.setVisible(false);
             jballoon.setVisible(false);
-            for (int i = 0; i < results.getSize(); i++) results.get(i).setVisible(false);
+            for (int i = 0;i < results.getSize();i++) results.get(i).setVisible(false);
 
         }
 
@@ -347,7 +345,7 @@ public class JGeocodeWWEPlugin extends JLayeredPane implements WWEPlugin, Action
         if (e.getSource() == TF_Place) {
             //--- Start the search process
             String string = TF_Place.getText().trim();
-            if (string.length()>3) fetchGazetteer(string);
+            if (string.length() > 3) fetchGazetteer(string);
 
         } else if (e.getActionCommand().equals("search")) {
             String house = TF_House.getText().trim();
@@ -355,8 +353,18 @@ public class JGeocodeWWEPlugin extends JLayeredPane implements WWEPlugin, Action
             String city = TF_City.getText().trim();
             String zip = TF_Zip.getText().trim();
             String country = CMB_Country.getSelectedItem().toString();
-            
+
             fetchGeocode(house, street, zip, city, country);
+
+        } else if (e.getActionCommand().equals("clear")) {
+            //--- Remove old points
+            for (int i = 0;i < results.size();i++) {
+                JBalloon jb = results.get(i);
+                layer.removeProjectable(jb);
+                jdesktop.remove(jb);
+            }
+            results.clear();
+
         }
     }
 
@@ -390,8 +398,6 @@ public class JGeocodeWWEPlugin extends JLayeredPane implements WWEPlugin, Action
         });
     }
 
-    
-
     //**************************************************************************
     //*** GeocodeFetcherListener
     //**************************************************************************
@@ -417,7 +423,7 @@ public class JGeocodeWWEPlugin extends JLayeredPane implements WWEPlugin, Action
             }
         });
     }
-    
+
     //**************************************************************************
     //*** ScreenProjectionListener
     //**************************************************************************
@@ -496,6 +502,7 @@ public class JGeocodeWWEPlugin extends JLayeredPane implements WWEPlugin, Action
         SL_Opacity = new javax.swing.JSlider();
         jPanel3 = new javax.swing.JPanel();
         PB_Waiting = new javax.swing.JProgressBar();
+        BT_Clear = new javax.swing.JButton();
         jPanel6 = new javax.swing.JPanel();
         TAB_Service = new javax.swing.JTabbedPane();
         PN_Reverse = new javax.swing.JPanel();
@@ -554,6 +561,10 @@ public class JGeocodeWWEPlugin extends JLayeredPane implements WWEPlugin, Action
 
         PB_Waiting.setPreferredSize(new java.awt.Dimension(100, 26));
         jPanel3.add(PB_Waiting);
+
+        BT_Clear.setText("Clear");
+        BT_Clear.setActionCommand("clear");
+        jPanel3.add(BT_Clear);
 
         PN_Config.add(jPanel3, java.awt.BorderLayout.PAGE_END);
 
@@ -712,6 +723,7 @@ public class JGeocodeWWEPlugin extends JLayeredPane implements WWEPlugin, Action
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton BT_Clear;
     private javax.swing.JButton BT_Search;
     private javax.swing.JComboBox<String> CMB_Country;
     private javax.swing.JInternalFrame IF_Results;
@@ -755,7 +767,7 @@ public class JGeocodeWWEPlugin extends JLayeredPane implements WWEPlugin, Action
      */
     private void fetchReverse(Position pos) {
         //--- Remove old points
-        for (int i = 0; i < results.size(); i++) {
+        for (int i = 0;i < results.size();i++) {
             JBalloon jb = results.get(i);
             layer.removeProjectable(jb);
             jdesktop.remove(jb);
@@ -763,7 +775,7 @@ public class JGeocodeWWEPlugin extends JLayeredPane implements WWEPlugin, Action
         results.clear();
 
         //--- Start the fetchin in parallel
-        for (WWEGeocodePlugin p : geocoders) {
+        for (WWEGeocodePlugin p:geocoders) {
             ReverseFetcher fetcher = new ReverseFetcher(this, pos, p);
             fetcher.start();
         }
@@ -772,7 +784,7 @@ public class JGeocodeWWEPlugin extends JLayeredPane implements WWEPlugin, Action
 
     private void fetchGeocode(String house, String street, String zip, String city, String country) {
         //--- Remove old points
-        for (int i = 0; i < results.size(); i++) {
+        for (int i = 0;i < results.size();i++) {
             JBalloon jb = results.get(i);
             layer.removeProjectable(jb);
             jdesktop.remove(jb);
@@ -780,7 +792,7 @@ public class JGeocodeWWEPlugin extends JLayeredPane implements WWEPlugin, Action
         results.clear();
 
         //--- Start the fetchin in parallel
-        for (WWEGeocodePlugin p : geocoders) {
+        for (WWEGeocodePlugin p:geocoders) {
             GeocodeFetcher fetcher = new GeocodeFetcher(this, house, street, zip, city, country, p);
             fetcher.start();
         }
@@ -789,7 +801,7 @@ public class JGeocodeWWEPlugin extends JLayeredPane implements WWEPlugin, Action
 
     private void fetchGazetteer(String string) {
         //--- Remove old points
-        for (int i = 0; i < results.size(); i++) {
+        for (int i = 0;i < results.size();i++) {
             JBalloon jb = results.get(i);
             layer.removeProjectable(jb);
             jdesktop.remove(jb);
@@ -797,16 +809,15 @@ public class JGeocodeWWEPlugin extends JLayeredPane implements WWEPlugin, Action
         results.clear();
 
         //--- Start the fetchin in parallel
-        for (WWEGazetteerPlugin p : gazetteers) {
+        for (WWEGazetteerPlugin p:gazetteers) {
             GazetteerFetcher fetcher = new GazetteerFetcher(this, string, p);
             fetcher.start();
         }
 
     }
-    
-    
+
     private void resultsFetchedEL(ArrayList<Result> result) {
-        for (Result r : result) {
+        for (Result r:result) {
             JBalloon jb = new JBalloon(r, getClass().getResource("/org/worldwindearth/geocode/Resources/Icons/32x32/BalloonBlue.png"));
             jb.setSize(jb.getPreferredSize());
             layer.addProjectable(jb);
@@ -816,5 +827,4 @@ public class JGeocodeWWEPlugin extends JLayeredPane implements WWEPlugin, Action
         }
     }
 
-    
 }

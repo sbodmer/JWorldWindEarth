@@ -65,6 +65,12 @@
                 </Property>
               </Properties>
             </Component>
+            <Component class="javax.swing.JButton" name="BT_Clear">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Clear"/>
+                <Property name="actionCommand" type="java.lang.String" value="clear"/>
+              </Properties>
+            </Component>
           </SubComponents>
         </Container>
         <Container class="javax.swing.JPanel" name="jPanel6">

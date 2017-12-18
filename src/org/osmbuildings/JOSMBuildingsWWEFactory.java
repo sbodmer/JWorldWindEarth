@@ -41,10 +41,17 @@ public class JOSMBuildingsWWEFactory extends javax.swing.JPanel implements WWEFa
         try {
             FileStore fs = WorldWind.getDataFileStore();
             URL url = fs.findFile(OSMBuildingsLayer.CACHE_FOLDER, false);
-            File f = new File(url.toURI());
-            f.mkdirs();
-            TF_CachePath.setText(f.getPath());
-
+            if (url == null) {
+                File tmp = fs.getLocations().get(0);
+                File f = new File(tmp, OSMBuildingsLayer.CACHE_FOLDER);
+                f.mkdirs();
+                TF_CachePath.setText(f.getPath());
+                
+            } else {
+                File f = new File(url.toURI());
+                TF_CachePath.setText(f.getPath());
+            }
+            
         } catch (URISyntaxException ex) {
             TF_CachePath.setText(ex.getMessage());
             ex.printStackTrace();
