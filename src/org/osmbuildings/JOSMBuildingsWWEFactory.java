@@ -38,7 +38,22 @@ public class JOSMBuildingsWWEFactory extends javax.swing.JPanel implements WWEFa
     public JOSMBuildingsWWEFactory() {
         initComponents();
 
-    
+        try {
+            FileStore fs = WorldWind.getDataFileStore();
+            URL url = fs.findFile(OSMBuildingsLayer.CACHE_FOLDER, false);
+            File f = new File(url.toURI());
+            f.mkdirs();
+            TF_CachePath.setText(f.getPath());
+
+        } catch (URISyntaxException ex) {
+            TF_CachePath.setText(ex.getMessage());
+            ex.printStackTrace();
+
+        } catch (NullPointerException ex) {
+            TF_CachePath.setText(ex.getMessage());
+            ex.printStackTrace();
+        }
+
     }
 
     //**************************************************************************
@@ -46,12 +61,11 @@ public class JOSMBuildingsWWEFactory extends javax.swing.JPanel implements WWEFa
     //**************************************************************************
     public int getExpireDays() {
         return (int) SP_ExpireDays.getValue();
-        
+
     }
     //**************************************************************************
     //*** WWEPluginFactory
     //**************************************************************************
-    
 
     @Override
     public Icon getFactoryIcon(int size) {
@@ -94,12 +108,12 @@ public class JOSMBuildingsWWEFactory extends javax.swing.JPanel implements WWEFa
     @Override
     public void configure(Element config) {
         if (config == null) return;
-        
+
         try {
             SP_ExpireDays.setValue(Integer.parseInt(config.getAttribute("expireDays")));
-            
+
         } catch (NumberFormatException ex) {
-            
+
         }
     }
 
@@ -107,11 +121,11 @@ public class JOSMBuildingsWWEFactory extends javax.swing.JPanel implements WWEFa
     public TinyPlugin newPlugin(Object o) {
         return new JOSMBuildingsWWEPlugin(this, (WorldWindow) o);
     }
-    
+
     @Override
     public void store(Element config) {
         if (config == null) return;
-        
+
         config.setAttribute("expireDays", SP_ExpireDays.getValue().toString());
     }
 
@@ -137,13 +151,16 @@ public class JOSMBuildingsWWEFactory extends javax.swing.JPanel implements WWEFa
                 FileStore fs = WorldWind.getDataFileStore();
                 URL url = fs.findFile(OSMBuildingsLayer.CACHE_FOLDER, false);
                 long size = calculateSize(new File(url.toURI()));
-                TF_CacheSize.setText((size/(1024*1024))+" MB");
-                
+                TF_CacheSize.setText((size / (1024 * 1024)) + " MB");
+
             } catch (URISyntaxException ex) {
                 ex.printStackTrace();
-                
+
+            } catch (NullPointerException ex) {
+                ex.printStackTrace();
+
             }
-            
+
         } else if (e.getActionCommand().equals("clear")) {
             //--- Clear the cache
             try {
@@ -152,11 +169,11 @@ public class JOSMBuildingsWWEFactory extends javax.swing.JPanel implements WWEFa
                 File f = new File(url.toURI());
                 recursiveDelete(f);
                 long size = calculateSize(new File(url.toURI()));
-                TF_CacheSize.setText((size/(1024*1024))+" MB");
-                
+                TF_CacheSize.setText((size / (1024 * 1024)) + " MB");
+
             } catch (URISyntaxException ex) {
                 ex.printStackTrace();
-                
+
             }
         }
     }
@@ -178,6 +195,8 @@ public class JOSMBuildingsWWEFactory extends javax.swing.JPanel implements WWEFa
         BT_Clear = new javax.swing.JButton();
         jLabel2 = new javax.swing.JLabel();
         SP_ExpireDays = new javax.swing.JSpinner();
+        jLabel3 = new javax.swing.JLabel();
+        TF_CachePath = new javax.swing.JTextField();
 
         LB_Name.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/osmbuildings/Resources/Icons/22x22/osmbuildings.png"))); // NOI18N
         java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("org/osmbuildings/OSMBuildings"); // NOI18N
@@ -198,6 +217,10 @@ public class JOSMBuildingsWWEFactory extends javax.swing.JPanel implements WWEFa
         SP_ExpireDays.setModel(new javax.swing.SpinnerNumberModel(30, 0, 365, 1));
         SP_ExpireDays.setToolTipText("Set the tile cache expire days");
 
+        jLabel3.setText("Cache path is");
+
+        TF_CachePath.setEditable(false);
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -206,16 +229,23 @@ public class JOSMBuildingsWWEFactory extends javax.swing.JPanel implements WWEFa
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(BT_Cache)
+                        .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(TF_CacheSize, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(BT_Clear))
+                        .addComponent(TF_CachePath))
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(SP_ExpireDays, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(129, Short.MAX_VALUE))
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(BT_Cache)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(TF_CacheSize, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(BT_Clear))
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(SP_ExpireDays, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGap(0, 98, Short.MAX_VALUE)))
+                .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -229,7 +259,11 @@ public class JOSMBuildingsWWEFactory extends javax.swing.JPanel implements WWEFa
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(SP_ExpireDays, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(235, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(TF_CachePath, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(198, Short.MAX_VALUE))
         );
 
         add(jPanel1, java.awt.BorderLayout.CENTER);
@@ -242,8 +276,10 @@ public class JOSMBuildingsWWEFactory extends javax.swing.JPanel implements WWEFa
     protected javax.swing.JLabel LB_Description;
     protected javax.swing.JLabel LB_Name;
     protected javax.swing.JSpinner SP_ExpireDays;
+    protected javax.swing.JTextField TF_CachePath;
     protected javax.swing.JTextField TF_CacheSize;
     protected javax.swing.JLabel jLabel2;
+    protected javax.swing.JLabel jLabel3;
     protected javax.swing.JPanel jPanel1;
     // End of variables declaration//GEN-END:variables
 
@@ -266,7 +302,7 @@ public class JOSMBuildingsWWEFactory extends javax.swing.JPanel implements WWEFa
     private void recursiveDelete(File f) {
         if (f.isFile()) {
             f.delete();
-            
+
         } else if (f.isDirectory()) {
             File fi[] = f.listFiles();
             for (int i = 0;i < fi.length;i++) recursiveDelete(fi[i]);
@@ -274,7 +310,4 @@ public class JOSMBuildingsWWEFactory extends javax.swing.JPanel implements WWEFa
         }
     }
 
-    
-
-    
-} 
+}
