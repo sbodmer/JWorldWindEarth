@@ -9,6 +9,7 @@ import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.awt.AWTInputHandler;
 import gov.nasa.worldwind.event.SelectEvent;
 import gov.nasa.worldwind.pick.PickedObjectList;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 
 /**
@@ -70,4 +71,5 @@ public class WWEInputHandler extends AWTInputHandler {
         // System.out.println("PRESSED:"+mouseEvent);
         super.mousePressed(mouseEvent);
     }
+
 }

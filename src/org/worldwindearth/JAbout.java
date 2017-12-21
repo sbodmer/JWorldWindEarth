@@ -35,7 +35,7 @@ public class JAbout extends javax.swing.JDialog {
             b.append("WorldWind cache paths\n");
             for (int i = 0;i<list.size();i++) {
                 File files = list.get(i);
-                b.append(" "+files.getPath()+"\n");
+                b.append(" "+files.getPath()+" (exists="+files.exists()+")\n");
             }
             TA_Paths.setText(b.toString());
             

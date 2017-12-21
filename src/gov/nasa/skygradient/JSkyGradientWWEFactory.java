@@ -97,6 +97,9 @@ public class JSkyGradientWWEFactory extends JPanel implements WWEFactory {
     
     @Override
     public Object getProperty(String property) {
+        if (property.equals(PROPERTY_AUTHOR)) {
+            return "Michael de Hoog, Patrick Murris";
+        }
         return null;
     }
 

@@ -51,6 +51,10 @@ public class OSMBuildingsTile {
     double defaultHeight = 10;
     boolean applyRoofTextures = false;
     ShapeAttributes defaultAttrs = null;
+    /**
+     * The fetching URL
+     */
+    URL url = null;
 
     Position center = null;
     FileStore store = null;
@@ -62,6 +66,11 @@ public class OSMBuildingsTile {
      * The loading timestamp
      */
     long ts = 0;
+
+    /**
+     * The start of the fetching process
+     */
+    long fetchTs = 0;
 
     OSMBuildingsTileListener listener = null;
 
@@ -92,7 +101,7 @@ public class OSMBuildingsTile {
         this.expireDate = expireDate;
         this.defaultAttrs = defaultAttrs;
         this.applyRoofTextures = applyRoofTextures;
-        
+
         cachePath = OSMBuildingsLayer.CACHE_FOLDER + File.separatorChar + level + File.separatorChar + x + File.separatorChar + y + ".json";
 
         BufferedImage tex = new BufferedImage(256, 256, BufferedImage.TYPE_INT_ARGB);
@@ -150,7 +159,7 @@ public class OSMBuildingsTile {
         cap.setDrawInterior(true);
         cap.setDrawOutline(true);
         tile.setCapAttributes(cap);
-        
+
     }
 
     @Override
@@ -162,19 +171,38 @@ public class OSMBuildingsTile {
     //*** API
     //**************************************************************************
     /**
+     * Returns the fetched url or null if not yet fetched
+     *
+     * @return
+     */
+    public URL getFetchedURL() {
+        return url;
+    }
+
+    /**
+     * Returns the start of the tile loading (fetch call)
+     *
+     * @return
+     */
+    public long getFetchedTimestamp() {
+        return fetchTs;
+    }
+
+    /**
      * Returns the renderable ids
-     * 
-     * @return 
+     *
+     * @return
      */
     public ArrayList<String> getIds() {
         if (renderable == null) return new ArrayList<>();
         return renderable.getIds();
     }
-    
+
     /**
      * Start the data fetch via HTTPRetriever
      */
     public void fetch() {
+        fetchTs = System.currentTimeMillis();
         LocalBuildingsLoader lbl = new LocalBuildingsLoader(cachePath, this);
         try {
             if (listener != null)
@@ -193,31 +221,31 @@ public class OSMBuildingsTile {
                 } else {
                     // System.out.println("FOUND LOCAL json:"+f);
                     WorldWind.getTaskService().addTask(lbl);
-
+                    return;
                 }
-
-            } else {
-                //--- Retreive data from remote server
-                String s = OSMBUILDINGS_URL;
-                //--- Find the current server to use
-                int i1 = s.indexOf('[');
-                if (i1 != -1) {
-                    int i2 = s.indexOf(']');
-                    String sub = s.substring(i1 + 1, i2);
-                    int l = sub.length();
-                    current++;
-                    if (current >= sub.length())
-                        current = 0;
-                    char c = sub.charAt(current);
-                    s = s.replaceAll("\\[" + sub + "\\]", "" + c);
-                }
-
-                s += "/15/" + x + "/" + y + ".json";
-                HTTPRetriever r = new HTTPRetriever(new URL(s), lbl);
-                r.setConnectTimeout(10000);
-                r.setReadTimeout(20000);
-                WorldWind.getRetrievalService().runRetriever(r);
             }
+
+            //--- Retreive data from remote server
+            String s = OSMBUILDINGS_URL;
+            //--- Find the current server to use
+            int i1 = s.indexOf('[');
+            if (i1 != -1) {
+                int i2 = s.indexOf(']');
+                String sub = s.substring(i1 + 1, i2);
+                int l = sub.length();
+                current++;
+                if (current >= sub.length())
+                    current = 0;
+                char c = sub.charAt(current);
+                s = s.replaceAll("\\[" + sub + "\\]", "" + c);
+            }
+
+            s += "/15/" + x + "/" + y + ".json";
+            url = new URL(s);
+            HTTPRetriever r = new HTTPRetriever(url, lbl);
+            r.setConnectTimeout(10000);
+            r.setReadTimeout(20000);
+            WorldWind.getRetrievalService().runRetriever(r);
 
         } catch (MalformedURLException ex) {
             //--- Failed
@@ -233,6 +261,11 @@ public class OSMBuildingsTile {
         }
     }
 
+    /**
+     * If not null, the tile was loaded
+     * 
+     * @return 
+     */
     public Renderable getRenderable() {
         /*
         ShapeAttributes a4 = new BasicShapeAttributes();
@@ -354,7 +387,7 @@ public class OSMBuildingsTile {
      * Local and remove listener for buildings json data loading process<p>
      *
      * When the json has arrived, fetch the textures
-     * 
+     *
      */
     private class LocalBuildingsLoader implements Runnable, RetrievalPostProcessor {
 
@@ -369,13 +402,15 @@ public class OSMBuildingsTile {
 
         @Override
         public void run() {
+            fetchTs = System.currentTimeMillis();
+            // System.out.println(">RUN ["+ti.x+"x"+ti.y+"]=>"+path);
             try {
                 URL data = store.findFile(path, false);
 
                 //--- Load the data
                 GeoJSONDoc doc = new GeoJSONDoc(data);
                 doc.parse();
-                
+
                 renderable = new OSMBuildingsRenderable(doc, defaultHeight, defaultAttrs, data.toString(), listener);
                 if (listener != null) listener.osmBuildingsLoaded(ti);
 
@@ -389,10 +424,14 @@ public class OSMBuildingsTile {
                 //--- Failed
                 if (listener != null) listener.osmBuildingsLoadingFailed(ti, "Local .json file could not be found : " + cachePath);
             }
+            // System.out.println("<RUN");
+            fetchTs = 0;
         }
 
         @Override
         public ByteBuffer run(Retriever retriever) {
+            fetchTs = System.currentTimeMillis();
+            // System.out.println(">RUN ["+ti.x+"x"+ti.y+"]=>"+path);
             HTTPRetriever hr = (HTTPRetriever) retriever;
             try {
                 if (hr.getResponseCode() == HttpURLConnection.HTTP_OK) {
@@ -429,6 +468,7 @@ public class OSMBuildingsTile {
                 if (listener != null)
                     listener.osmBuildingsLoadingFailed(ti, ".json file could not be found : " + ex.getMessage());
             }
+            fetchTs = 0;
             return hr.getBuffer();
         }
 
@@ -465,14 +505,14 @@ public class OSMBuildingsTile {
                     s += "&width=2048";
                     s += "&height=2048";
                     s += "&bbox=" + bl.longitude.degrees + "," + bl.latitude.degrees + "," + tr.longitude.degrees + "," + tr.latitude.degrees;
-                    System.out.println("S:" + s);
+                    // System.out.println("S:" + s);
                     HTTPRetriever r = new HTTPRetriever(new URL(s), rtl);
                     r.setConnectTimeout(10000);
                     r.setReadTimeout(20000);
                     WorldWind.getRetrievalService().runRetriever(r);
 
                 }
-                
+
             } catch (Exception ex) {
                 ex.printStackTrace();
             }

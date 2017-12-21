@@ -69,7 +69,8 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
     boolean drawProcessingBox = true;
     boolean drawOutline = false;
     boolean applyRoofTextures = false;
-
+    javax.swing.Timer timer = null;
+    
     // Cylinder c = null;
     public OSMBuildingsLayer() {
         super();
@@ -167,6 +168,10 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
         cursor.setVisible(true);
         addRenderable(cursor);
          */
+ 
+         //--- House keeping timer (check if building are not resolved in specific delay)
+         timer = new javax.swing.Timer(30000, this);
+         timer.start();
     }
 
     //**************************************************************************
@@ -302,6 +307,7 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
 
     @Override
     public void dispose() {
+        timer.stop();
         clearTiles();
         super.dispose();
     }
@@ -368,7 +374,7 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
      */
     @Override
     public void onMessage(Message msg) {
-        System.out.println("onMessage:" + msg.getName() + " when:" + msg.getWhen() + " source:" + msg.getSource());
+        // System.out.println("onMessage:" + msg.getName() + " when:" + msg.getWhen() + " source:" + msg.getSource());
 
         if (View.VIEW_STOPPED.equals(msg.getName()) && (center != null)) {
             if (ww == null) {
@@ -446,7 +452,7 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
     public void osmBuildingsLoadingFailed(OSMBuildingsTile btile, String reason) {
         // System.out.println("LOADING FAILED:" + btile+" reason:"+reason);
         removeRenderable(btile.getTileSurfaceRenderable());
-        Logging.logger().log(Level.WARNING, "OSMBuildingsLayer.osmBuildingsLoadingFailed for tile " + btile.toString(), new Object[]{reason});
+        Logging.logger().log(Level.WARNING, "OSMBuildingsLayer.osmBuildingsLoadingFailed for tile " + btile.toString()+", "+btile.getFetchedURL(), new Object[]{reason});
         buildings.remove(btile);
 
     }
@@ -470,7 +476,28 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
     //**************************************************************************
     @Override
     public void actionPerformed(ActionEvent e) {
-        //--- Nothing at the moment
+        if (e.getSource() == timer) {
+            long now = System.currentTimeMillis();
+            ArrayList<OSMBuildingsTile> tooLong = new ArrayList<>();
+            Iterator<String> it = buildings.keySet().iterator();
+            while (it.hasNext()) {
+                String key = it.next();
+                OSMBuildingsTile t = buildings.get(key);
+                
+                if (t.getRenderable() == null) {
+                    long load = t.getFetchedTimestamp();
+                    long diff = now-load;
+                    // System.out.println("["+key+"]="+load+", diff="+diff+" renderable=false");
+                    // System.out.println("DIFF:"+diff+" (load:"+load+" now:"+now+")");
+                    if (diff > 30000) {
+                        //--- Loading too long, consider failed
+                        tooLong.add(t);
+                    }
+                }
+                
+            }
+            for (int i=0;i<tooLong.size();i++) osmBuildingsLoadingFailed(tooLong.get(i), "No failed message received after 30s, force to failed loading...");
+        }
     }
 
     

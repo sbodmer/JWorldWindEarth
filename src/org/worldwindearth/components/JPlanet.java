@@ -7,6 +7,7 @@ package org.worldwindearth.components;
 
 import org.worldwindearth.WWEInputHandler;
 import gov.nasa.worldwind.Model;
+import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.WorldWind;
 import gov.nasa.worldwind.awt.WorldWindowGLJPanel;
 import gov.nasa.worldwind.event.InputHandler;
@@ -17,6 +18,7 @@ import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.layers.LayerList;
 import gov.nasa.worldwind.view.orbit.BasicOrbitView;
+import gov.nasa.worldwind.view.orbit.OrbitView;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -888,13 +890,57 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
             MN_Fullscreen.setSelected(!selected);
             ActionEvent ae = new ActionEvent(MN_Fullscreen, ActionEvent.ACTION_PERFORMED, MN_Fullscreen.getActionCommand());
             actionPerformed(ae);
-
+            e.consume();
+            
         } else if (e.getKeyCode() == KeyEvent.VK_SPACE) {
             boolean sticky = MN_HideLayers.isSelected();
             MN_HideLayers.setSelected(!sticky);
 
             actionPerformed(new ActionEvent(MN_HideLayers, ActionEvent.ACTION_PERFORMED, MN_HideLayers.getActionCommand()));
-
+            e.consume();
+            
+        } else if (e.getKeyCode() == KeyEvent.VK_W) {
+            System.out.println("FORWARD");
+            View v = wwd.getView();
+            // e.setKeyCode(KeyEvent.VK_UP);
+            // v.setOrientation(v.getCurrentEyePosition(), center);set
+            // e.consume();
+            // wwd.redraw();
+            
+        } else if (e.getKeyCode() == KeyEvent.VK_S) {
+            System.out.println("BACKWARD");
+            e.consume();
+            wwd.redraw();
+            
+         } else if (e.getKeyCode() == KeyEvent.VK_A) {
+            System.out.println("LEFT");
+            OrbitView v = (OrbitView) wwd.getView();
+            System.out.println("VIEW:"+v.getClass().getName());
+            v.setHeading(Angle.fromDegrees(v.getHeading().getDegrees()-2));
+            // v.setOrientation(v.getCurrentEyePosition(), v.getCenterPosition();
+            e.consume();
+            wwd.redraw();
+            
+        } else if (e.getKeyCode() == KeyEvent.VK_D) {
+            System.out.println("RIGHT");
+            View v = wwd.getView();
+            
+            v.setHeading(Angle.fromDegrees(v.getHeading().getDegrees()+2));
+            e.consume();
+            wwd.redraw();
+            
+        } else if (e.getKeyCode() == KeyEvent.VK_Q) {
+            View v = wwd.getView();
+            v.setRoll(Angle.fromDegrees(v.getRoll().getDegrees()+1));
+            e.consume();
+            wwd.redraw();
+            
+        } else if (e.getKeyCode() == KeyEvent.VK_E) {
+            View v = wwd.getView();
+            v.setRoll(Angle.fromDegrees(v.getRoll().getDegrees()-1));
+            e.consume();
+            wwd.redraw();
+            
         }
     }
 
