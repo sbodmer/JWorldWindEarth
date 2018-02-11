@@ -483,19 +483,24 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
             double roofHeight = 0;
             String roofMaterial = "concrete";
             String roofOrientation = "along";
-            String roofDirection = "";
+            double roofDirection = 0;
             if (properties != null) {
-                if (properties.getValue("height") != null) height = (Double) properties.getValue("height");
-                if (properties.getValue("levels") != null) levels = (Double) properties.getValue("levels");
-                if (properties.getValue("minHeight") != null) minHeight = (Double) properties.getValue("minHeight");
-                // --- Roof
-                if (properties.getValue("roofColor") != null) roofColor = (String) properties.getValue("roofColor");
-                if (properties.getValue("roofShape") != null) roofShape = (String) properties.getValue("roofShape");
-                if (properties.getValue("roofHeight") != null) roofHeight = (Double) properties.getValue("roofHeight");
-                if (properties.getValue("roofMaterial") != null) roofMaterial = (String) properties.getValue("roofMaterial");
-                if (properties.getValue("roofOrientation") != null) roofOrientation = (String) properties.getValue("roofOrientation");
-                if (properties.getValue("roofDirection") != null) roofDirection = (String) properties.getValue("roofDirection");
-
+                try {
+                    if (properties.getValue("height") != null) height = (Double) properties.getValue("height");
+                    if (properties.getValue("levels") != null) levels = (Double) properties.getValue("levels");
+                    if (properties.getValue("minHeight") != null) minHeight = (Double) properties.getValue("minHeight");
+                    // --- Roof
+                    if (properties.getValue("roofColor") != null) roofColor = (String) properties.getValue("roofColor");
+                    if (properties.getValue("roofShape") != null) roofShape = (String) properties.getValue("roofShape");
+                    if (properties.getValue("roofHeight") != null) roofHeight = (Double) properties.getValue("roofHeight");
+                    if (properties.getValue("roofMaterial") != null) roofMaterial = (String) properties.getValue("roofMaterial");
+                    if (properties.getValue("roofOrientation") != null) roofOrientation = (String) properties.getValue("roofOrientation");
+                    if (properties.getValue("roofDirection") != null) roofDirection = (Double) properties.getValue("roofDirection");
+                    
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    
+                }
             }
             if (roofColor == null) roofColor = "gray";
 
@@ -505,7 +510,8 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
                 // --- Consider 1 level to be 4 meters
                 height = (levels == 0 ? defaultHeight : levels * 4);
                 minHeight = 0;
-
+                if (height <= 0) height = defaultHeight;
+                
             } else if (minHeight >= height) {
                 // height = minHeight + 1;
                 minHeight = 0;
@@ -652,7 +658,7 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
                 double dX = WWE.getDistance(minLat, minLon, minLat, maxLon);
                 double dY = WWE.getDistance(minLat, minLon, maxLat, minLon);
                 Position center = Position.fromDegrees(centerLat, centerLon);
-                Ellipsoid dome = new Ellipsoid(center, dX/2, roofHeight, dY/2);
+                Ellipsoid dome = new Ellipsoid(center, dX / 2, roofHeight, dY / 2);
                 dome.setAttributes(ra);
                 dome.setAltitudeMode(WorldWind.RELATIVE_TO_GROUND);
                 dome.move(Position.fromDegrees(0, 0, height));
@@ -660,7 +666,7 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
                 dome.setValue(AVKEY_OSMBUILDING_COMMENT, comment);
                 dome.setValue(AVKEY_OSMBUILDING_FEATURE_ID, parent != null ? parent.getValue("id") : "");
                 renderables.add(dome);
-                
+
             } else if (roofShape.equals("round")) {
                 /*
                 roofHeight = roofHeight == 0 ? 2 : roofHeight;
