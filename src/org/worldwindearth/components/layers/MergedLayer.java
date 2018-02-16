@@ -56,7 +56,7 @@ public class MergedLayer extends AbstractLayer {
     
     @Override
     public void render(DrawContext dc) {
-        System.out.println("RENDER");
+        super.render(dc);
         for (int i=0;i<layers.size();i++) layers.get(i).render(dc);
         
     }
