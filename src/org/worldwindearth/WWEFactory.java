@@ -28,4 +28,7 @@ public interface WWEFactory extends TinyFactory {
     public static final String PLUGIN_FAMILY_WORLDWIND_LAYER_GRATICULE      = "graticule";
     public static final String PLUGIN_FAMILY_WORLDWIND_LAYER_SEARCH         = "search";
     
+    public static final String PLANET_EARTH = "earth";
+    public static final String PLANET_MARS = "mars";
+    
 }

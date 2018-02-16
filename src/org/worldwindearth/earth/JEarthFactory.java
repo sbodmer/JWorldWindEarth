@@ -11,6 +11,7 @@ import org.tinyrcp.App;
 import org.tinyrcp.TinyFactory;
 import org.tinyrcp.TinyPlugin;
 import org.w3c.dom.Element;
+import org.worldwindearth.WWEFactory;
 
 /**
  *
@@ -86,6 +87,10 @@ public class JEarthFactory extends javax.swing.JPanel implements TinyFactory {
     @Override
     public Object getProperty(String property) {
         return null;
+    }
+    
+    public boolean doesFactorySupport(Object obj) {
+        return false;
     }
     
     /**

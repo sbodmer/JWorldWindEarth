@@ -164,6 +164,11 @@ public class JWMSWWEFactory extends JPanel implements WWEFactory, ActionListener
         return null;
     }
 
+    public boolean doesFactorySupport(Object obj) {
+        if (obj != null) return obj.toString().equals(WWEFactory.PLANET_EARTH);
+        return false;
+    }
+    
     //**************************************************************************
     //*** ActionListener
     //**************************************************************************

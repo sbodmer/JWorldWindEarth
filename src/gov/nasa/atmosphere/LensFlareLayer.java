@@ -1,4 +1,4 @@
-package gov.nasa.skygradient;
+package gov.nasa.atmosphere;
 
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.geom.Line;
@@ -92,7 +92,7 @@ public class LensFlareLayer extends RenderableLayer {
 	}
 
 	public void render(DrawContext dc) {
-		if (sunPoint == null)
+        if (sunPoint == null)
 			return;
 
 		if (dc.getView().getFrustumInModelCoordinates().getNear().distanceTo(sunPoint) < 0)
@@ -114,7 +114,7 @@ public class LensFlareLayer extends RenderableLayer {
 		Point center = new Point(viewport.width / 2, viewport.height / 2);
 		Point sun = new Point((int) sunPos.x, (int) sunPos.y);
 
-		// Update all flare images
+        // Update all flare images
 		for (Renderable r : this.getRenderables())
 			if (r instanceof FlareImage)
 				((FlareImage) r).update(sun, center);

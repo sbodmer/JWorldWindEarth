@@ -12,13 +12,13 @@
             <Width>75</Width>
             <Name>en</Name>
             <Description/>
-            <HandlerConfiguration>./Sky.properties|false|true|true|false</HandlerConfiguration>
+            <HandlerConfiguration>./Atmosphere.properties|false|true|true|false</HandlerConfiguration>
         </Column>
         <Column>
             <Width>75</Width>
             <Name>fr</Name>
             <Description/>
-            <HandlerConfiguration>./Sky_fr.properties|false|true|true|false</HandlerConfiguration>
+            <HandlerConfiguration>./Atmosphere_fr.properties|false|true|true|false</HandlerConfiguration>
         </Column>
     </Columns>
     <Records>
@@ -27,9 +27,9 @@
             <Description/>
             <Disabled>false</Disabled>
             <MultiLine>true</MultiLine>
-            <DefaultValue>Sky</DefaultValue>
-            <Value disabled="true" final="false">Sky</Value>
-            <Value disabled="false" final="false">Ciel</Value>
+            <DefaultValue>Atmosphere</DefaultValue>
+            <Value disabled="true" final="false">Atmosphere</Value>
+            <Value disabled="false" final="false">Atmpshpère</Value>
         </Property>
     </Records>
 </MultiProperties>

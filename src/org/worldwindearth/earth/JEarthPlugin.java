@@ -21,6 +21,7 @@ import org.tinyrcp.App;
 import org.tinyrcp.TinyFactory;
 import org.w3c.dom.*;
 import org.tinyrcp.TinyPlugin;
+import org.worldwindearth.WWEFactory;
 import org.worldwindearth.components.JPlanet;
 
 /**
@@ -84,6 +85,11 @@ public class JEarthPlugin extends JPanel implements TinyPlugin {
         return factory;
     }
 
+    /**
+     * 
+     * @param app
+     * @param obj 
+     */
     @Override
     public void setup(App app, Object obj) {
         this.app = app;
@@ -95,7 +101,7 @@ public class JEarthPlugin extends JPanel implements TinyPlugin {
         Earth eg = new Earth();
         m.setGlobe(eg);
 
-        jplanet.initialize(app, m, obj);
+        jplanet.initialize(app, m, WWEFactory.PLANET_EARTH);
     }
 
     @Override

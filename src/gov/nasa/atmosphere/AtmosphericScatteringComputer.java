@@ -1,4 +1,4 @@
-package gov.nasa.skygradient;
+package gov.nasa.atmosphere;
 
 import gov.nasa.worldwind.geom.Vec4;
 

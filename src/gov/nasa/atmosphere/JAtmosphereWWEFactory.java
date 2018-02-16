@@ -1,20 +1,21 @@
-package gov.nasa.countries;
+package gov.nasa.atmosphere;
 
+import gov.nasa.skygradient.*;
 import gov.nasa.worldwind.WorldWindow;
 import java.util.ResourceBundle;
 import javax.swing.Icon;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
-import org.w3c.dom.Element;
 import org.tinyrcp.App;
-import org.tinyrcp.TinyPlugin;
+import org.w3c.dom.Element;
+import org.worldwindearth.WWEPlugin;
 import org.worldwindearth.WWEFactory;
 
 /**
  *
  * @author sbodmer
  */
-public class JCountriesWWEFactory extends JPanel implements WWEFactory {
+public class JAtmosphereWWEFactory extends JPanel implements WWEFactory {
 
     ResourceBundle bundle = null;
     App app = null;
@@ -22,58 +23,47 @@ public class JCountriesWWEFactory extends JPanel implements WWEFactory {
     /**
      * Creates new form JGridsLMFactory
      */
-    public JCountriesWWEFactory() {
-        bundle = ResourceBundle.getBundle("gov.nasa.countries.Countries");
+    public JAtmosphereWWEFactory() {
+        bundle = ResourceBundle.getBundle("gov.nasa.skygradient.Sky");
 
         initComponents();
 
-        // LB_Name.setText(bundle.getString("text_name"));
-        // LB_Description.setText(bundle.getString("text_description"));
+        
     }
     //***************************************************************************
     //*** TinyFactory
-    //***************************************************************************
+    //**************************************************************************
+
     @Override
     public String getFactoryCategory() {
-        return WWEFactory.PLUGIN_CATEGORY_WORLDWIND_LAYER;
-    }
-
-    @Override
-    public void initialize(App app) {
-        this.app = app;
-
+        return PLUGIN_CATEGORY_WORLDWIND_LAYER;
     }
 
     @Override
     public String getFactoryFamily() {
-        return PLUGIN_FAMILY_WORLDWIND_LAYER_NASA;
+        return PLUGIN_FAMILY_WORLDWIND_LAYER_WORLDWIND;
     }
-
-    @Override
-    public void configure(Element config) {
-        //---
-    }
-
+    
     @Override
     public JComponent getFactoryConfigComponent() {
         return null;
     }
     
     @Override
+    public void initialize(App app) {
+        this.app =  app;
+    }
+    
+    @Override
+    public void configure(Element config) {
+        //---
+
+    }
+
+    @Override
     public void store(Element config) {
         //---
     }
-    
-    @Override
-    public void destroy() {
-        //---
-    }
-    
-    @Override
-    public String getFactoryDescription() {
-        return LB_Description.getText();
-    }
-
     
     @Override
     public Icon getFactoryIcon(int size) {
@@ -85,22 +75,35 @@ public class JCountriesWWEFactory extends JPanel implements WWEFactory {
         return LB_Name.getText();
     }
 
+    @Override
+    public String getFactoryDescription() {
+        return LB_Description.getText();
+    }
+    
     /**
      * The pass argument is the WorldWindow
      * @param arg
      * @return 
      */
     @Override
-    public TinyPlugin newPlugin(Object arg) {
-        return new JCountriesWWEPlugin(this, (WorldWindow) arg);
+    public WWEPlugin newPlugin(Object arg) {
+        return new JAtmosphereWWEPlugin(this, (WorldWindow) arg);
         
     }
 
     @Override
-    public Object getProperty(String property) {
-        return null;
+    public void destroy() {
+        //---
     }
     
+    @Override
+    public Object getProperty(String property) {
+        if (property.equals(PROPERTY_AUTHOR)) {
+            return "Michael de Hoog, Patrick Murris";
+        }
+        return null;
+    }
+
     public boolean doesFactorySupport(Object obj) {
         if (obj != null) return obj.toString().equals(WWEFactory.PLANET_EARTH);
         return false;
@@ -117,12 +120,12 @@ public class JCountriesWWEFactory extends JPanel implements WWEFactory {
         LB_Name = new javax.swing.JLabel();
         LB_Description = new javax.swing.JLabel();
 
-        LB_Name.setIcon(new javax.swing.ImageIcon(getClass().getResource("/gov/nasa/countries/Resources/Icons/22x22/countries.png"))); // NOI18N
-        java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("gov/nasa/countries/Countries"); // NOI18N
+        LB_Name.setIcon(new javax.swing.ImageIcon(getClass().getResource("/gov/nasa/atmosphere/Resources/Icons/22x22/atomosphere.png"))); // NOI18N
+        java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("gov/nasa/atmosphere/Atmosphere"); // NOI18N
         LB_Name.setText(bundle.getString("factory_name")); // NOI18N
 
         LB_Description.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
-        LB_Description.setText("<html><body>\nWorldwind stars layer\n</body></html>");
+        LB_Description.setText("<html><body>\nWorldwind sky gradient (atmosphere) with sun shading\n</body></html>");
         LB_Description.setVerticalAlignment(javax.swing.SwingConstants.TOP);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
@@ -140,6 +143,4 @@ public class JCountriesWWEFactory extends JPanel implements WWEFactory {
     public javax.swing.JLabel LB_Description;
     public javax.swing.JLabel LB_Name;
     // End of variables declaration//GEN-END:variables
-
-    
 }

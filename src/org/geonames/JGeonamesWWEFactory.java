@@ -15,13 +15,14 @@ import org.worldwindearth.WWEFactory;
  * @author sbodmer
  */
 public class JGeonamesWWEFactory extends JPanel implements WWEFactory {
+
     public static final String COPYRIGHT_TEXT = "© Geonames";
-    
+
     ResourceBundle bundle = null;
     App app = null;
 
     /**
-     * 
+     *
      */
     public JGeonamesWWEFactory() {
         bundle = ResourceBundle.getBundle("org.geonames.Geonames");
@@ -29,6 +30,7 @@ public class JGeonamesWWEFactory extends JPanel implements WWEFactory {
         initComponents();
 
     }
+
     //***************************************************************************
     //*** TinyFactory
     //***************************************************************************
@@ -67,16 +69,17 @@ public class JGeonamesWWEFactory extends JPanel implements WWEFactory {
     public JComponent getFactoryConfigComponent() {
         return null;
     }
-    
+
     /**
      * The pass argument is the WorldWindow
+     *
      * @param arg
-     * @return 
+     * @return
      */
     @Override
     public TinyPlugin newPlugin(Object arg) {
         return new GeonamesPlugin(this, (WorldWindow) arg);
-        
+
     }
 
     @Override
@@ -99,7 +102,12 @@ public class JGeonamesWWEFactory extends JPanel implements WWEFactory {
     public void destroy() {
         //---
     }
-    
+
+    public boolean doesFactorySupport(Object obj) {
+        if (obj != null) return obj.toString().equals(WWEFactory.PLANET_EARTH);
+        return false;
+    }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -136,5 +144,4 @@ public class JGeonamesWWEFactory extends JPanel implements WWEFactory {
     public javax.swing.JLabel LB_Name;
     // End of variables declaration//GEN-END:variables
 
-    
 }

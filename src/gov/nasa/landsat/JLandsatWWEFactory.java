@@ -101,6 +101,11 @@ public class JLandsatWWEFactory extends JPanel implements WWEFactory {
         return null;
     }
 
+    public boolean doesFactorySupport(Object obj) {
+        if (obj != null) return obj.toString().equals(WWEFactory.PLANET_EARTH);
+        return false;
+    }
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always

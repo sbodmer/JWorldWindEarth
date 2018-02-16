@@ -177,7 +177,10 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         listeners.remove(listener);
     }
 
-    public void initialize(App app, Model model, Object obj) {
+    /**
+     * THe passed obj is the planet string (WWEFactory.PLUGIN_PLANET.xxx)
+     */
+    public void initialize(App app, Model model, String planet) {
         this.app = app;
         this.m = model;
 
@@ -214,7 +217,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         DP_Main.addComponentListener(this);
         // DP_Main.addMouseListener(this);
 
-        PU_More.add(app.createFactoryMenus(app.getString("word_panels", "App"), TinyFactory.PLUGIN_CATEGORY_PANEL, TinyFactory.PLUGIN_FAMILY_PANEL, this), 0);
+        PU_More.add(app.createFactoryMenus(app.getString("word_panels", "App"), TinyFactory.PLUGIN_CATEGORY_PANEL, TinyFactory.PLUGIN_FAMILY_PANEL, planet, this), 0);
         PU_More.add(app.createFactoryMenus(app.getString("word_containers", "App"), TinyFactory.PLUGIN_CATEGORY_PANEL, TinyFactory.PLUGIN_FAMILY_CONTAINER, this), 0);
 
         MN_HideStatusBar.addActionListener(this);
@@ -620,9 +623,10 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
 
                     installLayer(p, index);
 
+                    p.doAction(WWEPlugin.DO_ACTION_LAYER_ENABLED, null, null);
                 }
                 layers.fireTableDataChanged();
-
+                
             } else {
                 TinyPlugin p = factory.newPlugin(null);
                 p.setup(app, null);
@@ -739,8 +743,6 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
 
         } else if (e.getActionCommand().equals("screenIdentifier")) {
             App.showScreenIdentifiers();
-
-        
 
         } else if (e.getActionCommand().equals("fullscreen")) {
             if (MN_Fullscreen.isSelected()) {

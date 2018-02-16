@@ -114,6 +114,10 @@
         <jar destfile="${dist.dir}/lib/ext/layers/SkyGradient.jar" manifest="Manifests/layers/SkyGradient.mf">
             <fileset dir="${build.dir}/classes" includes="gov/nasa/skygradient/**"/>
         </jar>
+        <echo message="[Layer] Atmosphere"/>
+        <jar destfile="${dist.dir}/lib/ext/layers/Atmosphere.jar" manifest="Manifests/layers/Atmosphere.mf">
+            <fileset dir="${build.dir}/classes" includes="gov/nasa/atmosphere/**"/>
+        </jar>
         <echo message="[Layer] Bing (NASA)"/>
         <jar destfile="${dist.dir}/lib/ext/layers/Bing.jar" manifest="Manifests/layers/Bing.mf">
             <fileset dir="${build.dir}/classes" includes="gov/nasa/bing/**"/>
