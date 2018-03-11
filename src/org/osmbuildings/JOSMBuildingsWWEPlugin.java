@@ -156,7 +156,8 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
             CB_DrawOutline.setSelected(config.getAttribute("drawOutline").equals("true"));
             CB_ApplyRoofTextures.setSelected(config.getAttribute("applyRoofTextures").equals("true"));
             SP_Rows.setValue(Integer.parseInt(config.getAttribute("rows")));
-            layer.setResolutionGrid((int) SP_Rows.getValue(), (int) SP_Rows.getValue());
+            layer.setRows((int) SP_Rows.getValue());
+            layer.setCols((int) SP_Rows.getValue());
             
         } catch (NumberFormatException ex) {
             //---
@@ -205,7 +206,8 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
             layer.setMaxTiles((int) SP_MaxTiles.getValue());
 
         } else if (e.getSource() == SP_Rows) {
-            layer.setResolutionGrid((int) SP_Rows.getValue(),(int) SP_Rows.getValue());
+            layer.setRows((int) SP_Rows.getValue());
+            layer.setCols((int) SP_Rows.getValue());
             
         } else if (e.getSource() == SP_Opacity) {
             layer.setOpacity(SP_Opacity.getValue() / 100d);

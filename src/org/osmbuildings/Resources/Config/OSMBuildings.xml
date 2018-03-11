@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- For automatic creation use this config a starting point -->
 <Layer className="org.osmbuildings.OSMBuildingsLayer">
     <Property name="Name" value="OSM Buildings 3D"/>
     <Property name="MaxActiveAltitude" value="8000"/>
@@ -6,6 +7,8 @@
     <Property name="NetworkRetrievalEnabled" value="true"/>
     <Property name="DefaultBuildingHeight" value="10"/>
     <Property name="MaxTiles" value="30"/>
+    <Property name="Rows" value="3"/>
+    <Property name="Cols" value="3"/>
     <Property name="DrawOutline" value="false"/>
     <Property name="DrawProcessingBox" value="true"/>
     <Property name="ApplyRoofTextures" value="false"/>

@@ -214,17 +214,24 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
     }
     
     /**
-     * Set the resolution (center of screen resolution grid)
+     * Set the building resolution grid (rows)
      * 
-     * @param rows
+     * @param rows 
+     */
+    public void setRows(int rows) {
+        this.rows = Math.abs(rows);
+        if (maxTiles < (this.rows * this.cols)) maxTiles = this.rows * this.cols;
+    }
+    
+    /**
+     * Set the building resolution grid (cols)
      * @param cols 
      */
-    public void setResolutionGrid(int rows, int cols) {
-        this.rows = Math.abs(rows);
+    public void setCols(int cols) {
         this.cols = Math.abs(cols);
         if (maxTiles < (this.rows * this.cols)) maxTiles = this.rows * this.cols;
-        
     }
+    
     public static int lon2x(double lon, int z) {
         return (int) (Math.floor((lon + 180.0) / 360.0 * Math.pow(2.0, z)));
     }
