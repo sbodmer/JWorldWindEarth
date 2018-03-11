@@ -33,42 +33,42 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
     public static final double maxX = Math.pow(2, ZOOM);
     public static final double maxY = Math.pow(2, ZOOM);
 
-    public int cols = 3;
-    public int rows = 3;
+    protected int cols = 3;
+    protected int rows = 3;
     
     // LatLon center = null;
     // SurfacePolygon carpet = null;
-    ExtrudedPolygon box = null;
+    protected ExtrudedPolygon box = null;
 
     /**
      * All the rendered ids (needed for dupilcate check)
      */
-    ArrayList<String> ids = new ArrayList<>();
+    protected ArrayList<String> ids = new ArrayList<>();
     
     /**
      * The last viewport center postion in world coordinates
      */
-    Position center = null;
+    protected Position center = null;
 
     /**
      * The worldwindow for this layer
      */
-    WorldWindow ww = null;
+    protected WorldWindow ww = null;
 
-    SurfaceCircle cursor = null;
+    protected SurfaceCircle cursor = null;
 
     /**
      * The key is "{level};{x};{y}"
      */
-    HashMap<String, OSMBuildingsTile> buildings = new HashMap<String, OSMBuildingsTile>();
+    protected HashMap<String, OSMBuildingsTile> buildings = new HashMap<String, OSMBuildingsTile>();
 
-    File cacheFolder = null;
+    protected File cacheFolder = null;
 
-    int maxTiles = 10;
-    double defaultHeight = 10;
-    boolean drawProcessingBox = true;
-    boolean drawOutline = false;
-    boolean applyRoofTextures = false;
+    protected int maxTiles = 10;
+    protected double defaultHeight = 10;
+    protected boolean drawProcessingBox = true;
+    protected boolean drawOutline = false;
+    protected boolean applyRoofTextures = false;
     javax.swing.Timer timer = null;
     
     // Cylinder c = null;
@@ -212,7 +212,19 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
     public void setMaxTiles(int maxTiles) {
         this.maxTiles = maxTiles;
     }
-
+    
+    /**
+     * Set the resolution (center of screen resolution grid)
+     * 
+     * @param rows
+     * @param cols 
+     */
+    public void setResolutionGrid(int rows, int cols) {
+        this.rows = Math.abs(rows);
+        this.cols = Math.abs(cols);
+        if (maxTiles < (this.rows * this.cols)) maxTiles = this.rows * this.cols;
+        
+    }
     public static int lon2x(double lon, int z) {
         return (int) (Math.floor((lon + 180.0) / 360.0 * Math.pow(2.0, z)));
     }
@@ -396,7 +408,7 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
             int y = lat2y(center.getLatitude().degrees, ZOOM);
             // System.out.println("X=" + x + ", Y=" + y);
             
-            //--- Take the total of 9 tile
+            //--- Take the total of x tile
             x = x-(rows/2);
             y = y-(rows/2);
             for (int i = 0; i < rows; i++) {

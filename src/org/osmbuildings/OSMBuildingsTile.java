@@ -423,6 +423,11 @@ public class OSMBuildingsTile {
             } catch (IOException ex) {
                 //--- Failed
                 if (listener != null) listener.osmBuildingsLoadingFailed(ti, "Local .json file could not be found : " + cachePath);
+                
+            } catch (Exception ex) {
+                //--- Other problems
+                if (listener != null) listener.osmBuildingsLoadingFailed(ti, "Local .json file could not be loaded : "+ex.getMessage());
+                
             }
             // System.out.println("<RUN");
             fetchTs = 0;
