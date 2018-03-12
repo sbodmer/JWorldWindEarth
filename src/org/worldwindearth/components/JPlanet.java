@@ -798,6 +798,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
                 ll.moveLower(l);
                 layers.fireTableDataChanged();
                 TB_Layers.getSelectionModel().setSelectionInterval(index - 1, index - 1);
+                TB_Layers.scrollRectToVisible(new Rectangle(0, index-1 * TB_Layers.getRowHeight(), TB_Layers.getWidth(), TB_Layers.getRowHeight()));
             }
 
         } else if (e.getActionCommand().equals("downLayer")) {
@@ -811,7 +812,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
                 ll.moveHigher(l);
                 layers.fireTableDataChanged();
                 TB_Layers.getSelectionModel().setSelectionInterval(index + 1, index + 1);
-
+                TB_Layers.scrollRectToVisible(new Rectangle(0, index+1 * TB_Layers.getRowHeight(), TB_Layers.getWidth(), TB_Layers.getRowHeight()));
             }
 
         } else if (e.getActionCommand().equals("cameras")) {
@@ -845,17 +846,19 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
                 cameras.set(index-1, source);
                 cameras.set(index, det);
                 LI_Cameras.setSelectedIndex(index-1);
+                LI_Cameras.ensureIndexIsVisible(index-1);
                 LI_Cameras.repaint();
             }
             
         } else if (e.getActionCommand().equals("cameraDown")) {
             int index = LI_Cameras.getSelectedIndex();
-            if ((index > 0) && (index < cameras.size()-2)) {
+            if ((index > 0) && (index < cameras.size()-1)) {
                 Camera source = LI_Cameras.getSelectedValue();
                 Camera det = cameras.get(index+1);
                 cameras.set(index+1, source);
                 cameras.set(index, det);
                 LI_Cameras.setSelectedIndex(index+1);
+                LI_Cameras.ensureIndexIsVisible(index+1);
                 LI_Cameras.repaint();
             }
             
