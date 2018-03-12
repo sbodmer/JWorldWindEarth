@@ -820,10 +820,10 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
 
         } else if (e.getActionCommand().equals("newCamera")) {
             String title = JOptionPane.showInputDialog(PN_Cameras, "Camera title");
+            int index = LI_Cameras.getSelectedIndex();
             if (title != null) {
                 Camera c = new Camera(title, wwd);
-                cameras.addElement(c);
-
+                cameras.add(index==-1?0:index, c);
             }
 
         } else if (e.getActionCommand().equals("removeCamera")) {
