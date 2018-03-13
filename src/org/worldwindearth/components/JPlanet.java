@@ -12,11 +12,17 @@ import gov.nasa.worldwind.WorldWind;
 import gov.nasa.worldwind.awt.WorldWindowGLJPanel;
 import gov.nasa.worldwind.event.InputHandler;
 import gov.nasa.worldwind.event.NoOpInputHandler;
+import gov.nasa.worldwind.event.RenderingEvent;
+import gov.nasa.worldwind.event.RenderingListener;
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.Line;
 import gov.nasa.worldwind.geom.Position;
+import gov.nasa.worldwind.globes.Earth;
+import gov.nasa.worldwind.globes.Globe;
 import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.layers.LayerList;
+import gov.nasa.worldwind.render.DrawContext;
+import gov.nasa.worldwind.render.Renderable;
 import gov.nasa.worldwind.view.orbit.BasicOrbitView;
 import gov.nasa.worldwind.view.orbit.OrbitView;
 import java.awt.*;
@@ -38,6 +44,8 @@ import java.text.NumberFormat;
 import java.util.*;
 import javax.imageio.ImageIO;
 import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
 import javax.swing.event.ListSelectionEvent;
@@ -62,7 +70,7 @@ import org.worldwindearth.components.renderers.JCameraSmallCellRenderer;
  *
  * @author sbodmer
  */
-public class JPlanet extends JPanel implements KeyListener, ComponentListener, ActionListener, ListSelectionListener, MouseListener, MouseWheelListener, TableModelListener {
+public class JPlanet extends JPanel implements KeyListener, ComponentListener, ActionListener, ListSelectionListener, ChangeListener, MouseListener, MouseWheelListener, TableModelListener, RenderingListener {
 
     NumberFormat nf = new DecimalFormat("#.########");
 
@@ -183,10 +191,11 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
     public void initialize(App app, Model model, String planet) {
         this.app = app;
         this.m = model;
-
+        
         wwd = new WorldWindowGLJPanel();
         wwd.setModel(m);
         wwd.setInputHandler(new WWEInputHandler());
+        wwd.addRenderingListener(this);
         
         cameraCellRenderer = new JCameraCellRenderer(app);
         cameraSmallCellRenderer = new JCameraSmallCellRenderer(app);
@@ -222,6 +231,9 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
 
         MN_HideStatusBar.addActionListener(this);
         MN_HideLayers.addActionListener(this);
+        
+        SP_VerticalExageration.addChangeListener(this);
+        CB_Wireframe.addActionListener(this);
         
         InputHandler ih = wwd.getInputHandler();
         ih.addKeyListener(this);
@@ -874,6 +886,10 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
                 app.fireActionPerformed(new AppActionEvent(this, AppActionEvent.ACTION_ID_TINYFACTORY_SETTINGS, null, f));
 
             }
+        } else if (e.getActionCommand().equals("wireframe")) {
+            wwd.getSceneController().getModel().setShowWireframeExterior(CB_Wireframe.isSelected());
+            wwd.getSceneController().getModel().setShowWireframeExterior(CB_Wireframe.isSelected());
+            
         }
 
     }
@@ -1057,6 +1073,18 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
     }
 
     //**************************************************************************
+    //*** ChangeListener
+    //**************************************************************************
+    @Override
+    public void stateChanged(ChangeEvent e) {
+        if (e.getSource() == SP_VerticalExageration) {
+            int val = (Integer) SP_VerticalExageration.getValue();
+            wwd.getSceneController().setVerticalExaggeration((double) val/10d);
+            wwd.redraw();
+        }
+    }
+    
+    //**************************************************************************
     //*** MouseListener
     //**************************************************************************
     @Override
@@ -1139,6 +1167,23 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         }
     }
 
+    //*************************************************************************
+    //*** Renderable
+    //*************************************************************************
+    //--- NOT YET USED
+    public void render(DrawContext dc) {
+        //---
+        
+    }
+    
+    //*************************************************************************
+    //*** RenderingListener
+    //*************************************************************************
+    @Override
+    public void stageChanged(RenderingEvent event) {
+        //---
+        // System.out.println("STAGE:"+event.getStage());
+    }
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -1188,15 +1233,6 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         jPanel9 = new javax.swing.JPanel();
         BT_Configure = new javax.swing.JButton();
         PN_Right = new javax.swing.JPanel();
-        PN_Status = new javax.swing.JPanel();
-        PB_Downloading = new javax.swing.JProgressBar();
-        jlabel1 = new javax.swing.JLabel();
-        TF_Altitude = new javax.swing.JTextField();
-        jSeparator1 = new javax.swing.JSeparator();
-        jlabel2 = new javax.swing.JLabel();
-        TF_Latitude = new javax.swing.JTextField();
-        TF_Longitude = new javax.swing.JTextField();
-        LB_Licence = new javax.swing.JLabel();
         DP_Main = new javax.swing.JDesktopPane();
         PN_Cameras = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
@@ -1219,6 +1255,19 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         BT_Cameras = new javax.swing.JToggleButton();
         jPanel7 = new javax.swing.JPanel();
         BT_More = new javax.swing.JButton();
+        jPanel2 = new javax.swing.JPanel();
+        PN_Status = new javax.swing.JPanel();
+        PB_Downloading = new javax.swing.JProgressBar();
+        jlabel1 = new javax.swing.JLabel();
+        TF_Altitude = new javax.swing.JTextField();
+        jSeparator1 = new javax.swing.JSeparator();
+        jlabel2 = new javax.swing.JLabel();
+        TF_Latitude = new javax.swing.JTextField();
+        TF_Longitude = new javax.swing.JTextField();
+        LB_Licence = new javax.swing.JLabel();
+        jPanel5 = new javax.swing.JPanel();
+        SP_VerticalExageration = new javax.swing.JSpinner();
+        CB_Wireframe = new javax.swing.JCheckBox();
 
         MN_NewLayers.setText("New layer");
         PU_Layers.add(MN_NewLayers);
@@ -1377,47 +1426,6 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
 
         PN_Right.setLayout(new java.awt.BorderLayout());
 
-        PN_Status.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
-
-        PB_Downloading.setBackground(java.awt.Color.lightGray);
-        PB_Downloading.setForeground(java.awt.Color.red);
-        PB_Downloading.setToolTipText("Downloading");
-        PB_Downloading.setIndeterminate(true);
-        PB_Downloading.setPreferredSize(new java.awt.Dimension(50, 24));
-        PN_Status.add(PB_Downloading);
-
-        jlabel1.setText("Alt [m]");
-        jlabel1.setToolTipText("Altitude");
-        PN_Status.add(jlabel1);
-
-        TF_Altitude.setEditable(false);
-        TF_Altitude.setFont(new java.awt.Font("Monospaced", 0, 11)); // NOI18N
-        TF_Altitude.setPreferredSize(new java.awt.Dimension(100, 26));
-        PN_Status.add(TF_Altitude);
-
-        jSeparator1.setOrientation(javax.swing.SwingConstants.VERTICAL);
-        jSeparator1.setPreferredSize(new java.awt.Dimension(18, 18));
-        PN_Status.add(jSeparator1);
-
-        jlabel2.setText("Lat / Long [°]");
-        jlabel2.setToolTipText("Latitude / Longitude");
-        PN_Status.add(jlabel2);
-
-        TF_Latitude.setEditable(false);
-        TF_Latitude.setFont(new java.awt.Font("Monospaced", 0, 11)); // NOI18N
-        TF_Latitude.setPreferredSize(new java.awt.Dimension(100, 26));
-        PN_Status.add(TF_Latitude);
-
-        TF_Longitude.setEditable(false);
-        TF_Longitude.setFont(new java.awt.Font("Monospaced", 0, 11)); // NOI18N
-        TF_Longitude.setPreferredSize(new java.awt.Dimension(100, 26));
-        PN_Status.add(TF_Longitude);
-
-        LB_Licence.setText("...");
-        PN_Status.add(LB_Licence);
-
-        PN_Right.add(PN_Status, java.awt.BorderLayout.SOUTH);
-
         PN_Cameras.setLayout(new java.awt.BorderLayout());
 
         LI_Cameras.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
@@ -1559,6 +1567,60 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
 
         PN_Right.add(PN_Topbar, java.awt.BorderLayout.PAGE_START);
 
+        jPanel2.setLayout(new java.awt.BorderLayout());
+
+        PN_Status.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
+
+        PB_Downloading.setBackground(java.awt.Color.lightGray);
+        PB_Downloading.setForeground(java.awt.Color.red);
+        PB_Downloading.setToolTipText("Downloading");
+        PB_Downloading.setIndeterminate(true);
+        PB_Downloading.setPreferredSize(new java.awt.Dimension(50, 24));
+        PN_Status.add(PB_Downloading);
+
+        jlabel1.setText("Alt [m]");
+        jlabel1.setToolTipText("Altitude");
+        PN_Status.add(jlabel1);
+
+        TF_Altitude.setEditable(false);
+        TF_Altitude.setFont(new java.awt.Font("Monospaced", 0, 11)); // NOI18N
+        TF_Altitude.setPreferredSize(new java.awt.Dimension(100, 26));
+        PN_Status.add(TF_Altitude);
+
+        jSeparator1.setOrientation(javax.swing.SwingConstants.VERTICAL);
+        jSeparator1.setPreferredSize(new java.awt.Dimension(18, 18));
+        PN_Status.add(jSeparator1);
+
+        jlabel2.setText("Lat / Long [°]");
+        jlabel2.setToolTipText("Latitude / Longitude");
+        PN_Status.add(jlabel2);
+
+        TF_Latitude.setEditable(false);
+        TF_Latitude.setFont(new java.awt.Font("Monospaced", 0, 11)); // NOI18N
+        TF_Latitude.setPreferredSize(new java.awt.Dimension(100, 26));
+        PN_Status.add(TF_Latitude);
+
+        TF_Longitude.setEditable(false);
+        TF_Longitude.setFont(new java.awt.Font("Monospaced", 0, 11)); // NOI18N
+        TF_Longitude.setPreferredSize(new java.awt.Dimension(100, 26));
+        PN_Status.add(TF_Longitude);
+
+        LB_Licence.setText("...");
+        PN_Status.add(LB_Licence);
+
+        jPanel2.add(PN_Status, java.awt.BorderLayout.CENTER);
+
+        SP_VerticalExageration.setModel(new javax.swing.SpinnerNumberModel(10, 0, 100, 1));
+        jPanel5.add(SP_VerticalExageration);
+
+        CB_Wireframe.setText("Wireframe");
+        CB_Wireframe.setActionCommand("wireframe");
+        jPanel5.add(CB_Wireframe);
+
+        jPanel2.add(jPanel5, java.awt.BorderLayout.EAST);
+
+        PN_Right.add(jPanel2, java.awt.BorderLayout.SOUTH);
+
         SP_Main.setRightComponent(PN_Right);
 
         add(SP_Main, java.awt.BorderLayout.CENTER);
@@ -1580,6 +1642,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
     private javax.swing.JButton BT_ScrollRight;
     private javax.swing.JToggleButton BT_SmallCamera;
     private javax.swing.JButton BT_UpdateCamera;
+    private javax.swing.JCheckBox CB_Wireframe;
     private javax.swing.JDesktopPane DP_Main;
     private javax.swing.JLabel LB_Layer;
     private javax.swing.JLabel LB_LayerIcon;
@@ -1609,6 +1672,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
     private javax.swing.JSplitPane SP_Layers;
     private javax.swing.JScrollPane SP_LayersButtons;
     private javax.swing.JSplitPane SP_Main;
+    private javax.swing.JSpinner SP_VerticalExageration;
     private javax.swing.JToolBar TB_CameraTools;
     private javax.swing.JTable TB_Layers;
     private javax.swing.JToolBar TB_Tools;
@@ -1620,8 +1684,10 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
     private javax.swing.ButtonGroup btgscreens;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel11;
+    private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
+    private javax.swing.JPanel jPanel5;
     private javax.swing.JPanel jPanel7;
     private javax.swing.JPanel jPanel8;
     private javax.swing.JPanel jPanel9;
@@ -1703,4 +1769,10 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
     //**************************************************************************
     //*** For debug
     //**************************************************************************
+
+    
+
+    
+
+    
 }

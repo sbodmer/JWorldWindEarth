@@ -8,9 +8,12 @@ package org.osmbuildings;
 import gov.nasa.worldwind.*;
 import gov.nasa.worldwind.event.*;
 import gov.nasa.worldwind.geom.Position;
+import gov.nasa.worldwind.geom.Vec4;
 import gov.nasa.worldwind.layers.RenderableLayer;
 import gov.nasa.worldwind.render.*;
+import gov.nasa.worldwind.terrain.Tessellator;
 import gov.nasa.worldwind.util.Logging;
+import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -18,6 +21,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.logging.Level;
+import org.worldwindearth.WWE;
 
 /**
  * Always assume a zoom level of 15
@@ -35,7 +39,7 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
 
     protected int cols = 3;
     protected int rows = 3;
-    
+
     // LatLon center = null;
     // SurfacePolygon carpet = null;
     protected ExtrudedPolygon box = null;
@@ -44,7 +48,7 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
      * All the rendered ids (needed for dupilcate check)
      */
     protected ArrayList<String> ids = new ArrayList<>();
-    
+
     /**
      * The last viewport center postion in world coordinates
      */
@@ -69,8 +73,11 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
     protected boolean drawProcessingBox = true;
     protected boolean drawOutline = false;
     protected boolean applyRoofTextures = false;
+    protected boolean fixedLighting = true;
+    protected Vec4 defaultSunDirection = null;
+    protected Material defaultSunMat = null;
     javax.swing.Timer timer = null;
-    
+
     // Cylinder c = null;
     public OSMBuildingsLayer() {
         super();
@@ -168,19 +175,28 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
         cursor.setVisible(true);
         addRenderable(cursor);
          */
- 
-         //--- House keeping timer (check if building are not resolved in specific delay)
-         timer = new javax.swing.Timer(30000, this);
-         timer.start();
+        //--- House keeping timer (check if building are not resolved in specific delay)
+        timer = new javax.swing.Timer(30000, this);
+        timer.start();
     }
 
     //**************************************************************************
     //*** API
     //*************************************************************************
-    
-    
+    public void setFixedLighting(boolean fixedLighting) {
+        this.fixedLighting = fixedLighting;
+    }
+
+    public boolean isFixedLighting() {
+        return fixedLighting;
+    }
+
     public void setDefaultBuildingHeight(double defaultHeight) {
         this.defaultHeight = defaultHeight;
+    }
+
+    public double getDefaultBuildingHeight() {
+        return defaultHeight;
     }
 
     public void clearTiles() {
@@ -195,7 +211,7 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
 
     public void setDrawOutline(boolean drawOutline) {
         this.drawOutline = drawOutline;
-        for (Renderable r : renderables) {
+        for (Renderable r:renderables) {
             if (r instanceof OSMBuildingsRenderable) {
                 OSMBuildingsRenderable or = (OSMBuildingsRenderable) r;
                 ((OSMBuildingsRenderable) r).setDrawOutline(drawOutline);
@@ -205,26 +221,27 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
 
     public void setApplyRoofTextures(boolean applyRoofTextures) {
         this.applyRoofTextures = applyRoofTextures;
-        
+
         clearTiles();
     }
 
     public void setMaxTiles(int maxTiles) {
         this.maxTiles = maxTiles;
     }
-    
+
     /**
      * Set the resolution (center of screen resolution grid)
-     * 
+     *
      * @param rows
-     * @param cols 
+     * @param cols
      */
     public void setResolutionGrid(int rows, int cols) {
         this.rows = Math.abs(rows);
         this.cols = Math.abs(cols);
         if (maxTiles < (this.rows * this.cols)) maxTiles = this.rows * this.cols;
-        
+
     }
+
     public static int lon2x(double lon, int z) {
         return (int) (Math.floor((lon + 180.0) / 360.0 * Math.pow(2.0, z)));
     }
@@ -252,7 +269,7 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
      */
     public static String xy2quad(int x, int y, int zoom) {
         StringBuilder quadKey = new StringBuilder();
-        for (int i = zoom; i > 0; i--) {
+        for (int i = zoom;i > 0;i--) {
             char digit = '0';
             int mask = 1 << (i - 1);
             if ((x & mask) != 0) {
@@ -278,7 +295,7 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
     public static int[] quad2xy(String quad) {
         int xyz[] = {0, 0, 0};
         xyz[2] = quad.length();
-        for (int i = xyz[2]; i > 0; i--) {
+        for (int i = xyz[2];i > 0;i--) {
             int mask = 1 << (i - 1);
             switch (quad.charAt(xyz[2] - i)) {
                 case '0':
@@ -309,7 +326,7 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
     public void setOpacity(double opacity) {
         super.setOpacity(opacity);
 
-        for (Renderable r : renderables) {
+        for (Renderable r:renderables) {
             if (r instanceof OSMBuildingsRenderable) {
                 OSMBuildingsRenderable or = (OSMBuildingsRenderable) r;
                 ((OSMBuildingsRenderable) r).setOpacity(opacity);
@@ -338,6 +355,36 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
      */
     @Override
     public void doRender(DrawContext dc) {
+        // Tessellator tes = dc.getGlobe().getTessellator();
+        LightingModel lm = dc.getStandardLightingModel();
+        if (lm instanceof BasicLightingModel) {
+            BasicLightingModel blm = (BasicLightingModel) lm;
+            if (defaultSunDirection == null) defaultSunDirection = blm.getLightDirection();
+            if (defaultSunMat == null) defaultSunMat = blm.getLightMaterial();
+
+            if (fixedLighting) {
+                blm.setLightDirection(defaultSunDirection);
+                blm.setLightMaterial(defaultSunMat);
+
+            } else {
+                // blm.setLightDirection(Vec4.INFINITY);;
+                Tessellator tes = dc.getGlobe().getTessellator();
+                Vec4 sun = (Vec4) tes.getValue(WWE.TESSELATOR_KEY_SUN_DIRECTION);
+                if (sun != null) {
+                    Color color = (Color) tes.getValue(WWE.TESSELATOR_KEY_SUN_COLOR);
+                    blm.setLightDirection(sun);
+                    Color am = (Color) tes.getValue(WWE.TESSELATOR_KEY_SUN_AMBIENT_COLOR);
+                    Material m = new Material(Color.WHITE, color, am, Color.BLACK, 0);
+                    blm.setLightMaterial(m);
+
+                } else {
+                    blm.setLightDirection(defaultSunDirection);
+                    blm.setLightMaterial(defaultSunMat);
+                }
+            }
+
+        }
+
         center = dc.getViewportCenterPosition();
         //--- Move cursor to center of viewport
         // if (center != null) cursor.moveTo(new Position(center, 0));
@@ -407,12 +454,12 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
             int x = lon2x(center.getLongitude().degrees, ZOOM);
             int y = lat2y(center.getLatitude().degrees, ZOOM);
             // System.out.println("X=" + x + ", Y=" + y);
-            
+
             //--- Take the total of x tile
-            x = x-(rows/2);
-            y = y-(rows/2);
-            for (int i = 0; i < rows; i++) {
-                for (int j = 0; j < cols; j++) {
+            x = x - (rows / 2);
+            y = y - (rows / 2);
+            for (int i = 0;i < rows;i++) {
+                for (int j = 0;j < cols;j++) {
                     //--- Check if max tiles are reached, if so, remove the oldest one
                     if (buildings.size() > maxTiles) {
                         Iterator<OSMBuildingsTile> it = buildings.values().iterator();
@@ -427,7 +474,7 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
                         removeRenderable(oldest.getTileSurfaceRenderable());
                         //--- Remove the ids for removed tile
                         ArrayList<String> removed = oldest.getIds();
-                        for (int k=0;k<removed.size();k++) ids.remove(removed.get(k));
+                        for (int k = 0;k < removed.size();k++) ids.remove(removed.get(k));
                         buildings.remove(oldest.toString());
                     }
 
@@ -464,7 +511,7 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
     public void osmBuildingsLoadingFailed(OSMBuildingsTile btile, String reason) {
         // System.out.println("LOADING FAILED:" + btile+" reason:"+reason);
         removeRenderable(btile.getTileSurfaceRenderable());
-        Logging.logger().log(Level.WARNING, "OSMBuildingsLayer.osmBuildingsLoadingFailed for tile " + btile.toString()+", "+btile.getFetchedURL(), new Object[]{reason});
+        Logging.logger().log(Level.WARNING, "OSMBuildingsLayer.osmBuildingsLoadingFailed for tile " + btile.toString() + ", " + btile.getFetchedURL(), new Object[]{reason});
         buildings.remove(btile);
 
     }
@@ -472,10 +519,11 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
     /**
      * Check if the passed OSM id should be rendered (different border case tile
      * have the same ids, so duplicate will be rendered, to avoid it store all
-     * the already rendered id in an array for later check)<p>
-     * 
+     * the already rendered id in an array for later check)
+     * <p>
+     *
      * @param id
-     * @return 
+     * @return
      */
     @Override
     public boolean osmBuildingsProduceRenderableForId(String id) {
@@ -483,6 +531,7 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
         ids.add(id);
         return true;
     }
+
     //**************************************************************************
     //*** ActionListener
     //**************************************************************************
@@ -495,10 +544,10 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
             while (it.hasNext()) {
                 String key = it.next();
                 OSMBuildingsTile t = buildings.get(key);
-                
+
                 if (t.getRenderable() == null) {
                     long load = t.getFetchedTimestamp();
-                    long diff = now-load;
+                    long diff = now - load;
                     // System.out.println("["+key+"]="+load+", diff="+diff+" renderable=false");
                     // System.out.println("DIFF:"+diff+" (load:"+load+" now:"+now+")");
                     if (diff > 30000) {
@@ -506,18 +555,19 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
                         tooLong.add(t);
                     }
                 }
-                
+
             }
-            for (int i=0;i<tooLong.size();i++) osmBuildingsLoadingFailed(tooLong.get(i), "No failed message received after 30s, force to failed loading...");
+            for (int i = 0;i < tooLong.size();i++) osmBuildingsLoadingFailed(tooLong.get(i), "No failed message received after 30s, force to failed loading...");
         }
     }
 
-    
     //**************************************************************************
     //*** Private
     //**************************************************************************
     private ShapeAttributes produceDefaultShapeAttribute() {
         BasicShapeAttributes defaultAttrs = new BasicShapeAttributes();
+        // Material m = new Material(Color.LIGHT_GRAY.brighter(), Color.LIGHT_GRAY, Color.LIGHT_GRAY.darker(), Color.LIGHT_GRAY.darker(), 0);
+        // defaultAttrs.setInteriorMaterial(m);
         defaultAttrs.setInteriorMaterial(Material.LIGHT_GRAY);
         defaultAttrs.setInteriorOpacity(getOpacity());
         defaultAttrs.setOutlineMaterial(Material.GRAY);
@@ -527,6 +577,7 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
 
         defaultAttrs.setEnableLighting(true);
         defaultAttrs.setEnableAntialiasing(true);
+        
         return defaultAttrs;
     }
 

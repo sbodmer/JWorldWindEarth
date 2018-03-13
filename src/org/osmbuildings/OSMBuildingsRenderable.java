@@ -21,15 +21,10 @@ import gov.nasa.worldwind.formats.geojson.GeoJSONObject;
 import gov.nasa.worldwind.formats.geojson.GeoJSONPoint;
 import gov.nasa.worldwind.formats.geojson.GeoJSONPolygon;
 import gov.nasa.worldwind.formats.geojson.GeoJSONPositionArray;
-import gov.nasa.worldwind.geom.Extent;
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.geom.Sector;
-import gov.nasa.worldwind.geom.Sphere;
-import gov.nasa.worldwind.geom.Vec4;
-import gov.nasa.worldwind.pick.PickSupport;
 import gov.nasa.worldwind.render.BasicShapeAttributes;
-import gov.nasa.worldwind.render.Cylinder;
 import gov.nasa.worldwind.render.DrawContext;
 import gov.nasa.worldwind.render.Ellipsoid;
 import gov.nasa.worldwind.render.ExtrudedPolygon;
@@ -39,16 +34,13 @@ import gov.nasa.worldwind.render.PointPlacemark;
 import gov.nasa.worldwind.render.PointPlacemarkAttributes;
 import gov.nasa.worldwind.render.Polygon;
 import gov.nasa.worldwind.render.PreRenderable;
-import gov.nasa.worldwind.render.Pyramid;
 import gov.nasa.worldwind.render.Renderable;
 import gov.nasa.worldwind.render.ShapeAttributes;
 import gov.nasa.worldwind.render.SurfacePolygon;
 import gov.nasa.worldwind.render.SurfacePolyline;
 import gov.nasa.worldwind.util.Logging;
-import gov.nasa.worldwind.util.WWMath;
 
 import java.awt.Color;
-import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -457,6 +449,7 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
      * @param properties
      */
     protected void fillRenderablePolygon(GeoJSONFeature parent, GeoJSONPolygon owner, Iterable<? extends Position> outerBoundary, Iterable<? extends Position>[] innerBoundaries, ShapeAttributes attrs, AVList properties) {
+        
         if (hasNonzeroAltitude(outerBoundary)) {
             // --- It's a ploygon with height (not a flat foot print)
             Polygon poly = new Polygon(outerBoundary);
@@ -531,13 +524,19 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
             ra.copy(attrs);
             ra.setInteriorMaterial(new Material(stringToColor(roofColor)));
             ra.setOutlineMaterial(new Material(stringToColor(roofColor)));
+            
+            // Color c = stringToColor(roofColor);
+            // Color tran = new Color(0,0,0,255);
+            // Material m = new Material(c, c, c, c, 0);
+            // ra.setInteriorMaterial(m);
+            // ra.setOutlineMaterial(m);
             // ra.setOutlineMaterial(Material.RED);
-            // ra.setInteriorOpacity(roofMaterial.equals("glass") ? 0.7 : 1.0d);
-            // ra.setOutlineOpacity(roofMaterial.equals("glass") ? 0.7 : 1.0d);
+            ra.setInteriorOpacity(roofMaterial.equals("glass") ? 0.7 : 1.0d);
+            ra.setOutlineOpacity(roofMaterial.equals("glass") ? 0.7 : 1.0d);
             ra.setDrawInterior(true);
             ra.setEnableLighting(true);
             ra.setDrawOutline(false);
-            ra.setEnableAntialiasing(true);
+            // ra.setEnableAntialiasing(true);
 
             // --- If levels, try some texture on it
             /*
@@ -774,6 +773,10 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
             if (mat.equals("glass")) sa.setDrawOutline(true);
         }
         if (v == null) v = "#bbbbbb";   //--
+        // Color c = stringToColor(v);
+        
+        // Material m = new Material(c.brighter(), c, c.darker(), c.darker(), 0);
+        // sa.setInteriorMaterial(m);
         sa.setInteriorMaterial(new Material(stringToColor(v)));
         /*
         sa.setInteriorOpacity(opacity);
