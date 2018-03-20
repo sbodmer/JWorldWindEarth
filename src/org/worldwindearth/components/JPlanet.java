@@ -12,11 +12,17 @@ import gov.nasa.worldwind.WorldWind;
 import gov.nasa.worldwind.awt.WorldWindowGLJPanel;
 import gov.nasa.worldwind.event.InputHandler;
 import gov.nasa.worldwind.event.NoOpInputHandler;
+import gov.nasa.worldwind.event.RenderingEvent;
+import gov.nasa.worldwind.event.RenderingListener;
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.Line;
 import gov.nasa.worldwind.geom.Position;
+import gov.nasa.worldwind.globes.Earth;
+import gov.nasa.worldwind.globes.Globe;
 import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.layers.LayerList;
+import gov.nasa.worldwind.render.DrawContext;
+import gov.nasa.worldwind.render.Renderable;
 import gov.nasa.worldwind.view.orbit.BasicOrbitView;
 import gov.nasa.worldwind.view.orbit.OrbitView;
 import java.awt.*;
@@ -38,6 +44,8 @@ import java.text.NumberFormat;
 import java.util.*;
 import javax.imageio.ImageIO;
 import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
 import javax.swing.event.ListSelectionEvent;
@@ -62,7 +70,7 @@ import org.worldwindearth.components.renderers.JCameraSmallCellRenderer;
  *
  * @author sbodmer
  */
-public class JPlanet extends JPanel implements KeyListener, ComponentListener, ActionListener, ListSelectionListener, MouseListener, MouseWheelListener, TableModelListener {
+public class JPlanet extends JPanel implements KeyListener, ComponentListener, ActionListener, ListSelectionListener, ChangeListener, MouseListener, MouseWheelListener, TableModelListener, RenderingListener {
 
     NumberFormat nf = new DecimalFormat("#.########");
 
@@ -183,10 +191,11 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
     public void initialize(App app, Model model, String planet) {
         this.app = app;
         this.m = model;
-
+        
         wwd = new WorldWindowGLJPanel();
         wwd.setModel(m);
         wwd.setInputHandler(new WWEInputHandler());
+        wwd.addRenderingListener(this);
         
         cameraCellRenderer = new JCameraCellRenderer(app);
         cameraSmallCellRenderer = new JCameraSmallCellRenderer(app);
@@ -218,10 +227,14 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         // DP_Main.addMouseListener(this);
 
         PU_More.add(app.createFactoryMenus(app.getString("word_panels", "App"), TinyFactory.PLUGIN_CATEGORY_PANEL, TinyFactory.PLUGIN_FAMILY_PANEL, planet, this), 0);
-        PU_More.add(app.createFactoryMenus(app.getString("word_containers", "App"), TinyFactory.PLUGIN_CATEGORY_PANEL, TinyFactory.PLUGIN_FAMILY_CONTAINER, this), 0);
+        PU_More.add(app.createFactoryMenus(app.getString("word_containers", "App"), TinyFactory.PLUGIN_CATEGORY_PANEL, TinyFactory.PLUGIN_FAMILY_CONTAINER, planet, this), 1);
 
         MN_HideStatusBar.addActionListener(this);
         MN_HideLayers.addActionListener(this);
+        MN_HideTopBar.addActionListener(this);
+        
+        SP_VerticalExageration.addChangeListener(this);
+        CB_Wireframe.addActionListener(this);
         
         InputHandler ih = wwd.getInputHandler();
         ih.addKeyListener(this);
@@ -660,8 +673,11 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
             }
 
         } else if (e.getActionCommand().equals("hideStatusBar")) {
-            PN_Status.setVisible(!MN_HideStatusBar.isSelected());
+            PN_StatusBar.setVisible(!MN_HideStatusBar.isSelected());
 
+        } else if (e.getActionCommand().equals("hideTopBar")) {
+            PN_TopBar.setVisible(!MN_HideTopBar.isSelected());
+            
         } else if (e.getActionCommand().equals("hideLayers")) {
             boolean hide = MN_HideLayers.isSelected();
             if (hide) {
@@ -798,6 +814,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
                 ll.moveLower(l);
                 layers.fireTableDataChanged();
                 TB_Layers.getSelectionModel().setSelectionInterval(index - 1, index - 1);
+                TB_Layers.scrollRectToVisible(new Rectangle(0, index-1 * TB_Layers.getRowHeight(), TB_Layers.getWidth(), TB_Layers.getRowHeight()));
             }
 
         } else if (e.getActionCommand().equals("downLayer")) {
@@ -811,7 +828,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
                 ll.moveHigher(l);
                 layers.fireTableDataChanged();
                 TB_Layers.getSelectionModel().setSelectionInterval(index + 1, index + 1);
-
+                TB_Layers.scrollRectToVisible(new Rectangle(0, index+1 * TB_Layers.getRowHeight(), TB_Layers.getWidth(), TB_Layers.getRowHeight()));
             }
 
         } else if (e.getActionCommand().equals("cameras")) {
@@ -819,10 +836,10 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
 
         } else if (e.getActionCommand().equals("newCamera")) {
             String title = JOptionPane.showInputDialog(PN_Cameras, "Camera title");
+            int index = LI_Cameras.getSelectedIndex();
             if (title != null) {
                 Camera c = new Camera(title, wwd);
-                cameras.addElement(c);
-
+                cameras.add(index==-1?0:index, c);
             }
 
         } else if (e.getActionCommand().equals("removeCamera")) {
@@ -845,17 +862,19 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
                 cameras.set(index-1, source);
                 cameras.set(index, det);
                 LI_Cameras.setSelectedIndex(index-1);
+                LI_Cameras.ensureIndexIsVisible(index-1);
                 LI_Cameras.repaint();
             }
             
         } else if (e.getActionCommand().equals("cameraDown")) {
             int index = LI_Cameras.getSelectedIndex();
-            if ((index > 0) && (index < cameras.size()-2)) {
+            if ((index > 0) && (index < cameras.size()-1)) {
                 Camera source = LI_Cameras.getSelectedValue();
                 Camera det = cameras.get(index+1);
                 cameras.set(index+1, source);
                 cameras.set(index, det);
                 LI_Cameras.setSelectedIndex(index+1);
+                LI_Cameras.ensureIndexIsVisible(index+1);
                 LI_Cameras.repaint();
             }
             
@@ -871,6 +890,10 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
                 app.fireActionPerformed(new AppActionEvent(this, AppActionEvent.ACTION_ID_TINYFACTORY_SETTINGS, null, f));
 
             }
+        } else if (e.getActionCommand().equals("wireframe")) {
+            wwd.getSceneController().getModel().setShowWireframeExterior(CB_Wireframe.isSelected());
+            wwd.getSceneController().getModel().setShowWireframeExterior(CB_Wireframe.isSelected());
+            
         }
 
     }
@@ -1054,6 +1077,18 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
     }
 
     //**************************************************************************
+    //*** ChangeListener
+    //**************************************************************************
+    @Override
+    public void stateChanged(ChangeEvent e) {
+        if (e.getSource() == SP_VerticalExageration) {
+            int val = (Integer) SP_VerticalExageration.getValue();
+            wwd.getSceneController().setVerticalExaggeration((double) val/10d);
+            wwd.redraw();
+        }
+    }
+    
+    //**************************************************************************
     //*** MouseListener
     //**************************************************************************
     @Override
@@ -1136,6 +1171,23 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         }
     }
 
+    //*************************************************************************
+    //*** Renderable
+    //*************************************************************************
+    //--- NOT YET USED
+    public void render(DrawContext dc) {
+        //---
+        
+    }
+    
+    //*************************************************************************
+    //*** RenderingListener
+    //*************************************************************************
+    @Override
+    public void stageChanged(RenderingEvent event) {
+        //---
+        // System.out.println("STAGE:"+event.getStage());
+    }
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -1152,6 +1204,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         MN_RemoveLayer = new javax.swing.JMenuItem();
         PU_More = new javax.swing.JPopupMenu();
         jSeparator10 = new javax.swing.JPopupMenu.Separator();
+        MN_HideTopBar = new javax.swing.JCheckBoxMenuItem();
         MN_HideStatusBar = new javax.swing.JCheckBoxMenuItem();
         MN_HideLayers = new javax.swing.JCheckBoxMenuItem();
         jSeparator11 = new javax.swing.JPopupMenu.Separator();
@@ -1185,15 +1238,6 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         jPanel9 = new javax.swing.JPanel();
         BT_Configure = new javax.swing.JButton();
         PN_Right = new javax.swing.JPanel();
-        PN_Status = new javax.swing.JPanel();
-        PB_Downloading = new javax.swing.JProgressBar();
-        jlabel1 = new javax.swing.JLabel();
-        TF_Altitude = new javax.swing.JTextField();
-        jSeparator1 = new javax.swing.JSeparator();
-        jlabel2 = new javax.swing.JLabel();
-        TF_Latitude = new javax.swing.JTextField();
-        TF_Longitude = new javax.swing.JTextField();
-        LB_Licence = new javax.swing.JLabel();
         DP_Main = new javax.swing.JDesktopPane();
         PN_Cameras = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
@@ -1206,7 +1250,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         BT_SmallCamera = new javax.swing.JToggleButton();
         jSeparator13 = new javax.swing.JToolBar.Separator();
         BT_RemoveCamera = new javax.swing.JButton();
-        PN_Topbar = new javax.swing.JPanel();
+        PN_TopBar = new javax.swing.JPanel();
         jPanel1 = new javax.swing.JPanel();
         SP_LayersButtons = new javax.swing.JScrollPane();
         PN_LayersButtons = new javax.swing.JPanel();
@@ -1216,6 +1260,19 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         BT_Cameras = new javax.swing.JToggleButton();
         jPanel7 = new javax.swing.JPanel();
         BT_More = new javax.swing.JButton();
+        PN_StatusBar = new javax.swing.JPanel();
+        PN_Status = new javax.swing.JPanel();
+        PB_Downloading = new javax.swing.JProgressBar();
+        jlabel1 = new javax.swing.JLabel();
+        TF_Altitude = new javax.swing.JTextField();
+        jSeparator1 = new javax.swing.JSeparator();
+        jlabel2 = new javax.swing.JLabel();
+        TF_Latitude = new javax.swing.JTextField();
+        TF_Longitude = new javax.swing.JTextField();
+        LB_Licence = new javax.swing.JLabel();
+        jPanel5 = new javax.swing.JPanel();
+        SP_VerticalExageration = new javax.swing.JSpinner();
+        CB_Wireframe = new javax.swing.JCheckBox();
 
         MN_NewLayers.setText("New layer");
         PU_Layers.add(MN_NewLayers);
@@ -1230,6 +1287,10 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         PU_Layers.add(MN_RemoveLayer);
 
         PU_More.add(jSeparator10);
+
+        MN_HideTopBar.setText("Hide top bar");
+        MN_HideTopBar.setActionCommand("hideTopBar");
+        PU_More.add(MN_HideTopBar);
 
         MN_HideStatusBar.setText("Hide status bar");
         MN_HideStatusBar.setActionCommand("hideStatusBar");
@@ -1374,47 +1435,6 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
 
         PN_Right.setLayout(new java.awt.BorderLayout());
 
-        PN_Status.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
-
-        PB_Downloading.setBackground(java.awt.Color.lightGray);
-        PB_Downloading.setForeground(java.awt.Color.red);
-        PB_Downloading.setToolTipText("Downloading");
-        PB_Downloading.setIndeterminate(true);
-        PB_Downloading.setPreferredSize(new java.awt.Dimension(50, 24));
-        PN_Status.add(PB_Downloading);
-
-        jlabel1.setText("Alt [m]");
-        jlabel1.setToolTipText("Altitude");
-        PN_Status.add(jlabel1);
-
-        TF_Altitude.setEditable(false);
-        TF_Altitude.setFont(new java.awt.Font("Monospaced", 0, 11)); // NOI18N
-        TF_Altitude.setPreferredSize(new java.awt.Dimension(100, 26));
-        PN_Status.add(TF_Altitude);
-
-        jSeparator1.setOrientation(javax.swing.SwingConstants.VERTICAL);
-        jSeparator1.setPreferredSize(new java.awt.Dimension(18, 18));
-        PN_Status.add(jSeparator1);
-
-        jlabel2.setText("Lat / Long [°]");
-        jlabel2.setToolTipText("Latitude / Longitude");
-        PN_Status.add(jlabel2);
-
-        TF_Latitude.setEditable(false);
-        TF_Latitude.setFont(new java.awt.Font("Monospaced", 0, 11)); // NOI18N
-        TF_Latitude.setPreferredSize(new java.awt.Dimension(100, 26));
-        PN_Status.add(TF_Latitude);
-
-        TF_Longitude.setEditable(false);
-        TF_Longitude.setFont(new java.awt.Font("Monospaced", 0, 11)); // NOI18N
-        TF_Longitude.setPreferredSize(new java.awt.Dimension(100, 26));
-        PN_Status.add(TF_Longitude);
-
-        LB_Licence.setText("...");
-        PN_Status.add(LB_Licence);
-
-        PN_Right.add(PN_Status, java.awt.BorderLayout.SOUTH);
-
         PN_Cameras.setLayout(new java.awt.BorderLayout());
 
         LI_Cameras.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
@@ -1496,7 +1516,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
 
         PN_Right.add(DP_Main, java.awt.BorderLayout.CENTER);
 
-        PN_Topbar.setLayout(new java.awt.BorderLayout());
+        PN_TopBar.setLayout(new java.awt.BorderLayout());
 
         jPanel1.setOpaque(false);
         jPanel1.setLayout(new java.awt.BorderLayout());
@@ -1534,7 +1554,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         BT_ScrollRight.setPreferredSize(new java.awt.Dimension(22, 22));
         jPanel1.add(BT_ScrollRight, java.awt.BorderLayout.EAST);
 
-        PN_Topbar.add(jPanel1, java.awt.BorderLayout.CENTER);
+        PN_TopBar.add(jPanel1, java.awt.BorderLayout.CENTER);
 
         PN_Tray.setOpaque(false);
         PN_Tray.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT));
@@ -1544,7 +1564,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         BT_Cameras.setPreferredSize(new java.awt.Dimension(32, 32));
         PN_Tray.add(BT_Cameras);
 
-        PN_Topbar.add(PN_Tray, java.awt.BorderLayout.EAST);
+        PN_TopBar.add(PN_Tray, java.awt.BorderLayout.EAST);
 
         BT_More.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
         BT_More.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/down.png"))); // NOI18N
@@ -1552,9 +1572,63 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         BT_More.setPreferredSize(new java.awt.Dimension(32, 32));
         jPanel7.add(BT_More);
 
-        PN_Topbar.add(jPanel7, java.awt.BorderLayout.WEST);
+        PN_TopBar.add(jPanel7, java.awt.BorderLayout.WEST);
 
-        PN_Right.add(PN_Topbar, java.awt.BorderLayout.PAGE_START);
+        PN_Right.add(PN_TopBar, java.awt.BorderLayout.PAGE_START);
+
+        PN_StatusBar.setLayout(new java.awt.BorderLayout());
+
+        PN_Status.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
+
+        PB_Downloading.setBackground(java.awt.Color.lightGray);
+        PB_Downloading.setForeground(java.awt.Color.red);
+        PB_Downloading.setToolTipText("Downloading");
+        PB_Downloading.setIndeterminate(true);
+        PB_Downloading.setPreferredSize(new java.awt.Dimension(50, 24));
+        PN_Status.add(PB_Downloading);
+
+        jlabel1.setText("Alt [m]");
+        jlabel1.setToolTipText("Altitude");
+        PN_Status.add(jlabel1);
+
+        TF_Altitude.setEditable(false);
+        TF_Altitude.setFont(new java.awt.Font("Monospaced", 0, 11)); // NOI18N
+        TF_Altitude.setPreferredSize(new java.awt.Dimension(100, 26));
+        PN_Status.add(TF_Altitude);
+
+        jSeparator1.setOrientation(javax.swing.SwingConstants.VERTICAL);
+        jSeparator1.setPreferredSize(new java.awt.Dimension(18, 18));
+        PN_Status.add(jSeparator1);
+
+        jlabel2.setText("Lat / Long [°]");
+        jlabel2.setToolTipText("Latitude / Longitude");
+        PN_Status.add(jlabel2);
+
+        TF_Latitude.setEditable(false);
+        TF_Latitude.setFont(new java.awt.Font("Monospaced", 0, 11)); // NOI18N
+        TF_Latitude.setPreferredSize(new java.awt.Dimension(100, 26));
+        PN_Status.add(TF_Latitude);
+
+        TF_Longitude.setEditable(false);
+        TF_Longitude.setFont(new java.awt.Font("Monospaced", 0, 11)); // NOI18N
+        TF_Longitude.setPreferredSize(new java.awt.Dimension(100, 26));
+        PN_Status.add(TF_Longitude);
+
+        LB_Licence.setText("...");
+        PN_Status.add(LB_Licence);
+
+        PN_StatusBar.add(PN_Status, java.awt.BorderLayout.CENTER);
+
+        SP_VerticalExageration.setModel(new javax.swing.SpinnerNumberModel(10, 0, 100, 1));
+        jPanel5.add(SP_VerticalExageration);
+
+        CB_Wireframe.setText("Wireframe");
+        CB_Wireframe.setActionCommand("wireframe");
+        jPanel5.add(CB_Wireframe);
+
+        PN_StatusBar.add(jPanel5, java.awt.BorderLayout.EAST);
+
+        PN_Right.add(PN_StatusBar, java.awt.BorderLayout.SOUTH);
 
         SP_Main.setRightComponent(PN_Right);
 
@@ -1577,6 +1651,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
     private javax.swing.JButton BT_ScrollRight;
     private javax.swing.JToggleButton BT_SmallCamera;
     private javax.swing.JButton BT_UpdateCamera;
+    private javax.swing.JCheckBox CB_Wireframe;
     private javax.swing.JDesktopPane DP_Main;
     private javax.swing.JLabel LB_Layer;
     private javax.swing.JLabel LB_LayerIcon;
@@ -1585,6 +1660,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
     private javax.swing.JCheckBoxMenuItem MN_Fullscreen;
     private javax.swing.JCheckBoxMenuItem MN_HideLayers;
     private javax.swing.JCheckBoxMenuItem MN_HideStatusBar;
+    private javax.swing.JCheckBoxMenuItem MN_HideTopBar;
     private javax.swing.JMenu MN_NewLayers;
     private javax.swing.JMenuItem MN_RemoveLayer;
     private javax.swing.JMenuItem MN_Rename;
@@ -1599,13 +1675,15 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
     private javax.swing.JPanel PN_Left;
     private javax.swing.JPanel PN_Right;
     private javax.swing.JPanel PN_Status;
-    private javax.swing.JPanel PN_Topbar;
+    private javax.swing.JPanel PN_StatusBar;
+    private javax.swing.JPanel PN_TopBar;
     private javax.swing.JPanel PN_Tray;
     private javax.swing.JPopupMenu PU_Layers;
     private javax.swing.JPopupMenu PU_More;
     private javax.swing.JSplitPane SP_Layers;
     private javax.swing.JScrollPane SP_LayersButtons;
     private javax.swing.JSplitPane SP_Main;
+    private javax.swing.JSpinner SP_VerticalExageration;
     private javax.swing.JToolBar TB_CameraTools;
     private javax.swing.JTable TB_Layers;
     private javax.swing.JToolBar TB_Tools;
@@ -1619,6 +1697,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
     private javax.swing.JPanel jPanel11;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
+    private javax.swing.JPanel jPanel5;
     private javax.swing.JPanel jPanel7;
     private javax.swing.JPanel jPanel8;
     private javax.swing.JPanel jPanel9;
@@ -1700,4 +1779,10 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
     //**************************************************************************
     //*** For debug
     //**************************************************************************
+
+    
+
+    
+
+    
 }

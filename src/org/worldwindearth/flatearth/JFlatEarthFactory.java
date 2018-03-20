@@ -89,8 +89,9 @@ public class JFlatEarthFactory extends javax.swing.JPanel implements TinyFactory
         return null;
     }
     
+    @Override
     public boolean doesFactorySupport(Object obj) {
-        return false;
+        return true;
     }
     
     /**

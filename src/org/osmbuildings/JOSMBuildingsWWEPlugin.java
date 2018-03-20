@@ -136,7 +136,8 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
         
         CB_DrawOutline.addActionListener(this);
         CB_ApplyRoofTextures.addActionListener(this);
-
+        CB_FixedLighting.addActionListener(this);
+        
         BT_Clear.addActionListener(this);
     }
 
@@ -156,6 +157,8 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
             CB_DrawOutline.setSelected(config.getAttribute("drawOutline").equals("true"));
             CB_ApplyRoofTextures.setSelected(config.getAttribute("applyRoofTextures").equals("true"));
             SP_Rows.setValue(Integer.parseInt(config.getAttribute("rows")));
+            CB_FixedLighting.setSelected(config.getAttribute("fixedLighting").equals("true"));
+            layer.setFixedLighting(config.getAttribute("fixedLighting").equals("true"));
             layer.setRows((int) SP_Rows.getValue());
             layer.setCols((int) SP_Rows.getValue());
             
@@ -181,6 +184,7 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
         config.setAttribute("drawOutline", "" + CB_DrawOutline.isSelected());
         config.setAttribute("applyRoofTextures", "" + CB_ApplyRoofTextures.isSelected());
         config.setAttribute("rows", SP_Rows.getValue().toString());
+        config.setAttribute("fixedLighting", ""+CB_FixedLighting.isSelected());
     }
 
     @Override
@@ -227,6 +231,9 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
         } else if (e.getActionCommand().equals("applyRoofTextures")) {
             layer.setApplyRoofTextures(CB_ApplyRoofTextures.isSelected());
 
+        } else if (e.getActionCommand().equals("fixedLighting")) {
+            layer.setFixedLighting(CB_FixedLighting.isSelected());
+            
         } else if (e.getActionCommand().equals("clear")) {
             layer.clearTiles();
 
@@ -325,6 +332,8 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
         jLabel7 = new javax.swing.JLabel();
         SP_Rows = new javax.swing.JSpinner();
         jLabel4 = new javax.swing.JLabel();
+        jLabel8 = new javax.swing.JLabel();
+        CB_FixedLighting = new javax.swing.JCheckBox();
         jPanel2 = new javax.swing.JPanel();
         SP_Opacity = new javax.swing.JSlider();
 
@@ -386,6 +395,14 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
         jLabel4.setText("Resolution rows");
         jLabel4.setPreferredSize(new java.awt.Dimension(150, 26));
 
+        jLabel8.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        jLabel8.setText("Fixed lighting");
+        jLabel8.setPreferredSize(new java.awt.Dimension(150, 26));
+
+        CB_FixedLighting.setSelected(true);
+        CB_FixedLighting.setActionCommand("fixedLighting");
+        CB_FixedLighting.setPreferredSize(new java.awt.Dimension(26, 26));
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -424,9 +441,15 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
                         .addComponent(SP_MaxTiles, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(19, 251, Short.MAX_VALUE))
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(SP_Rows, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(18, 18, 18)
+                                .addComponent(SP_Rows, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(18, 18, 18)
+                                .addComponent(CB_FixedLighting, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addGap(0, 0, Short.MAX_VALUE))))
         );
         jPanel1Layout.setVerticalGroup(
@@ -457,7 +480,11 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
                     .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(CB_ApplyRoofTextures, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 129, Short.MAX_VALUE)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(CB_FixedLighting, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 97, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -501,6 +528,7 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
     protected javax.swing.JCheckBox CB_ApplyRoofTextures;
     protected javax.swing.JCheckBox CB_DrawOutline;
     protected javax.swing.JCheckBox CB_DrawProcessingBox;
+    protected javax.swing.JCheckBox CB_FixedLighting;
     protected javax.swing.JSpinner SP_DefaultHeight;
     protected javax.swing.JSpinner SP_MaxTiles;
     protected javax.swing.JSlider SP_Opacity;
@@ -513,6 +541,7 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
     protected javax.swing.JLabel jLabel5;
     protected javax.swing.JLabel jLabel6;
     protected javax.swing.JLabel jLabel7;
+    protected javax.swing.JLabel jLabel8;
     protected javax.swing.JPanel jPanel1;
     protected javax.swing.JPanel jPanel2;
     protected javax.swing.JScrollPane jScrollPane1;

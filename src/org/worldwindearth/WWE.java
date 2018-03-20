@@ -10,7 +10,22 @@ package org.worldwindearth;
  * @author sbodmer
  */
 public class WWE {
-
+    
+    /**
+     * The sun direction (Vec4) in the tessellator
+     */
+    public static String TESSELATOR_KEY_SUN_DIRECTION = "wwe.sun.direction";
+    
+    /**
+     * The sun color (Color) in the tessellator
+     */
+    public static String TESSELATOR_KEY_SUN_COLOR = "wwe.sun.color";
+    
+    /**
+     * The sun ambient color (Color) in the tessellator
+     */
+    public static String TESSELATOR_KEY_SUN_AMBIENT_COLOR = "wwe.sun.ambient.color";
+    
     /**
      * Returns the distance in meters between two location
      * 

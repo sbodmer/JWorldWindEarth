@@ -50,6 +50,7 @@ import java.util.Map;
 import javax.media.opengl.GL2;
 
 import com.jogamp.common.nio.Buffers;
+import org.worldwindearth.WWE;
 
 /**
  * @author tag
@@ -396,6 +397,7 @@ public class RectangularNormalTessellator extends WWObjectImpl implements Tessel
 	}
 
 	public void setLightDirection(Vec4 direction) {
+        setValue(WWE.TESSELATOR_KEY_SUN_DIRECTION, direction);
 		this.lightDirection = direction;
 	}
 
@@ -410,6 +412,7 @@ public class RectangularNormalTessellator extends WWObjectImpl implements Tessel
 			throw new IllegalArgumentException(msg);
 		}
 		this.lightColor = color;
+        setValue(WWE.TESSELATOR_KEY_SUN_COLOR, color);
 	}
 
 	public Color getAmbientColor() {
@@ -422,6 +425,7 @@ public class RectangularNormalTessellator extends WWObjectImpl implements Tessel
 			Logging.logger().severe(msg);
 			throw new IllegalArgumentException(msg);
 		}
+        setValue(WWE.TESSELATOR_KEY_SUN_AMBIENT_COLOR, color);
 		this.ambientColor = color;
 	}
 
