@@ -892,7 +892,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
             }
         } else if (e.getActionCommand().equals("wireframe")) {
             wwd.getSceneController().getModel().setShowWireframeExterior(CB_Wireframe.isSelected());
-            wwd.getSceneController().getModel().setShowWireframeExterior(CB_Wireframe.isSelected());
+            
             
         }
 
@@ -1620,6 +1620,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         PN_StatusBar.add(PN_Status, java.awt.BorderLayout.CENTER);
 
         SP_VerticalExageration.setModel(new javax.swing.SpinnerNumberModel(10, 0, 100, 1));
+        SP_VerticalExageration.setToolTipText("Elevation exageration (10 = normal, 20 = 2x normal)");
         jPanel5.add(SP_VerticalExageration);
 
         CB_Wireframe.setText("Wireframe");

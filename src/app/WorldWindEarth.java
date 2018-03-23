@@ -58,6 +58,8 @@ public class WorldWindEarth {
                 
                 //--- Prepare default boot splash frame
                 JAppLauncher japp = new JAppLauncher(args);
+                japp.setAppCustomPanel(new JWWESplash());
+                japp.setAppTitle("JWorldWindEarth");
                 japp.setVisible(true);
                 
                 //--- Start boot process

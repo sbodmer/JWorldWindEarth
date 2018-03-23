@@ -236,7 +236,7 @@ public class JWorldWindEarth extends javax.swing.JFrame implements ActionListene
             jsettings.setVisible(true);
 
         } else if (e.getActionCommand().equals("about")) {
-            JAbout jb = new JAbout((Frame) getParent(), true);
+            JAbout jb = new JAbout((Frame) getParent(), true, app);
             jb.setLocationRelativeTo(this);
             jb.setVisible(true);
             

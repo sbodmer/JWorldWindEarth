@@ -11,8 +11,11 @@ import java.io.File;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.List;
 import org.osmbuildings.OSMBuildingsLayer;
+import org.tinyrcp.App;
+import org.tinyrcp.TinyFactory;
 
 /**
  *
@@ -23,22 +26,38 @@ public class JAbout extends javax.swing.JDialog {
     /**
      * Creates new form JAbout
      */
-    public JAbout(java.awt.Frame parent, boolean modal) {
+    public JAbout(java.awt.Frame parent, boolean modal, App app) {
         super(parent, modal);
-        
+
         initComponents();
+
+        String txt = "";
+        ArrayList<String> cont = new ArrayList<>();
+        ArrayList<TinyFactory> factories = app.getFactories(null);
+        for (int i = 0;i < factories.size();i++) {
+            TinyFactory fac = factories.get(i);
+            String author = (String) fac.getProperty(TinyFactory.PROPERTY_AUTHOR);
+            if (author == null) continue;
+            if (!cont.contains(author)) {
+                txt += "" + author + "\n";
+                cont.add(author);
+            }
+
+        }
+        TA_Contributors.setText(txt);
+        TA_Contributors.setCaretPosition(0);
         
         try {
             FileStore fs = WorldWind.getDataFileStore();
             List<? extends File> list = fs.getLocations();
             StringBuilder b = new StringBuilder("");
             b.append("WorldWind cache paths\n");
-            for (int i = 0;i<list.size();i++) {
+            for (int i = 0;i < list.size();i++) {
                 File files = list.get(i);
-                b.append(" "+files.getPath()+" (exists="+files.exists()+")\n");
+                b.append(" " + files.getPath() + " (exists=" + files.exists() + ")\n");
             }
             TA_Paths.setText(b.toString());
-            
+
         } catch (NullPointerException ex) {
             ex.printStackTrace();
         }
@@ -53,20 +72,36 @@ public class JAbout extends javax.swing.JDialog {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jPanel1 = new javax.swing.JPanel();
-        jLabel1 = new javax.swing.JLabel();
+        LB_Image = new javax.swing.JLabel();
         jTabbedPane1 = new javax.swing.JTabbedPane();
+        jPanel1 = new javax.swing.JPanel();
+        jScrollPane3 = new javax.swing.JScrollPane();
+        TA_Contributors = new javax.swing.JTextArea();
         jPanel2 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         TA_Paths = new javax.swing.JTextArea();
+        jPanel3 = new javax.swing.JPanel();
+        jLabel1 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setPreferredSize(new java.awt.Dimension(480, 480));
 
-        jLabel1.setFont(new java.awt.Font("Dialog", 0, 12)); // NOI18N
-        jLabel1.setText("<html>\n<b>JWorldWindEarth</b> Preview<br>\n</html>");
-        jPanel1.add(jLabel1);
+        LB_Image.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Images/cards_wwe.jpg"))); // NOI18N
+        getContentPane().add(LB_Image, java.awt.BorderLayout.CENTER);
 
-        getContentPane().add(jPanel1, java.awt.BorderLayout.NORTH);
+        jTabbedPane1.setPreferredSize(new java.awt.Dimension(145, 200));
+
+        jPanel1.setLayout(new java.awt.BorderLayout());
+
+        TA_Contributors.setEditable(false);
+        TA_Contributors.setColumns(20);
+        TA_Contributors.setFont(new java.awt.Font("Monospaced", 0, 11)); // NOI18N
+        TA_Contributors.setRows(5);
+        jScrollPane3.setViewportView(TA_Contributors);
+
+        jPanel1.add(jScrollPane3, java.awt.BorderLayout.CENTER);
+
+        jTabbedPane1.addTab("Contributors", jPanel1);
 
         jPanel2.setLayout(new java.awt.BorderLayout());
 
@@ -80,59 +115,29 @@ public class JAbout extends javax.swing.JDialog {
 
         jTabbedPane1.addTab("Paths", jPanel2);
 
-        getContentPane().add(jTabbedPane1, java.awt.BorderLayout.CENTER);
+        getContentPane().add(jTabbedPane1, java.awt.BorderLayout.SOUTH);
 
-        setBounds(0, 0, 610, 350);
+        jLabel1.setFont(new java.awt.Font("Arial", 0, 24)); // NOI18N
+        jLabel1.setText("<html>\n<b>JWorldWindEarth</b> Preview<br>\n</html>");
+        jPanel3.add(jLabel1);
+
+        getContentPane().add(jPanel3, java.awt.BorderLayout.PAGE_START);
+
+        setBounds(0, 0, 650, 510);
     }// </editor-fold>//GEN-END:initComponents
 
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info:javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(JAbout.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(JAbout.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(JAbout.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(JAbout.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
-
-        /* Create and display the dialog */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                JAbout dialog = new JAbout(new javax.swing.JFrame(), true);
-                dialog.addWindowListener(new java.awt.event.WindowAdapter() {
-                    @Override
-                    public void windowClosing(java.awt.event.WindowEvent e) {
-                        System.exit(0);
-                    }
-                });
-                dialog.setVisible(true);
-            }
-        });
-    }
+    
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JLabel LB_Image;
+    private javax.swing.JTextArea TA_Contributors;
     private javax.swing.JTextArea TA_Paths;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
+    private javax.swing.JPanel jPanel3;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JTabbedPane jTabbedPane1;
     // End of variables declaration//GEN-END:variables
 }

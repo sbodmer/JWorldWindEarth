@@ -1,5 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <WMS>
+    <Server title="World/OpenStreetMap">http://129.206.228.72/cached/osm</Server>
+    <Server title="World/Some NASA Servers">https://neo.sci.gsfc.nasa.gov/wms/wms</Server>
+    <Server title="World/GEBCO">http://www.gebco.net/data_and_products/gebco_web_services/web_map_service/mapserv</Server>
+    <Server title="World/FAO Data">http://data.fao.org/geo/wms</Server>
+    <Server title="World/EOX Data">https://tiles.maps.eox.at/wms</Server>
+    <Server title="World/NPD Data">http://ogc.bgs.ac.uk/cgi-bin/BGS_Bedrock_and_Superficial_Geology/wms</Server>
+    <Server title="World/Columbia University">https://sedac.ciesin.columbia.edu/geoserver/wcs</Server>
+    <!-- <Server title="UK/NPD Data">http://npdwms.npd.no/npdwmsmap_wgs84.asp</Server> -->
+    <Server title="France/French Geology BRGM">http://geoservices.brgm.fr/geologie</Server>
+    <Server title="New-Zeland/NZ Topography Baselayers">http://maps.scinfo.org.nz/basemaps/wms</Server>
+    <Server title="New-Zeland/NZ Land Resource Inventory">http://maps.scinfo.org.nz/lri/wms</Server>
+    <Server title="New-Zeland/NZ Land Cover Database">http://maps.scinfo.org.nz/lcdb/wms</Server>
+    <Server title="North America/Etopo1">https://maps.ngdc.noaa.gov/arcgis/services/etopo1/MapServer/WMSServer</Server>
+    <Server title="NOAA/Overview">https://encdirect.noaa.gov/arcgis/services/encdirect/enc_overview/MapServer/WmsServer</Server>
+    <Server title="NOAA/General">https://encdirect.noaa.gov/arcgis/services/encdirect/enc_general/MapServer/WmsServer</Server>
+    <Server title="NOAA/Coastal">https://encdirect.noaa.gov/arcgis/services/encdirect/enc_coastal/MapServer/WmsServer</Server>
+    <Server title="NOAA/Approach">https://encdirect.noaa.gov/arcgis/services/encdirect/enc_approach/MapServer/WmsServer</Server>
+    <Server title="NOAA/Harbour">https://encdirect.noaa.gov/arcgis/services/encdirect/enc_harbour/MapServer/WmsServer</Server>
+    <Server title="NOAA/Berthing">https://encdirect.noaa.gov/arcgis/services/encdirect/enc_berthing/MapServer/WmsServer</Server>
     <Server title="Switzerland/BGDI">http://wms.geo.admin.ch/</Server>
     <Server title="Switzerland/Geneva/Orthophoto 2011">https://ge.ch/sitgags2/services/RASTER/ORTHOPHOTOS_2011/MapServer/WMSServer</Server>
     <Server title="Switzerland/Geneva/Plan">http://ge.ch/ags2/services/Plan_Officiel/MapServer/WMSServer</Server>
@@ -7,5 +26,13 @@
     <Server title="Swizterland/Geneva [E-G]">https://ge.ch/sitgags1/services/VECTOR/SITG_OPENDATA_02/MapServer/WMSServer</Server>
     <Server title="Swizterland/Geneva [H-O]">https://ge.ch/sitgags1/services/VECTOR/SITG_OPENDATA_03/MapServer/WMSServer</Server>
     <Server title="Switzerland/Geneva [P-Z]">https://ge.ch/sitgags1/services/VECTOR/SITG_OPENDATA_04/MapServer/WMSServer</Server>
-    <Server title="World/OpenStreetMap">http://129.206.228.72/cached/osm</Server>
+    <Server title="UK/UK Geology">http://ogc.bgs.ac.uk/cgi-bin/BGS_Bedrock_and_Superficial_Geology/wms</Server>
+    <Server title="USA/USGS Geology">https://mrdata.usgs.gov/services/kb</Server>
+    <Server title="USA/USGS Federal Land">https://mrdata.usgs.gov/services/fedland</Server>
+    <Server title="USA/USGS Mineral Data System">https://mrdata.usgs.gov/services/mrds</Server>
+    <Server title="USA/USGS Hydrologic System">https://mrdata.usgs.gov/services/ushydro</Server>
+    <Server title="USA/USA Roads">https://mrdata.usgs.gov/services/usroads</Server>
+    <Server title="USA/USGS Arizona Geology">https://mrdata.usgs.gov/services/az</Server>
+    <Server title="USA/USGS Colorado Geology">https://mrdata.usgs.gov/services/co</Server>
+    <Server title="USA/USGS Utah Geology">https://mrdata.usgs.gov/services/ut</Server>
 </WMS>

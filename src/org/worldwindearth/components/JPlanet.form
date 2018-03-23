@@ -883,6 +883,7 @@
                         <Property name="model" type="javax.swing.SpinnerModel" editor="org.netbeans.modules.form.editors2.SpinnerModelEditor">
                           <SpinnerModel initial="10" maximum="100" minimum="0" numberType="java.lang.Integer" stepSize="1" type="number"/>
                         </Property>
+                        <Property name="toolTipText" type="java.lang.String" value="Elevation exageration (10 = normal, 20 = 2x normal)"/>
                       </Properties>
                     </Component>
                     <Component class="javax.swing.JCheckBox" name="CB_Wireframe">

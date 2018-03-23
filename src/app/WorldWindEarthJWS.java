@@ -84,6 +84,9 @@ public class WorldWindEarthJWS {
             public void run() {
                 //--- Prepare default boot splash frame
                 JAppLauncher japp = new JAppLauncher(args);
+                japp.setAppCustomPanel(new JWWESplash());
+                japp.setAppTitle("JWorldWindEarth");
+                japp.setVisible(true);
                 japp.setVisible(true);
 
                 //--- Start manual boot process, no dynamic loading
