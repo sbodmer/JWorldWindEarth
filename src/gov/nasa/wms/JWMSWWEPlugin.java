@@ -339,7 +339,8 @@ public class JWMSWWEPlugin extends JPanel implements WWEPlugin, ActionListener, 
     @Override
     public void wmsCapabilitiesLoaded(final WMSServer wms, final WMSCapabilities caps, final String defaultLayers) {
         final ItemListener listener = this;
-
+        final TableModelListener tlistener = this;
+        
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
@@ -377,14 +378,15 @@ public class JWMSWWEPlugin extends JPanel implements WWEPlugin, ActionListener, 
                 for (int i = 0;i < tokens.length;i++) selectedLayers.add(tokens[i]);
 
                 //--- Fill the exposed layers
+                
                 DefaultTableModel model = (DefaultTableModel) TB_Layers.getModel();
+                model.removeTableModelListener(tlistener);
                 model.setRowCount(0);
                 try {
                     Iterator<WMSLayerCapabilities> it = caps.getNamedLayers().iterator();
                     while (it.hasNext()) {
                         WMSLayerCapabilities l = it.next();
-
-                        System.out.println("L:" + l.getTitle() + " => " + l.isLeaf() + "," + l.isNoSubsets() + "," + l.isOpaque() + "," + l.isQueryable());
+                        // System.out.println("L:" + l.getTitle() + " => " + l.isLeaf() + "," + l.isNoSubsets() + "," + l.isOpaque() + "," + l.isQueryable());
                         if (l.isLeaf()) {
                             Object objs[] = { selectedLayers.contains(l.getName()), l};
                             model.addRow(objs);
@@ -397,8 +399,8 @@ public class JWMSWWEPlugin extends JPanel implements WWEPlugin, ActionListener, 
                     
                 }
                 //--- On Linux the table is not showed in some cases ???
+                model.addTableModelListener(tlistener);
                 TB_Layers.repaint();
-                
                 
                 //--- If empty, try to apply anyway
                 apply();
@@ -484,8 +486,9 @@ public class JWMSWWEPlugin extends JPanel implements WWEPlugin, ActionListener, 
         jPanel1 = new javax.swing.JPanel();
         CMB_ImageFormat = new javax.swing.JComboBox<>();
         jPanel4 = new javax.swing.JPanel();
-        BT_Go = new javax.swing.JButton();
         PB_Waiting = new javax.swing.JProgressBar();
+        jPanel7 = new javax.swing.JPanel();
+        BT_Go = new javax.swing.JButton();
         TAB_Main = new javax.swing.JTabbedPane();
         PN_Layers = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
@@ -510,15 +513,17 @@ public class JWMSWWEPlugin extends JPanel implements WWEPlugin, ActionListener, 
 
         jPanel3.add(jPanel1, java.awt.BorderLayout.EAST);
 
-        BT_Go.setText("Go to slected layer");
-        BT_Go.setToolTipText("Move to the geographic position of the first selected layer");
-        BT_Go.setActionCommand("go");
-        jPanel4.add(BT_Go);
-
         PB_Waiting.setPreferredSize(new java.awt.Dimension(100, 26));
         jPanel4.add(PB_Waiting);
 
         jPanel3.add(jPanel4, java.awt.BorderLayout.CENTER);
+
+        BT_Go.setText("Go");
+        BT_Go.setToolTipText("Move to the geographic position of the highlightes layer");
+        BT_Go.setActionCommand("go");
+        jPanel7.add(BT_Go);
+
+        jPanel3.add(jPanel7, java.awt.BorderLayout.WEST);
 
         add(jPanel3, java.awt.BorderLayout.PAGE_END);
 
@@ -614,10 +619,10 @@ public class JWMSWWEPlugin extends JPanel implements WWEPlugin, ActionListener, 
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(CMB_Server, 0, 262, Short.MAX_VALUE)
+                .addComponent(CMB_Server, 0, 317, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(BT_Load)
-                .addGap(61, 61, 61))
+                .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -654,6 +659,7 @@ public class JWMSWWEPlugin extends JPanel implements WWEPlugin, ActionListener, 
     private javax.swing.JPanel jPanel4;
     private javax.swing.JPanel jPanel5;
     private javax.swing.JPanel jPanel6;
+    private javax.swing.JPanel jPanel7;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
@@ -736,6 +742,7 @@ public class JWMSWWEPlugin extends JPanel implements WWEPlugin, ActionListener, 
         return urlString;
     }
      */
+    
     private static String buildBBoxWithPosition(Position p) {
         // BBOX=-88.59375,37.265625,-87.890625,37.96875
         double lon1 = p.getLongitude().degrees - 0.00001;
