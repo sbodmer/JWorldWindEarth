@@ -6,7 +6,11 @@
 package gov.nasa.atmosphere;
 
 import gov.nasa.atmosphere.AtmosphereLayer;
+import gov.nasa.worldwind.Model;
+import gov.nasa.worldwind.WorldWind;
 import gov.nasa.worldwind.WorldWindow;
+import gov.nasa.worldwind.avlist.AVKey;
+import gov.nasa.worldwind.awt.WorldWindowGLJPanel;
 import gov.nasa.worldwind.event.PositionEvent;
 import gov.nasa.worldwind.event.PositionListener;
 import gov.nasa.worldwind.geom.Angle;
@@ -14,7 +18,12 @@ import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Matrix;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.geom.Vec4;
+import gov.nasa.worldwind.globes.Earth;
+import gov.nasa.worldwind.layers.BasicLayerFactory;
 import gov.nasa.worldwind.layers.Layer;
+import gov.nasa.worldwind.layers.LayerList;
+import gov.nasa.worldwind.layers.StarsLayer;
+import gov.nasa.worldwind.layers.TiledImageLayer;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -28,8 +37,11 @@ import org.w3c.dom.Element;
 import org.worldwindearth.WWEFactory;
 import org.worldwindearth.WWEPlugin;
 import gov.nasa.worldwind.terrain.Tessellator;
+import java.awt.BorderLayout;
+import java.io.InputStream;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import org.worldwindearth.WWEInputHandler;
 import org.worldwindearth.components.layers.MergedLayer;
 
 /**
@@ -51,7 +63,10 @@ public class JAtmosphereWWEPlugin extends JPanel implements WWEPlugin, ActionLis
      * Layer which contains the other one
      */
     SunshadingLayer layer = new SunshadingLayer();
-    
+    JCircle azi = null;
+    JCircle ele = null;
+    WorldWindowGLJPanel pww = null;
+    SunshadingLayer player = new SunshadingLayer(); //--- Preview
     /**
      *
      */
@@ -62,6 +77,11 @@ public class JAtmosphereWWEPlugin extends JPanel implements WWEPlugin, ActionLis
 
         initComponents();
 
+        azi = new JCircle();
+        PN_Azimut.add(azi, BorderLayout.CENTER);
+        
+        ele = new JCircle();
+        PN_Elevation.add(ele, BorderLayout.CENTER);
     }
 
     //**************************************************************************
@@ -105,9 +125,24 @@ public class JAtmosphereWWEPlugin extends JPanel implements WWEPlugin, ActionLis
         BT_Relative.addActionListener(this);
         BT_Absolute.addActionListener(this);
 
-        SL_Azimuth.addChangeListener(this);
+        SL_Azimut.addChangeListener(this);
         SL_Elevation.addChangeListener(this);
 
+        pww = new WorldWindowGLJPanel();
+        Model m = (Model) WorldWind.createConfigurationComponent(AVKey.MODEL_CLASS_NAME);
+        m.setGlobe(new Earth());
+        m.getGlobe().setTessellator(tessellator);
+        pww.setModel(m);
+        PN_Preview.add(pww, BorderLayout.CENTER);
+        
+        BasicLayerFactory bl = new BasicLayerFactory();
+        LayerList ll = m.getLayers();
+        ll.add(new StarsLayer());
+        Layer l = (TiledImageLayer) bl.createFromConfigSource("config/Earth/BMNGWMSLayer2.xml", null);
+        l.setName("Blue Marble (2004)");
+        l.setEnabled(true);
+        ll.add(l);
+        ll.add(player);
     }
 
     @Override
@@ -116,9 +151,9 @@ public class JAtmosphereWWEPlugin extends JPanel implements WWEPlugin, ActionLis
 
         try {
             int nb = Integer.parseInt(config.getAttribute("azimuth"));
-            SL_Azimuth.removeChangeListener(this);
-            SL_Azimuth.setValue(nb);
-            SL_Azimuth.addChangeListener(this);
+            SL_Azimut.removeChangeListener(this);
+            SL_Azimut.setValue(nb);
+            SL_Azimut.addChangeListener(this);
 
             nb = Integer.parseInt(config.getAttribute("elevation"));
             SL_Elevation.removeChangeListener(this);
@@ -132,7 +167,8 @@ public class JAtmosphereWWEPlugin extends JPanel implements WWEPlugin, ActionLis
             boolean lf = config.getAttribute("lensFlare").equals("true");
             CB_LensFlare.setSelected(lf);
             layer.setLensFlare(CB_LensFlare.isSelected());
-                    
+            player.setLensFlare(CB_LensFlare.isSelected());
+            
         } catch (NumberFormatException ex) {
             //---
         }
@@ -141,6 +177,8 @@ public class JAtmosphereWWEPlugin extends JPanel implements WWEPlugin, ActionLis
 
     @Override
     public void cleanup() {
+        pww.destroy();
+        player.dispose();
         
         layer.dispose();
 
@@ -152,7 +190,7 @@ public class JAtmosphereWWEPlugin extends JPanel implements WWEPlugin, ActionLis
 
         config.setAttribute("lensFlare", "" + CB_LensFlare.isSelected());
         config.setAttribute("orientation", BT_Relative.isSelected() ? "relative" : "absolute");
-        config.setAttribute("azimuth", "" + SL_Azimuth.getValue());
+        config.setAttribute("azimuth", "" + SL_Azimut.getValue());
         config.setAttribute("elevation", "" + SL_Elevation.getValue());
         config.setAttribute("light", "" + BT_Light.getBackground().getRGB());
         config.setAttribute("shade", "" + BT_Shade.getBackground().getRGB());
@@ -175,7 +213,8 @@ public class JAtmosphereWWEPlugin extends JPanel implements WWEPlugin, ActionLis
             ww.removePositionListener(this);    //--- Remove it first to be sure no double adding
             ww.addPositionListener(this);
             ww.getModel().getGlobe().setTessellator(tessellator);
-
+            
+            
         } else if (action.equals(DO_ACTION_LAYER_DISABLED)) {
             ww.removePositionListener(this);
             ww.getModel().getGlobe().setTessellator(null);
@@ -218,15 +257,16 @@ public class JAtmosphereWWEPlugin extends JPanel implements WWEPlugin, ActionLis
 
         } else if (e.getActionCommand().equals("lensFlare")) {
             layer.setLensFlare(CB_LensFlare.isSelected());
+            player.setLensFlare(CB_LensFlare.isSelected());
             update();
 
         } else if (e.getActionCommand().equals("relative")) {
-            SL_Azimuth.setEnabled(true);
+            SL_Azimut.setEnabled(true);
             SL_Elevation.setEnabled(true);
             update();
 
         } else if (e.getActionCommand().equals("absolute")) {
-            SL_Azimuth.setEnabled(false);
+            SL_Azimut.setEnabled(false);
             SL_Elevation.setEnabled(false);
             update();
 
@@ -268,13 +308,16 @@ public class JAtmosphereWWEPlugin extends JPanel implements WWEPlugin, ActionLis
         BT_Shade = new javax.swing.JButton();
         BT_Relative = new javax.swing.JRadioButton();
         BT_Absolute = new javax.swing.JRadioButton();
-        SL_Azimuth = new javax.swing.JSlider();
+        SL_Azimut = new javax.swing.JSlider();
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
         SL_Elevation = new javax.swing.JSlider();
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
         CB_LensFlare = new javax.swing.JCheckBox();
+        PN_Preview = new javax.swing.JPanel();
+        PN_Elevation = new javax.swing.JPanel();
+        PN_Azimut = new javax.swing.JPanel();
 
         BT_Light.setBackground(java.awt.Color.white);
         BT_Light.setActionCommand("light");
@@ -296,21 +339,21 @@ public class JAtmosphereWWEPlugin extends JPanel implements WWEPlugin, ActionLis
         BT_Absolute.setText("Absolute");
         BT_Absolute.setActionCommand("absolute");
 
-        SL_Azimuth.setFont(new java.awt.Font("Arial", 0, 9)); // NOI18N
-        SL_Azimuth.setMajorTickSpacing(90);
-        SL_Azimuth.setMaximum(360);
-        SL_Azimuth.setPaintLabels(true);
-        SL_Azimuth.setPaintTicks(true);
-        SL_Azimuth.setValue(125);
+        SL_Azimut.setFont(new java.awt.Font("Arial", 0, 9)); // NOI18N
+        SL_Azimut.setMajorTickSpacing(90);
+        SL_Azimut.setMaximum(360);
+        SL_Azimut.setPaintLabels(true);
+        SL_Azimut.setPaintTicks(true);
+        SL_Azimut.setValue(125);
 
         jLabel1.setText("Elevation");
 
-        jLabel2.setText("Azimuth");
+        jLabel2.setText("Azimut");
 
         SL_Elevation.setFont(new java.awt.Font("Arial", 0, 9)); // NOI18N
-        SL_Elevation.setMajorTickSpacing(10);
+        SL_Elevation.setMajorTickSpacing(20);
         SL_Elevation.setMaximum(90);
-        SL_Elevation.setMinimum(-10);
+        SL_Elevation.setMinimum(-90);
         SL_Elevation.setPaintLabels(true);
         SL_Elevation.setPaintTicks(true);
 
@@ -321,6 +364,14 @@ public class JAtmosphereWWEPlugin extends JPanel implements WWEPlugin, ActionLis
         CB_LensFlare.setText("Lens Flare");
         CB_LensFlare.setActionCommand("lensFlare");
 
+        PN_Preview.setLayout(new java.awt.BorderLayout());
+
+        PN_Elevation.setPreferredSize(new java.awt.Dimension(41, 41));
+        PN_Elevation.setLayout(new java.awt.BorderLayout());
+
+        PN_Azimut.setPreferredSize(new java.awt.Dimension(41, 41));
+        PN_Azimut.setLayout(new java.awt.BorderLayout());
+
         javax.swing.GroupLayout PN_ConfigLayout = new javax.swing.GroupLayout(PN_Config);
         PN_Config.setLayout(PN_ConfigLayout);
         PN_ConfigLayout.setHorizontalGroup(
@@ -328,31 +379,38 @@ public class JAtmosphereWWEPlugin extends JPanel implements WWEPlugin, ActionLis
             .addGroup(PN_ConfigLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(PN_ConfigLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(PN_ConfigLayout.createSequentialGroup()
-                        .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 69, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(SL_Azimuth, javax.swing.GroupLayout.DEFAULT_SIZE, 354, Short.MAX_VALUE))
-                    .addGroup(PN_ConfigLayout.createSequentialGroup()
-                        .addGroup(PN_ConfigLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 69, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 69, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(PN_ConfigLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(PN_ConfigLayout.createSequentialGroup()
-                                .addComponent(BT_Relative)
+                    .addComponent(PN_Preview, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, PN_ConfigLayout.createSequentialGroup()
+                        .addGroup(PN_ConfigLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, PN_ConfigLayout.createSequentialGroup()
+                                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 69, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(BT_Absolute))
-                            .addGroup(PN_ConfigLayout.createSequentialGroup()
-                                .addGroup(PN_ConfigLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                                    .addComponent(BT_Light, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(BT_Shade, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(CB_LensFlare)))
-                        .addGap(0, 0, Short.MAX_VALUE))
-                    .addGroup(PN_ConfigLayout.createSequentialGroup()
-                        .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 69, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(SL_Elevation, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, PN_ConfigLayout.createSequentialGroup()
+                                .addGroup(PN_ConfigLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 69, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 69, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(PN_ConfigLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(PN_ConfigLayout.createSequentialGroup()
+                                        .addComponent(BT_Relative)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(BT_Absolute))
+                                    .addGroup(PN_ConfigLayout.createSequentialGroup()
+                                        .addGroup(PN_ConfigLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                            .addComponent(BT_Light, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                            .addComponent(BT_Shade, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                        .addComponent(CB_LensFlare)))
+                                .addGap(0, 0, Short.MAX_VALUE))
+                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, PN_ConfigLayout.createSequentialGroup()
+                                .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 69, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(SL_Azimut, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(SL_Elevation, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                        .addGroup(PN_ConfigLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(PN_Azimut, javax.swing.GroupLayout.PREFERRED_SIZE, 47, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(PN_Elevation, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 47, javax.swing.GroupLayout.PREFERRED_SIZE))))
                 .addContainerGap())
         );
         PN_ConfigLayout.setVerticalGroup(
@@ -373,13 +431,21 @@ public class JAtmosphereWWEPlugin extends JPanel implements WWEPlugin, ActionLis
                     .addComponent(BT_Absolute))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(PN_ConfigLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(SL_Azimuth, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(PN_ConfigLayout.createSequentialGroup()
+                        .addGroup(PN_ConfigLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(SL_Azimut, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(PN_ConfigLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(SL_Elevation, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addGroup(PN_ConfigLayout.createSequentialGroup()
+                        .addComponent(PN_Azimut, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(PN_Elevation, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(PN_ConfigLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(SL_Elevation, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(277, 277, 277))
+                .addComponent(PN_Preview, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap())
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
@@ -402,8 +468,11 @@ public class JAtmosphereWWEPlugin extends JPanel implements WWEPlugin, ActionLis
     private javax.swing.JRadioButton BT_Relative;
     private javax.swing.JButton BT_Shade;
     private javax.swing.JCheckBox CB_LensFlare;
+    private javax.swing.JPanel PN_Azimut;
     private javax.swing.JPanel PN_Config;
-    private javax.swing.JSlider SL_Azimuth;
+    private javax.swing.JPanel PN_Elevation;
+    private javax.swing.JPanel PN_Preview;
+    private javax.swing.JSlider SL_Azimut;
     private javax.swing.JSlider SL_Elevation;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
@@ -412,15 +481,19 @@ public class JAtmosphereWWEPlugin extends JPanel implements WWEPlugin, ActionLis
     // End of variables declaration//GEN-END:variables
 
     private void update() {
+        azi.setAngle(SL_Azimut.getValue());
+        ele.setAngle(SL_Elevation.getValue());
+        
         // Update colors
         tessellator.setLightColor(BT_Light.getBackground());
         tessellator.setAmbientColor(BT_Shade.getBackground());
         // Compute Sun direction
         Vec4 sun, light;
         if (BT_Relative.isSelected()) {
+            
             // Compute Sun position relative to the eye position
             Angle elevation = Angle.fromDegrees(SL_Elevation.getValue());
-            Angle azimuth = Angle.fromDegrees(SL_Azimuth.getValue());
+            Angle azimuth = Angle.fromDegrees(SL_Azimut.getValue());
             Position eyePos = ww.getView().getEyePosition();
             sun = Vec4.UNIT_Y;
             sun = sun.transformBy3(Matrix.fromRotationX(elevation));
@@ -440,9 +513,10 @@ public class JAtmosphereWWEPlugin extends JPanel implements WWEPlugin, ActionLis
         tessellator.setLightDirection(light);
 
         layer.setSunDirection(sun);
-        
+        player.setSunDirection(sun);
         // Redraw
         ww.redraw();
+        pww.redraw();
     }
 
 }
