@@ -8,8 +8,11 @@ package gov.nasa.wms;
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVListImpl;
 import gov.nasa.worldwind.ogc.wms.WMSCapabilities;
+import gov.nasa.worldwind.ogc.wms.WMSLayerCapabilities;
 import gov.nasa.worldwind.wms.Capabilities;
+import gov.nasa.worldwindx.applications.worldwindow.core.WMSLayerInfo;
 import java.net.URI;
+import java.util.List;
 
 /**
  * Simple WMS container
@@ -112,6 +115,11 @@ public class WMSServer {
                 caps = WMSCapabilities.retrieve(api);
                 caps.parse();
 
+                
+                /*
+                
+                */
+                
                 // System.out.println("CAP:" + (cap == null ? "NULL" : "NOT NULL"));
                 // System.out.println("FORMAT:" + cap.getImageFormats());
                 // WMSCapabilityInformation info = cap.

@@ -129,10 +129,9 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
      */
     WWEPlugin selected = null;
 
-    
     ListCellRenderer<Camera> cameraCellRenderer = null;
     ListCellRenderer<Camera> cameraSmallCellRenderer = null;
-    
+
     /**
      * Creates new form JTerminals
      */
@@ -191,12 +190,12 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
     public void initialize(App app, Model model, String planet) {
         this.app = app;
         this.m = model;
-        
+
         wwd = new WorldWindowGLJPanel();
         wwd.setModel(m);
         wwd.setInputHandler(new WWEInputHandler());
         wwd.addRenderingListener(this);
-        
+
         cameraCellRenderer = new JCameraCellRenderer(app);
         cameraSmallCellRenderer = new JCameraSmallCellRenderer(app);
         LI_Cameras.setCellRenderer(cameraCellRenderer);
@@ -208,7 +207,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         BT_CameraUp.addActionListener(this);
         BT_CameraDown.addActionListener(this);
         BT_SmallCamera.addActionListener(this);
-        
+
         BT_AddLayer.addActionListener(this);
         BT_RemoveLayer.addActionListener(this);
         BT_LayerUp.addActionListener(this);
@@ -216,7 +215,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         BT_Configure.addActionListener(this);
 
         BT_More.addActionListener(this);
-        
+
         BT_ScrollLeft.addActionListener(this);
         BT_ScrollRight.addActionListener(this);
 
@@ -232,15 +231,15 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         MN_HideStatusBar.addActionListener(this);
         MN_HideLayers.addActionListener(this);
         MN_HideTopBar.addActionListener(this);
-        
+
         SP_VerticalExageration.addChangeListener(this);
         CB_Wireframe.addActionListener(this);
-        
+
         InputHandler ih = wwd.getInputHandler();
         ih.addKeyListener(this);
         ih.addMouseListener(this);
         ih.addMouseWheelListener(this);
-        
+
     }
 
     public void configure(Element config) {
@@ -356,7 +355,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
                             p.configure(e);
                             Layer l = p.getLayer();
                             l.setValue(AVKEY_WORLDWIND_LAYER_PLUGIN, p);
-                            l.setName(e.getAttribute("name"));
+                            p.setPluginName(e.getAttribute("name"));
                             Boolean b = Boolean.valueOf(e.getAttribute("active"));
                             l.setEnabled(b);
                             plugins.put("" + p.hashCode(), p);
@@ -493,7 +492,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
                 Element wwp = config.getOwnerDocument().createElement("WorldWindLayer");
                 wwp.setAttribute("active", "" + l.isEnabled());
                 wwp.setAttribute("factory", p.getPluginFactory().getClass().getName());
-                wwp.setAttribute("name", l.getName());
+                wwp.setAttribute("name", p.getPluginName());
                 p.saveConfig(wwp);
                 config.appendChild(wwp);
             }
@@ -514,8 +513,8 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
                 while (it.hasNext()) {
                     WWEPlugin p = it.next();
                     p.doAction(TinyPlugin.DO_ACTION_NEWSIZE, DP_Main.getSize(), null);
-                    p.doAction(p.getLayer().isEnabled()?WWEPlugin.DO_ACTION_LAYER_ENABLED:WWEPlugin.DO_ACTION_LAYER_DISABLED, null, null);
-             
+                    p.doAction(p.getLayer().isEnabled() ? WWEPlugin.DO_ACTION_LAYER_ENABLED : WWEPlugin.DO_ACTION_LAYER_DISABLED, null, null);
+
                 }
 
                 /*
@@ -639,7 +638,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
                     p.doAction(WWEPlugin.DO_ACTION_LAYER_ENABLED, null, null);
                 }
                 layers.fireTableDataChanged();
-                
+
             } else {
                 TinyPlugin p = factory.newPlugin(null);
                 p.setup(app, null);
@@ -677,28 +676,37 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
 
         } else if (e.getActionCommand().equals("hideTopBar")) {
             PN_TopBar.setVisible(!MN_HideTopBar.isSelected());
-            
+
         } else if (e.getActionCommand().equals("hideLayers")) {
             boolean hide = MN_HideLayers.isSelected();
             if (hide) {
                 SP_Main.setLastDividerLocation(SP_Main.getDividerLocation());
                 PN_Left.setVisible(false);
                 SP_Main.setDividerSize(0);
-                
+
             } else {
                 PN_Left.setVisible(true);
                 SP_Main.setDividerLocation(SP_Main.getLastDividerLocation());
                 SP_Main.setDividerSize(10);
-                
+
             }
             SP_Main.revalidate();
-            
+
         } else if (e.getActionCommand().equals("renameLayer")) {
             int index = TB_Layers.getSelectedRow();
             if (index != -1) {
                 Layer l = (Layer) TB_Layers.getValueAt(index, 1);
                 String newname = JOptionPane.showInputDialog("Layer name", l.getName());
-                if (newname != null) l.setName(newname);
+                if (newname != null) {
+                    WWEPlugin p = (WWEPlugin) l.getValue(WWEPlugin.AVKEY_WORLDWIND_LAYER_PLUGIN);
+                    if (p != null) {
+                        p.setPluginName(newname);
+
+                    } else {
+                        l.setName(newname);
+                    }
+                }
+
             }
             TB_Layers.repaint();
 
@@ -708,7 +716,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
                 Layer l = (Layer) TB_Layers.getValueAt(index, 1);
                 LayerList ll = m.getLayers();
                 ll.remove(l);
-                
+
                 WWEPlugin p = (WWEPlugin) l.getValue(WWEPlugin.AVKEY_WORLDWIND_LAYER_PLUGIN);
                 if (p != null) {
                     //--- Remove the config panel
@@ -814,7 +822,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
                 ll.moveLower(l);
                 layers.fireTableDataChanged();
                 TB_Layers.getSelectionModel().setSelectionInterval(index - 1, index - 1);
-                TB_Layers.scrollRectToVisible(new Rectangle(0, index-1 * TB_Layers.getRowHeight(), TB_Layers.getWidth(), TB_Layers.getRowHeight()));
+                TB_Layers.scrollRectToVisible(new Rectangle(0, index - 1 * TB_Layers.getRowHeight(), TB_Layers.getWidth(), TB_Layers.getRowHeight()));
             }
 
         } else if (e.getActionCommand().equals("downLayer")) {
@@ -828,7 +836,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
                 ll.moveHigher(l);
                 layers.fireTableDataChanged();
                 TB_Layers.getSelectionModel().setSelectionInterval(index + 1, index + 1);
-                TB_Layers.scrollRectToVisible(new Rectangle(0, index+1 * TB_Layers.getRowHeight(), TB_Layers.getWidth(), TB_Layers.getRowHeight()));
+                TB_Layers.scrollRectToVisible(new Rectangle(0, index + 1 * TB_Layers.getRowHeight(), TB_Layers.getWidth(), TB_Layers.getRowHeight()));
             }
 
         } else if (e.getActionCommand().equals("cameras")) {
@@ -839,7 +847,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
             int index = LI_Cameras.getSelectedIndex();
             if (title != null) {
                 Camera c = new Camera(title, wwd);
-                cameras.add(index==-1?0:index, c);
+                cameras.add(index == -1 ? 0 : index, c);
             }
 
         } else if (e.getActionCommand().equals("removeCamera")) {
@@ -858,30 +866,30 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
             int index = LI_Cameras.getSelectedIndex();
             if (index > 0) {
                 Camera source = LI_Cameras.getSelectedValue();
-                Camera det = cameras.get(index-1);
-                cameras.set(index-1, source);
+                Camera det = cameras.get(index - 1);
+                cameras.set(index - 1, source);
                 cameras.set(index, det);
-                LI_Cameras.setSelectedIndex(index-1);
-                LI_Cameras.ensureIndexIsVisible(index-1);
+                LI_Cameras.setSelectedIndex(index - 1);
+                LI_Cameras.ensureIndexIsVisible(index - 1);
                 LI_Cameras.repaint();
             }
-            
+
         } else if (e.getActionCommand().equals("cameraDown")) {
             int index = LI_Cameras.getSelectedIndex();
-            if ((index > 0) && (index < cameras.size()-1)) {
+            if ((index > 0) && (index < cameras.size() - 1)) {
                 Camera source = LI_Cameras.getSelectedValue();
-                Camera det = cameras.get(index+1);
-                cameras.set(index+1, source);
+                Camera det = cameras.get(index + 1);
+                cameras.set(index + 1, source);
                 cameras.set(index, det);
-                LI_Cameras.setSelectedIndex(index+1);
-                LI_Cameras.ensureIndexIsVisible(index+1);
+                LI_Cameras.setSelectedIndex(index + 1);
+                LI_Cameras.ensureIndexIsVisible(index + 1);
                 LI_Cameras.repaint();
             }
-            
+
         } else if (e.getActionCommand().equals("smallCamera")) {
-            LI_Cameras.setCellRenderer(BT_SmallCamera.isSelected()?cameraSmallCellRenderer:cameraCellRenderer);
+            LI_Cameras.setCellRenderer(BT_SmallCamera.isSelected() ? cameraSmallCellRenderer : cameraCellRenderer);
             LI_Cameras.repaint();
-            
+
         } else if (e.getActionCommand().equals("configure")) {
             JComponent jcomp = (JComponent) e.getSource();
             TinyPlugin p = (TinyPlugin) jcomp.getClientProperty("plugin");
@@ -892,8 +900,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
             }
         } else if (e.getActionCommand().equals("wireframe")) {
             wwd.getSceneController().getModel().setShowWireframeExterior(CB_Wireframe.isSelected());
-            
-            
+
         }
 
     }
@@ -916,14 +923,14 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
             ActionEvent ae = new ActionEvent(MN_Fullscreen, ActionEvent.ACTION_PERFORMED, MN_Fullscreen.getActionCommand());
             actionPerformed(ae);
             e.consume();
-            
+
         } else if (e.getKeyCode() == KeyEvent.VK_SPACE) {
             boolean sticky = MN_HideLayers.isSelected();
             MN_HideLayers.setSelected(!sticky);
 
             actionPerformed(new ActionEvent(MN_HideLayers, ActionEvent.ACTION_PERFORMED, MN_HideLayers.getActionCommand()));
             e.consume();
-            
+
         } else if (e.getKeyCode() == KeyEvent.VK_W) {
             System.out.println("FORWARD");
             View v = wwd.getView();
@@ -931,41 +938,41 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
             // v.setOrientation(v.getCurrentEyePosition(), center);set
             // e.consume();
             // wwd.redraw();
-            
+
         } else if (e.getKeyCode() == KeyEvent.VK_S) {
             System.out.println("BACKWARD");
             e.consume();
             wwd.redraw();
-            
-         } else if (e.getKeyCode() == KeyEvent.VK_A) {
+
+        } else if (e.getKeyCode() == KeyEvent.VK_A) {
             System.out.println("LEFT");
             OrbitView v = (OrbitView) wwd.getView();
-            System.out.println("VIEW:"+v.getClass().getName());
-            v.setHeading(Angle.fromDegrees(v.getHeading().getDegrees()-2));
+            System.out.println("VIEW:" + v.getClass().getName());
+            v.setHeading(Angle.fromDegrees(v.getHeading().getDegrees() - 2));
             // v.setOrientation(v.getCurrentEyePosition(), v.getCenterPosition();
             e.consume();
             wwd.redraw();
-            
+
         } else if (e.getKeyCode() == KeyEvent.VK_D) {
             System.out.println("RIGHT");
             View v = wwd.getView();
-            
-            v.setHeading(Angle.fromDegrees(v.getHeading().getDegrees()+2));
+
+            v.setHeading(Angle.fromDegrees(v.getHeading().getDegrees() + 2));
             e.consume();
             wwd.redraw();
-            
+
         } else if (e.getKeyCode() == KeyEvent.VK_Q) {
             View v = wwd.getView();
-            v.setRoll(Angle.fromDegrees(v.getRoll().getDegrees()+1));
+            v.setRoll(Angle.fromDegrees(v.getRoll().getDegrees() + 1));
             e.consume();
             wwd.redraw();
-            
+
         } else if (e.getKeyCode() == KeyEvent.VK_E) {
             View v = wwd.getView();
-            v.setRoll(Angle.fromDegrees(v.getRoll().getDegrees()-1));
+            v.setRoll(Angle.fromDegrees(v.getRoll().getDegrees() - 1));
             e.consume();
             wwd.redraw();
-            
+
         }
     }
 
@@ -1083,11 +1090,11 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
     public void stateChanged(ChangeEvent e) {
         if (e.getSource() == SP_VerticalExageration) {
             int val = (Integer) SP_VerticalExageration.getValue();
-            wwd.getSceneController().setVerticalExaggeration((double) val/10d);
+            wwd.getSceneController().setVerticalExaggeration((double) val / 10d);
             wwd.redraw();
         }
     }
-    
+
     //**************************************************************************
     //*** MouseListener
     //**************************************************************************
@@ -1103,7 +1110,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
                 }
 
             }
-            
+
         } else if (e.getSource() == wwd) {
             //--- Forward to selected layed
             if (selected != null) selected.layerMouseClicked(e, wwd.getCurrentPosition());
@@ -1117,7 +1124,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
             if (e.getButton() == MouseEvent.BUTTON2) {
                 PU_More.show(DP_Main, e.getX(), e.getY());
             }
-            
+
         }
     }
 
@@ -1129,7 +1136,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
             if (e.getButton() == MouseEvent.BUTTON2) {
                 PU_More.show(DP_Main, e.getX(), e.getY());
             }
-            
+
         }
     }
 
@@ -1177,9 +1184,9 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
     //--- NOT YET USED
     public void render(DrawContext dc) {
         //---
-        
+
     }
-    
+
     //*************************************************************************
     //*** RenderingListener
     //*************************************************************************
@@ -1188,6 +1195,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         //---
         // System.out.println("STAGE:"+event.getStage());
     }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -1780,10 +1788,4 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
     //**************************************************************************
     //*** For debug
     //**************************************************************************
-
-    
-
-    
-
-    
 }
