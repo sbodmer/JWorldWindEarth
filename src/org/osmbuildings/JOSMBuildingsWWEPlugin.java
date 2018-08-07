@@ -384,7 +384,7 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
         jScrollPane1.setViewportView(TA_Object);
 
         jLabel7.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel7.setText("DOuble Click on a polygon to see details");
+        jLabel7.setText("Double Click on a polygon to see details");
         jLabel7.setPreferredSize(new java.awt.Dimension(150, 26));
 
         SP_Rows.setModel(new javax.swing.SpinnerNumberModel(3, 1, 256, 1));
