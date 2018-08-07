@@ -65,9 +65,9 @@ The jar itself should be placed in the WorldWindEarth lib folder
 ## Classes
 Your layer must be composed of
 
-- A factory instance
-- A plugin instance produced by the factory
-- A WorldWind layer returned by the plugin instance
+- A factory instance class
+- A plugin instance class produced by the factory
+- A WorldWind layer instance class returned by the plugin instance
 
 ### Plugin factory
 Your factory class must implement the tiny rcp framework factory
