@@ -17,7 +17,10 @@ The project is base on a Java Swing framework called [TinyRCP](https://github.co
 
 The projet is a Netbeans project.
 
-The system is completely modular and plugin based.
+The system is completely modular and plugin based. The main idea is to wrap 
+WorldWind layers in a framework class which will expose the layer functionalities
+without interfering with the layer implementation. So the layer implementation
+keeps to be independent of the WorldWindEarth integration.
 
 Each world wind layer is stored in a jar file with a specific manifest entry
     
@@ -30,8 +33,6 @@ The layers are recursively loaded from file system in the default folders
 
 ## Release
 Work in progress, but enough for a Preview...
-
-**The API is not yet stable, use it with caution for the moment**
 
 ## Building
 The project is a Netbeans project, for manual compiling, use the ant build.xml
@@ -50,7 +51,7 @@ TODO
 
 # Adding new layer
 ## Files
-To add a new WorldWind layer you have to create a .jar which contains the the
+To add a new WorldWindEarth layer you have to create a .jar which contains the
 classes and resources for your layer.
 
 The manifest of the jar must be
