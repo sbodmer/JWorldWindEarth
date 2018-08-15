@@ -27,11 +27,11 @@ import javax.imageio.ImageIO;
  * @author sbodmer
  */
 public class OSMBuildingsTile {
-
+    
     /**
      * Special key for ww osm
      */
-    static final String OSMBUILDINGS_URL = "http://[abcd].data.osmbuildings.org/0.2/sx3pxpz6/tile";
+    // static final String OSMBUILDINGS_URL = "http://[abcd].data.osmbuildings.org/0.2/sx3pxpz6/tile";
     static final String NASA_BINGMAPS_URL = "https://worldwind27.arc.nasa.gov/wms/virtualearth";
 
     /**
@@ -44,7 +44,7 @@ public class OSMBuildingsTile {
      * The counter for the different servers
      */
     static int current = 0;
-
+    
     int x = 0;
     int y = 0;
     int level = 15;
@@ -226,7 +226,7 @@ public class OSMBuildingsTile {
             }
 
             //--- Retreive data from remote server
-            String s = OSMBUILDINGS_URL;
+            String s = getOSMBuildingUrl();
             //--- Find the current server to use
             int i1 = s.indexOf('[');
             if (i1 != -1) {
@@ -355,8 +355,12 @@ public class OSMBuildingsTile {
     }
      */
     //**************************************************************************
-    //*** Runnable
+    //*** Private
     //**************************************************************************
+    private String getOSMBuildingUrl() {
+        return "http://[abcd].data.osmbuildings.org/0.2/"+OSMBuildingsLayer.osmBuildingKey+"/tile";
+        
+    }
     /**
      * Load local cached file
      */

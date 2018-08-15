@@ -32,6 +32,11 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
 
     public static final String CACHE_FOLDER = "Earth" + File.separatorChar + "OSMBuildings";
 
+     /**
+     * The api key
+     */
+    public static String osmBuildingKey = "sx3pxpz6";
+    
     public static final int ZOOM = 15;
 
     public static final double maxX = Math.pow(2, ZOOM);
@@ -219,6 +224,10 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
         }
     }
 
+    public void setOSMBuildingKey(String key) {
+        if (!key.equals("")) osmBuildingKey = key;
+    }
+    
     public void setApplyRoofTextures(boolean applyRoofTextures) {
         this.applyRoofTextures = applyRoofTextures;
 

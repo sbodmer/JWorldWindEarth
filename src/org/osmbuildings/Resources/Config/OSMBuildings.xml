@@ -12,4 +12,5 @@
     <Property name="DrawOutline" value="false"/>
     <Property name="DrawProcessingBox" value="true"/>
     <Property name="ApplyRoofTextures" value="false"/>
+    <Property name="OSMBuildingKey" value=""/>
 </Layer>

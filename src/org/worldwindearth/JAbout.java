@@ -7,12 +7,15 @@ package org.worldwindearth;
 
 import gov.nasa.worldwind.WorldWind;
 import gov.nasa.worldwind.cache.FileStore;
+import java.awt.Desktop;
 import java.io.File;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
+import javax.swing.event.HyperlinkEvent;
+import javax.swing.event.HyperlinkListener;
 import org.osmbuildings.OSMBuildingsLayer;
 import org.tinyrcp.App;
 import org.tinyrcp.TinyFactory;
@@ -21,7 +24,7 @@ import org.tinyrcp.TinyFactory;
  *
  * @author sbodmer
  */
-public class JAbout extends javax.swing.JDialog {
+public class JAbout extends javax.swing.JDialog implements HyperlinkListener {
 
     /**
      * Creates new form JAbout
@@ -61,8 +64,26 @@ public class JAbout extends javax.swing.JDialog {
         } catch (NullPointerException ex) {
             ex.printStackTrace();
         }
+        
+        TP_WorldWind.addHyperlinkListener(this);
     }
 
+    //**************************************************************************
+    //*** HyperlinkListener
+    //**************************************************************************
+    @Override
+    public void hyperlinkUpdate(HyperlinkEvent e) {
+        if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
+            try {
+                Desktop dt = Desktop.getDesktop();
+                dt.browse(e.getURL().toURI());
+                
+            } catch (Exception ex) {
+                
+            }
+        }
+    }
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -74,6 +95,8 @@ public class JAbout extends javax.swing.JDialog {
 
         LB_Image = new javax.swing.JLabel();
         jTabbedPane1 = new javax.swing.JTabbedPane();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        TP_WorldWind = new javax.swing.JTextPane();
         jPanel1 = new javax.swing.JPanel();
         jScrollPane3 = new javax.swing.JScrollPane();
         TA_Contributors = new javax.swing.JTextArea();
@@ -90,6 +113,14 @@ public class JAbout extends javax.swing.JDialog {
         getContentPane().add(LB_Image, java.awt.BorderLayout.CENTER);
 
         jTabbedPane1.setPreferredSize(new java.awt.Dimension(145, 200));
+
+        TP_WorldWind.setEditable(false);
+        TP_WorldWind.setContentType("text/html"); // NOI18N
+        TP_WorldWind.setFont(new java.awt.Font("Monospaced", 0, 11)); // NOI18N
+        TP_WorldWind.setText("<html>\n  <head>\n\n  </head>\n  <body>\n    <p style=\"margin-top: 0\">\n      This application uses the Nasa WorldWind SDK<br>\n      <a href=\"https://worldwind.arc.nasa.gov\">Nasa worldwind home page</a>\n    </p>\n  </body>\n</html>\n");
+        jScrollPane2.setViewportView(TP_WorldWind);
+
+        jTabbedPane1.addTab("WorldWind", jScrollPane2);
 
         jPanel1.setLayout(new java.awt.BorderLayout());
 
@@ -132,12 +163,16 @@ public class JAbout extends javax.swing.JDialog {
     private javax.swing.JLabel LB_Image;
     private javax.swing.JTextArea TA_Contributors;
     private javax.swing.JTextArea TA_Paths;
+    private javax.swing.JTextPane TP_WorldWind;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JTabbedPane jTabbedPane1;
     // End of variables declaration//GEN-END:variables
+
+    
 }

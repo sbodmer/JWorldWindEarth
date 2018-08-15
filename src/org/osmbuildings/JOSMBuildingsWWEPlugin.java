@@ -124,6 +124,7 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
         layer = (OSMBuildingsLayer) bl.createFromConfigSource(in, null);
         layer.setName("OSMBuildings");
         layer.setExpiryTime(((JOSMBuildingsWWEFactory) factory).getExpireDays() * 24L * 60L * 60L * 1000L);
+        layer.setOSMBuildingKey(((JOSMBuildingsWWEFactory) factory).getOSMBuildingKey());
         // System.out.println("PICK:"+layer.isPickEnabled());
         // layer.setPickEnabled(true);
         ww.addSelectListener(this);
