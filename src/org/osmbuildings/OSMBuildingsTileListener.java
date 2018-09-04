@@ -15,8 +15,10 @@ public interface OSMBuildingsTileListener {
     public void osmBuildingsLoadingFailed(OSMBuildingsTile btile, String reason);
     
     /**
+     * To avoid multiple same rendering, return true if the passed id was
+     * already rendered
      * 
-     * @param id
+     * @param id The GeoJSON string id
      * @return 
      */
     public boolean osmBuildingsProduceRenderableForId(String id);

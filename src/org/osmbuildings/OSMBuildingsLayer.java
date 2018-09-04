@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.logging.Level;
-import org.worldwindearth.WWE;
 
 /**
  * Always assume a zoom level of 15
@@ -78,11 +77,21 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
     protected boolean drawProcessingBox = true;
     protected boolean drawOutline = false;
     protected boolean applyRoofTextures = false;
-    protected boolean fixedLighting = true;
-    protected Vec4 defaultSunDirection = null;
-    protected Material defaultSunMat = null;
+    
+    
     javax.swing.Timer timer = null;
 
+    /**
+     * For tile progress listening
+     */
+    protected ArrayList<OSMBuildingsTileListener> tileListeners = new ArrayList<>();
+    
+    /**
+     * The list of pre renderer
+     */
+    protected ArrayList<PreBuildingsRenderer> preRenderer = new ArrayList<>();
+    protected ArrayList<PostBuildingsRenderer>postRenderer = new ArrayList<>();
+    
     // Cylinder c = null;
     public OSMBuildingsLayer() {
         super();
@@ -188,14 +197,6 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
     //**************************************************************************
     //*** API
     //*************************************************************************
-    public void setFixedLighting(boolean fixedLighting) {
-        this.fixedLighting = fixedLighting;
-    }
-
-    public boolean isFixedLighting() {
-        return fixedLighting;
-    }
-
     public void setDefaultBuildingHeight(double defaultHeight) {
         this.defaultHeight = defaultHeight;
     }
@@ -238,6 +239,28 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
         this.maxTiles = maxTiles;
     }
 
+    public void addPreBuildingsRenderer(PreBuildingsRenderer pbr) {
+        if (!preRenderer.contains(pbr)) preRenderer.add(pbr);
+    }
+    
+    public boolean removePreBuildingsRenderer(PreBuildingsRenderer pbr) {
+        return preRenderer.remove(pbr);
+    }
+    
+    public void addPostBuildingsRenderer(PostBuildingsRenderer pbr) {
+        if (!postRenderer.contains(pbr)) postRenderer.add(pbr);
+    }
+    
+    public boolean removePostBuildingsRenderer(PostBuildingsRenderer pbr) {
+        return postRenderer.remove(pbr);
+    }
+    
+    public void addTileListener(OSMBuildingsTileListener listener) {
+        if (!tileListeners.contains(listener)) tileListeners.add(listener);
+    }
+    public boolean removeTileListener(OSMBuildingsTileListener listener) {
+        return tileListeners.remove(listener);
+    }
     /**
      * Set the building resolution grid (rows)
      * 
@@ -351,6 +374,9 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
 
     @Override
     public void dispose() {
+        preRenderer.clear();
+        postRenderer.clear();
+        
         timer.stop();
         clearTiles();
         super.dispose();
@@ -370,40 +396,13 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
      */
     @Override
     public void doRender(DrawContext dc) {
-        // Tessellator tes = dc.getGlobe().getTessellator();
-        LightingModel lm = dc.getStandardLightingModel();
-        if (lm instanceof BasicLightingModel) {
-            BasicLightingModel blm = (BasicLightingModel) lm;
-            if (defaultSunDirection == null) defaultSunDirection = blm.getLightDirection();
-            if (defaultSunMat == null) defaultSunMat = blm.getLightMaterial();
-
-            if (fixedLighting) {
-                blm.setLightDirection(defaultSunDirection);
-                blm.setLightMaterial(defaultSunMat);
-
-            } else {
-                // blm.setLightDirection(Vec4.INFINITY);;
-                Tessellator tes = dc.getGlobe().getTessellator();
-                Vec4 sun = (Vec4) tes.getValue(WWE.TESSELATOR_KEY_SUN_DIRECTION);
-                if (sun != null) {
-                    Color color = (Color) tes.getValue(WWE.TESSELATOR_KEY_SUN_COLOR);
-                    blm.setLightDirection(sun);
-                    Color am = (Color) tes.getValue(WWE.TESSELATOR_KEY_SUN_AMBIENT_COLOR);
-                    Material m = new Material(Color.WHITE, color, am, Color.BLACK, 0);
-                    blm.setLightMaterial(m);
-
-                } else {
-                    blm.setLightDirection(defaultSunDirection);
-                    blm.setLightMaterial(defaultSunMat);
-                }
-            }
-
-        }
-
-        center = dc.getViewportCenterPosition();
-        //--- Move cursor to center of viewport
-        // if (center != null) cursor.moveTo(new Position(center, 0));
+        for (int i=0;i<preRenderer.size();i++) preRenderer.get(i).preBuildingsRender(dc);
+        
         super.doRender(dc);
+        
+        for (int i=0;i<postRenderer.size();i++) postRenderer.get(i).postBuildingsRender(dc);
+        
+        center = dc.getViewportCenterPosition();
     }
 
     @Override
@@ -513,6 +512,8 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
     public void osmBuildingsLoaded(OSMBuildingsTile btile) {
         removeRenderable(btile.getTileSurfaceRenderable());
         addRenderable(btile.getRenderable());
+        
+        for (OSMBuildingsTileListener tl: tileListeners) tl.osmBuildingsLoaded(btile);
     }
 
     @Override
@@ -520,6 +521,8 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
         //--- Loading in progress, display tile shadow
         if (drawProcessingBox) addRenderable(btile.getTileSurfaceRenderable());
         ww.redrawNow();
+        
+        for (OSMBuildingsTileListener tl: tileListeners) tl.osmBuildingsLoading(btile);
     }
 
     @Override
@@ -529,6 +532,7 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
         Logging.logger().log(Level.WARNING, "OSMBuildingsLayer.osmBuildingsLoadingFailed for tile " + btile.toString() + ", " + btile.getFetchedURL(), new Object[]{reason});
         buildings.remove(btile);
 
+        for (OSMBuildingsTileListener tl: tileListeners) tl.osmBuildingsLoadingFailed(btile, reason);
     }
 
     /**
@@ -596,6 +600,20 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
         return defaultAttrs;
     }
 
+    //**************************************************************************
+    //*** Classes and interfaces
+    //**************************************************************************
+    /**
+     * Will be called just before the layer will render
+     * 
+     */
+    public static interface PreBuildingsRenderer {
+        public void preBuildingsRender(DrawContext dc);
+    }
+    public static interface PostBuildingsRenderer {
+        public void postBuildingsRender(DrawContext dc);
+    }
+    
     //**************************************************************************
     //*** Debug
     //**************************************************************************

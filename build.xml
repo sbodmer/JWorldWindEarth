@@ -78,7 +78,7 @@
     
     <target name="-post-jar" description="Create all jars">
         <antcall target="create_jars"/>
-        
+        <antcall target="wwlayersonly"/>
         <antcall target="copy_libs"/>
     </target>
     
@@ -212,6 +212,19 @@
             <fileset file="lib/worldwind/worldwind.jar"/>
             <fileset file="lib/worldwind/worldwindx.jar"/>
         </copy>
+    </target>
+    
+    <target name="wwlayersonly">
+        <echo message="Creating stand alone jars of only world wind layers"/>
+        
+        <echo message="[WorldWindLayer] OSMBuildings"/>
+        <mkdir dir="${dist.dir}/dist"/>
+        <jar destfile="${dist.dir}/dist/OSMBuildings.jar">
+            <fileset dir="${build.dir}/classes" includes="org/osmbuildings/OSMBuildingsLayer*"/>
+            <fileset dir="${build.dir}/classes" includes="org/osmbuildings/OSMBuildingsRenderable*"/>
+            <fileset dir="${build.dir}/classes" includes="org/osmbuildings/OSMBuildingsTile*"/>
+            <fileset dir="${build.dir}/classes" includes="org/osmbuildings/Resources/"/>        
+        </jar>
     </target>
     
     <!-- If the TinyRCP project is available use it to get the latest version -->

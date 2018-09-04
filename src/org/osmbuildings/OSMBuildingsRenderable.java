@@ -49,7 +49,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
-import org.worldwindearth.WWE;
+
 
 /**
  * The renderable of the GeoJSONDoc tile for OSM Buildings
@@ -159,6 +159,8 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
     // **************************************************************************
     // *** API
     // **************************************************************************
+    
+    
     public void clear() {
         renderables.clear();
         ids.clear();
@@ -654,8 +656,8 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
                 double dLon = maxLon - minLon;
                 double centerLat = minLat + (dLat / 2);
                 double centerLon = minLon + (dLon / 2);
-                double dX = WWE.getDistance(minLat, minLon, minLat, maxLon);
-                double dY = WWE.getDistance(minLat, minLon, maxLat, minLon);
+                double dX = getDistance(minLat, minLon, minLat, maxLon);
+                double dY = getDistance(minLat, minLon, maxLat, minLon);
                 Position center = Position.fromDegrees(centerLat, centerLon);
                 Ellipsoid dome = new Ellipsoid(center, dX / 2, roofHeight, dY / 2);
                 dome.setAttributes(ra);
@@ -823,6 +825,24 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
         }
     }
 
+    private static double getDistance(double lat1, double lon1, double lat2, double lon2) {
+        lat1 = lat1 * Math.PI / 180;
+        lat2 = lat2 * Math.PI / 180;
+        lon1 = lon1 * Math.PI / 180;
+        lon2 = lon2 * Math.PI / 180;
+
+        double distance = 2 * Math.asin(Math.sqrt((Math.sin((lat1 - lat2) / 2)) * (Math.sin((lat1 - lat2) / 2))
+                + Math.cos(lat1) * Math.cos(lat2) * (Math.sin((lon1 - lon2) / 2)) * (Math.sin((lon1 - lon2) / 2))));
+
+        return (distance * 6372.795*1000);
+
+    }
+    
+    
+    
+    //***************************************************************************
+    //*** Debug
+    //**************************************************************************
     public static final void main(String args[]) {
         double l1 = -50;
         double l2 = -100;
