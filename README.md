@@ -45,6 +45,9 @@ To run the application cd in the newly created dist dir
     cd dist
     java -jar WWEarth.jar
 
+To use only the World Wind Layer in other project, the folder dist contains the
+standalone WW layers libraries.
+
 
 ## Features
 TODO
