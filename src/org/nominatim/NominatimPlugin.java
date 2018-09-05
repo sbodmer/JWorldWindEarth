@@ -29,7 +29,7 @@ import org.worldwindearth.geocode.WWEGeocodePlugin;
  */
 public class NominatimPlugin implements WWEGeocodePlugin {
 
-    static final String DEFAULT_URL = "http://nominatim.openstreetmap.org";
+    static final String DEFAULT_URL = "https://nominatim.openstreetmap.org";
 
     TinyFactory factory = null;
     App app = null;
@@ -77,7 +77,8 @@ public class NominatimPlugin implements WWEGeocodePlugin {
                 HttpURLConnection con = (HttpURLConnection) url.openConnection();
                 con.setReadTimeout(20000);
                 con.setRequestProperty("User-Agent", "WorldWindEarth (https://github.com/sbodmer/WorldWindEarth)");
-
+                
+                // System.out.println("URL:"+url);
                 //--- Parse (create here, because multi threaded access)
                 DocumentBuilder builder = docBuilder.newDocumentBuilder();
                 Document doc = builder.parse(con.getInputStream());
