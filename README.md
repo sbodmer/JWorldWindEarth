@@ -12,6 +12,8 @@ A Java Web Start app is available to start the application without installation
 
 ![New York](https://user-images.githubusercontent.com/18146968/29412234-243faed8-8358-11e7-9e26-3675b769c608.jpg)
 
+[Other screen shots](https://github.com/sbodmer/JWorldWindEarth/issues/1)
+
 ## Architecture
 The project is base on a Java Swing framework called [TinyRCP](https://github.com/lsimedia/TinyRCP).
 
