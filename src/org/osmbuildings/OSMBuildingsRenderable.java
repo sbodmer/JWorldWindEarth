@@ -50,7 +50,6 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
-
 /**
  * The renderable of the GeoJSONDoc tile for OSM Buildings
  *
@@ -139,7 +138,7 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
             prepare(obj);
 
         } else if (doc.getRootObject() instanceof Object[]) {
-            for (Object o : (Object[]) doc.getRootObject()) {
+            for (Object o:(Object[]) doc.getRootObject()) {
                 if (o instanceof GeoJSONObject) {
                     prepare((GeoJSONObject) o);
 
@@ -159,8 +158,6 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
     // **************************************************************************
     // *** API
     // **************************************************************************
-    
-    
     public void clear() {
         renderables.clear();
         ids.clear();
@@ -183,7 +180,7 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
     public void setOpacity(double opacity) {
         defaultAttrs.setInteriorOpacity(opacity);
 
-        for (Renderable renderable : renderables) {
+        for (Renderable renderable:renderables) {
             if (renderable instanceof Polygon) {
                 Polygon polygon = (Polygon) renderable;
                 polygon.getAttributes().setInteriorOpacity(opacity);
@@ -211,7 +208,7 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
     public void setDrawOutline(boolean draw) {
         defaultAttrs.setDrawOutline(draw);
 
-        for (Renderable renderable : renderables) {
+        for (Renderable renderable:renderables) {
             if (renderable instanceof Polygon) {
                 Polygon polygon = (Polygon) renderable;
                 polygon.getAttributes().setDrawOutline(draw);
@@ -237,7 +234,7 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
      * @param s
      */
     public void applyRoofTexture(BufferedImage tex, Sector sector) {
-        for (Renderable renderable : renderables) {
+        for (Renderable renderable:renderables) {
             if (renderable instanceof Polygon) {
                 Polygon polygon = (Polygon) renderable;
                 // polygon.getAttributes().setDrawOutline(draw);
@@ -265,7 +262,7 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
                         cnt++;
                     }
                     float tc[] = new float[texCoord.size()];
-                    for (int i = 0; i < tc.length; i++) tc[i] = texCoord.get(i);
+                    for (int i = 0;i < tc.length;i++) tc[i] = texCoord.get(i);
                     polygon.setCapImageSource(tex, tc, cnt);
                 }
 
@@ -280,7 +277,7 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
     // **************************************************************************
     @Override
     public void render(DrawContext dc) {
-        for (Renderable r : renderables) {
+        for (Renderable r:renderables) {
             r.render(dc);
         }
 
@@ -288,7 +285,7 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
 
     @Override
     public void preRender(DrawContext dc) {
-        for (Renderable r : renderables) {
+        for (Renderable r:renderables) {
             if (r instanceof PreRenderable)
                 ((PreRenderable) r).preRender(dc);
         }
@@ -299,7 +296,7 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
     // **************************************************************************
     @Override
     public void dispose() {
-        for (Renderable r : renderables) {
+        for (Renderable r:renderables) {
             if (r instanceof Disposable)
                 ((Disposable) r).dispose();
         }
@@ -332,7 +329,7 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
 
         } else if (object.isFeatureCollection()) {
             GeoJSONFeatureCollection c = object.asFeatureCollection();
-            for (GeoJSONFeature f : c.getFeatures()) {
+            for (GeoJSONFeature f:c.getFeatures()) {
                 String id = f.getValue("id").toString();
                 boolean r = listener.osmBuildingsProduceRenderableForId(id);
                 if (r) {
@@ -360,7 +357,7 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
         } else if (geom.isMultiPoint()) {
             GeoJSONMultiPoint mp = geom.asMultiPoint();
             PointPlacemarkAttributes pa = new PointPlacemarkAttributes();
-            for (int i = 0; i < mp.getPointCount(); i++) {
+            for (int i = 0;i < mp.getPointCount();i++) {
                 fillRenderablePoint(f, mp.asPoint(), mp.getPosition(i), pa, properties);
             }
 
@@ -374,7 +371,7 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
             BasicShapeAttributes sa = new BasicShapeAttributes();
             sa.copy(defaultAttrs);
             fillShapeAttribute(sa, properties);
-            for (GeoJSONPositionArray coords : ms.getCoordinates()) {
+            for (GeoJSONPositionArray coords:ms.getCoordinates()) {
                 fillRenderablePolyline(f, geom, coords, sa, properties);
             }
 
@@ -391,14 +388,14 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
             BasicShapeAttributes sa = new BasicShapeAttributes();
             sa.copy(defaultAttrs);
             fillShapeAttribute(sa, properties);
-            for (int i = 0; i < mpoly.getPolygonCount(); i++) {
+            for (int i = 0;i < mpoly.getPolygonCount();i++) {
                 fillRenderablePolygon(f, mpoly.asPolygon(), mpoly.getExteriorRing(i), mpoly.getInteriorRings(i), sa, properties);
             }
 
         } else if (geom.isGeometryCollection()) {
             GeoJSONGeometryCollection c = geom.asGeometryCollection();
             GeoJSONGeometry geos[] = c.getGeometries();
-            for (int i = 0; i < geos.length; i++) {
+            for (int i = 0;i < geos.length;i++) {
                 fill(f, geos[i], properties);
             }
 
@@ -451,14 +448,14 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
      * @param properties
      */
     protected void fillRenderablePolygon(GeoJSONFeature parent, GeoJSONPolygon owner, Iterable<? extends Position> outerBoundary, Iterable<? extends Position>[] innerBoundaries, ShapeAttributes attrs, AVList properties) {
-        
+
         if (hasNonzeroAltitude(outerBoundary)) {
             // --- It's a ploygon with height (not a flat foot print)
             Polygon poly = new Polygon(outerBoundary);
             poly.setValue(AVKEY_OSMBUILDING_HAS_INNER_BOUNDS, false);
             poly.setAttributes(attrs);
             if (innerBoundaries != null) {
-                for (Iterable<? extends Position> iter : innerBoundaries) poly.addInnerBoundary(iter);
+                for (Iterable<? extends Position> iter:innerBoundaries) poly.addInnerBoundary(iter);
                 poly.setValue(AVKEY_OSMBUILDING_HAS_INNER_BOUNDS, true);
             }
 
@@ -491,10 +488,10 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
                     if (properties.getValue("roofMaterial") != null) roofMaterial = (String) properties.getValue("roofMaterial");
                     if (properties.getValue("roofOrientation") != null) roofOrientation = (String) properties.getValue("roofOrientation");
                     if (properties.getValue("roofDirection") != null) roofDirection = (Double) properties.getValue("roofDirection");
-                    
+
                 } catch (Exception ex) {
                     ex.printStackTrace();
-                    
+
                 }
             }
             if (roofColor == null) roofColor = "gray";
@@ -506,7 +503,7 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
                 height = (levels == 0 ? defaultHeight : levels * 4);
                 minHeight = 0;
                 if (height <= 0) height = defaultHeight;
-                
+
             } else if (minHeight >= height) {
                 // height = minHeight + 1;
                 minHeight = 0;
@@ -526,7 +523,7 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
             ra.copy(attrs);
             ra.setInteriorMaterial(new Material(stringToColor(roofColor)));
             ra.setOutlineMaterial(new Material(stringToColor(roofColor)));
-            
+
             // Color c = stringToColor(roofColor);
             // Color tran = new Color(0,0,0,255);
             // Material m = new Material(c, c, c, c, 0);
@@ -568,7 +565,7 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
             box.setOuterBoundary(outerBoundary);
             box.setBaseDepth(-minHeight); // --- negative value will push the base up instead of below
             if (innerBoundaries != null) {
-                for (Iterable<? extends Position> iter : innerBoundaries) {
+                for (Iterable<? extends Position> iter:innerBoundaries) {
                     box.addInnerBoundary(iter);
                 }
                 box.setValue(AVKEY_OSMBUILDING_HAS_INNER_BOUNDS, true);
@@ -600,7 +597,7 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
                 double centerLon = lons / corners.size();
                 Position center = Position.fromDegrees(centerLats, centerLon, roofHeight);
 
-                for (int i = 0; i < corners.size(); i++) {
+                for (int i = 0;i < corners.size();i++) {
                     if (i == corners.size() - 1) break;
 
                     Position p = corners.get(i);
@@ -693,7 +690,7 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
             //--- Display the foot print
             SurfacePolygon poly = new SurfacePolygon(attrs, outerBoundary);
             if (innerBoundaries != null) {
-                for (Iterable<? extends Position> iter : innerBoundaries) {
+                for (Iterable<? extends Position> iter:innerBoundaries) {
                     poly.addInnerBoundary(iter);
                 }
             }
@@ -736,7 +733,7 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
      * @return
      */
     protected static boolean hasNonzeroAltitude(Iterable<? extends Position> positions) {
-        for (Position pos : positions) {
+        for (Position pos:positions) {
             if (pos.getAltitude() != 0)
                 return true;
         }
@@ -767,7 +764,7 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
         //--- Use a default random gray scale
         int r = random.nextInt(16);
         String v = "#";
-        for (int i = 0; i < 6; i++) v += Integer.toHexString(r);
+        for (int i = 0;i < 6;i++) v += Integer.toHexString(r);
         if (properties != null) {
             v = properties.getStringValue("color");
             String mat = properties.getStringValue("material");
@@ -776,7 +773,7 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
         }
         if (v == null) v = "#bbbbbb";   //--
         // Color c = stringToColor(v);
-        
+
         // Material m = new Material(c.brighter(), c, c.darker(), c.darker(), 0);
         // sa.setInteriorMaterial(m);
         sa.setInteriorMaterial(new Material(stringToColor(v)));
@@ -819,6 +816,17 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
 
             return new Color((float) fxColor.getRed(), (float) fxColor.getGreen(), (float) fxColor.getBlue(), (float) fxColor.getOpacity());
 
+        } catch (Error er) {
+            //--- Javafx not present
+            try {
+                Color c = Color.decode(value);
+                return c;
+                
+            } catch (NumberFormatException ex) {
+                //---
+            }
+            return Color.LIGHT_GRAY;
+            
         } catch (Exception e) {
             System.out.println("Color not found:" + value);
             return Color.LIGHT_GRAY;
@@ -834,12 +842,10 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
         double distance = 2 * Math.asin(Math.sqrt((Math.sin((lat1 - lat2) / 2)) * (Math.sin((lat1 - lat2) / 2))
                 + Math.cos(lat1) * Math.cos(lat2) * (Math.sin((lon1 - lon2) / 2)) * (Math.sin((lon1 - lon2) / 2))));
 
-        return (distance * 6372.795*1000);
+        return (distance * 6372.795 * 1000);
 
     }
-    
-    
-    
+
     //***************************************************************************
     //*** Debug
     //**************************************************************************
