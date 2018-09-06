@@ -161,6 +161,12 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
             btgscreens.add(jitem);
             if (i == 0) jitem.setSelected(true);
         }
+        JRadioButtonMenuItem jitem = new JRadioButtonMenuItem("Window");
+        jitem.setActionCommand("screen");
+        jitem.addActionListener(this);
+        MN_Screens.add(jitem);
+        btgscreens.add(jitem);
+            
         MN_Fullscreen.addActionListener(this);
         MN_ScreenIdentifier.addActionListener(this);
 
@@ -780,13 +786,27 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
                         repaint();
 
                         GraphicsDevice gd = (GraphicsDevice) jitem.getClientProperty("gd");
-                        DisplayMode mode = gd.getDisplayMode();
-                        jframe = new JFrame("", gd.getDefaultConfiguration());
-                        jframe.add(SP_Main);
-                        jframe.setSize(mode.getWidth(), mode.getHeight());
-                        jframe.setUndecorated(true);
-                        jframe.setVisible(true);
-                        gd.setFullScreenWindow(jframe);
+                        if (gd == null) {
+                            //--- No graphic device defined, try to do a full window on all screen
+                            Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+                            jframe = new JFrame("");
+                            jframe.add(SP_Main);
+                            jframe.setSize(dim);
+                            jframe.setUndecorated(true);
+                            jframe.setVisible(true);
+                            // GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+                            // gd = ge.getDefaultScreenDevice();
+                            // gd.setFullScreenWindow(jframe);
+                            
+                        } else {
+                            DisplayMode mode = gd.getDisplayMode();
+                            jframe = new JFrame("", gd.getDefaultConfiguration());
+                            jframe.add(SP_Main);
+                            jframe.setSize(mode.getWidth(), mode.getHeight());
+                            jframe.setUndecorated(true);
+                            jframe.setVisible(true);
+                            gd.setFullScreenWindow(jframe);
+                        }
                         break;
                     }
                 }
