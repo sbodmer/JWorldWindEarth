@@ -8,9 +8,13 @@ package org.worldwindearth;
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.awt.AWTInputHandler;
 import gov.nasa.worldwind.event.SelectEvent;
+import gov.nasa.worldwind.geom.Position;
+import gov.nasa.worldwind.geom.Vec4;
 import gov.nasa.worldwind.pick.PickedObjectList;
+import gov.nasa.worldwind.view.orbit.BasicOrbitView;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseWheelEvent;
 
 /**
  *
@@ -26,7 +30,7 @@ public class WWEInputHandler extends AWTInputHandler {
     //*** MouseListener
     //**************************************************************************
     /**
-     * Remove the anoying simple click / double click move
+     * Remove the annoying simple click / double click move
      *
      * @param mouseEvent
      */
@@ -72,4 +76,37 @@ public class WWEInputHandler extends AWTInputHandler {
         super.mousePressed(mouseEvent);
     }
 
+    public void mouseWheelMoved(MouseWheelEvent mouseWheelEvent) {
+        Position pos = wwd.getCurrentPosition();
+        callMouseMovedListeners(mouseWheelEvent);
+        
+        Position eye = wwd.getView().getCurrentEyePosition();
+        // System.out.println("POS:"+pos+" EYE:"+eye);
+        // super.mouseWheelMoved(mouseWheelEvent);
+        /*
+        BasicOrbitView view = (BasicOrbitView) wwd.getView();
+        Vec4 fw = view.getCurrentForwardVector();
+        System.out.println("fw:"+fw);
+        */
+            // view.addPanToAnimator(pos, Angle.fromDegrees(pos.getHeading()), Angle.fromDegrees(c.getPitch()), c.getZoom());
+            // this.wwd.getView().getViewInputHandler().mouseWheelMoved(mouseWheelEvent);
+        super.mouseWheelMoved(mouseWheelEvent);
+        
+        /*
+        if (this.wwd == null)
+        {
+            return;
+        }
+
+        if (mouseWheelEvent == null)
+        {
+            return;
+        }
+
+        this.callMouseWheelMovedListeners(mouseWheelEvent);
+
+        if (!mouseWheelEvent.isConsumed())
+            this.wwd.getView().getViewInputHandler().mouseWheelMoved(mouseWheelEvent);
+        */
+    }
 }

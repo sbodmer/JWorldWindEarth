@@ -5,9 +5,11 @@
  */
 package org.osmbuildings;
 
+import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.WorldWindow;
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVList;
+import gov.nasa.worldwind.event.Message;
 import gov.nasa.worldwind.event.SelectEvent;
 import gov.nasa.worldwind.event.SelectListener;
 import gov.nasa.worldwind.geom.Vec4;
@@ -123,6 +125,11 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
 
     @Override
     public Object doAction(String message, Object argument, Object subject) {
+        if (message.equals(DO_ACTION_VIEWPORT_NEEDS_REFRESH)) {
+            //--- Simulate the stop event, so the layer will refresh the buildings
+            Message msg = new Message(View.VIEW_STOPPED, ww);
+            layer.onMessage(msg);
+        }
         return null;
     }
 

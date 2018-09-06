@@ -13,6 +13,7 @@ import gov.nasa.worldwind.layers.RenderableLayer;
 import gov.nasa.worldwind.render.*;
 import gov.nasa.worldwind.terrain.Tessellator;
 import gov.nasa.worldwind.util.Logging;
+import gov.nasa.worldwind.view.firstperson.BasicFlyView;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -403,6 +404,10 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
         for (int i=0;i<postRenderer.size();i++) postRenderer.get(i).postBuildingsRender(dc);
         
         center = dc.getViewportCenterPosition();
+        //--- If Fly view, the center is the eye (no center postion available)
+        if (dc.getView() instanceof BasicFlyView) {
+            center = dc.getView().getCurrentEyePosition();
+        }
     }
 
     @Override
@@ -447,7 +452,7 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
      */
     @Override
     public void onMessage(Message msg) {
-        // System.out.println("onMessage:" + msg.getName() + " when:" + msg.getWhen() + " source:" + msg.getSource());
+        System.out.println("onMessage:" + msg.getName() + " when:" + msg.getWhen() + " source:" + msg.getSource());
 
         if (View.VIEW_STOPPED.equals(msg.getName()) && (center != null)) {
             if (ww == null) {
@@ -465,6 +470,7 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
             double dy = 128 / Math.PI * maxY * (Math.PI - Math.log(tl));
             int y = (int) dy / 256;
              */
+            
             int x = lon2x(center.getLongitude().degrees, ZOOM);
             int y = lat2y(center.getLatitude().degrees, ZOOM);
             // System.out.println("X=" + x + ", Y=" + y);
