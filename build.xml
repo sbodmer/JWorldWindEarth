@@ -110,6 +110,10 @@
         <jar destfile="${dist.dir}/lib/ext/layers/Landsat.jar" manifest="Manifests/layers/Landsat.mf">
             <fileset dir="${build.dir}/classes" includes="gov/nasa/landsat/**"/>
         </jar>
+        <echo message="[Layer] Earth at night"/>
+        <jar destfile="${dist.dir}/lib/ext/layers/EarthAtNight.jar" manifest="Manifests/layers/EarthAtNight.mf">
+            <fileset dir="${build.dir}/classes" includes="gov/nasa/earthatnight/**"/>
+        </jar>
         <echo message="[Layer] Sky gradient"/>
         <jar destfile="${dist.dir}/lib/ext/layers/SkyGradient.jar" manifest="Manifests/layers/SkyGradient.mf">
             <fileset dir="${build.dir}/classes" includes="gov/nasa/skygradient/**"/>
@@ -118,6 +122,11 @@
         <jar destfile="${dist.dir}/lib/ext/layers/Atmosphere.jar" manifest="Manifests/layers/Atmosphere.mf">
             <fileset dir="${build.dir}/classes" includes="gov/nasa/atmosphere/**"/>
         </jar>
+        <echo message="[Layer] Fog"/>
+        <jar destfile="${dist.dir}/lib/ext/layers/Fog.jar" manifest="Manifests/layers/Fog.mf">
+            <fileset dir="${build.dir}/classes" includes="gov/nasa/fog/**"/>
+        </jar>
+        
         <echo message="[Layer] Bing (NASA)"/>
         <jar destfile="${dist.dir}/lib/ext/layers/Bing.jar" manifest="Manifests/layers/Bing.mf">
             <fileset dir="${build.dir}/classes" includes="gov/nasa/bing/**"/>

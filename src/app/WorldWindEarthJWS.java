@@ -36,6 +36,7 @@ public class WorldWindEarthJWS {
         "-factory", "de.komoot.photon.JPhotonGazetteerWWEFactory",
         "-factory", "gov.nasa.skygradient.JSkyGradientWWEFactory",
         "-factory", "gov.nasa.atmosphere.JAtmosphereWWEFactory",
+        "-factory", "gov.nasa.fog.JFogWWEFactory",
         "-factory", "gov.nasa.compass.JCompassWWEFactory",
         "-factory", "gov.nasa.bmng.JBMNGWWEFactory",
         "-factory", "gov.nasa.stars.JStarsWWEFactory",
@@ -48,6 +49,7 @@ public class WorldWindEarthJWS {
         "-factory", "gov.nasa.openstreetmap.JOpenstreetmapWWEFactory",
         "-factory", "gov.nasa.countries.JCountriesWWEFactory",
         "-factory", "gov.nasa.landsat.JLandsatWWEFactory",
+        "-factory", "gov.nasa.earthatnight.JEarthAtNightWWEFactory",
         "-factory", "gov.nasa.wms.JWMSWWEFactory",
         "-factory", "gov.nasa.yahoo.search.JYahooGazetteerWWEFactory",
         "-main", "org.worldwindearth.JWorldWindEarth"
