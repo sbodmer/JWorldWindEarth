@@ -452,7 +452,7 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
      */
     @Override
     public void onMessage(Message msg) {
-        System.out.println("onMessage:" + msg.getName() + " when:" + msg.getWhen() + " source:" + msg.getSource());
+        // System.out.println("onMessage:" + msg.getName() + " when:" + msg.getWhen() + " source:" + msg.getSource());
 
         if (View.VIEW_STOPPED.equals(msg.getName()) && (center != null)) {
             if (ww == null) {

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<MultiProperties xmlns="hu.skzs.multiproperties">
+    <Version>1.2</Version>
+    <Name>ML</Name>
+    <Description/>
+    <Handler>Java Properties Handler</Handler>
+    <Columns>
+        <Key>
+            <Width>150</Width>
+        </Key>
+        <Column>
+            <Width>304</Width>
+            <Name>en</Name>
+            <Description/>
+            <HandlerConfiguration>./GroundCursor.properties|false|true|true|false</HandlerConfiguration>
+        </Column>
+        <Column>
+            <Width>325</Width>
+            <Name>fr</Name>
+            <Description/>
+            <HandlerConfiguration>./GroundCursor_fr.properties|false|true|true|false</HandlerConfiguration>
+        </Column>
+    </Columns>
+    <Records>
+        <Property>
+            <Name>factory_name</Name>
+            <Description/>
+            <Disabled>false</Disabled>
+            <MultiLine>true</MultiLine>
+            <DefaultValue>Ground cursor</DefaultValue>
+            <Value disabled="true" final="false">Ground cursor</Value>
+            <Value disabled="true" final="false">Ground cursor</Value>
+        </Property>
+    </Records>
+</MultiProperties>

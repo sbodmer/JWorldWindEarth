@@ -151,9 +151,13 @@
         <jar destfile="${dist.dir}/lib/ext/layers/Virtualearth.jar" manifest="Manifests/layers/Virtualearth.mf">
             <fileset dir="${build.dir}/classes" includes="org/microsoft/virtualearth/**"/>
         </jar>
-        <echo message="[Layer] LatLonGraticule"/>
+        <echo message="[Layer] Lat Lon Graticule"/>
         <jar destfile="${dist.dir}/lib/ext/layers/LatLonGraticule.jar" manifest="Manifests/layers/LatLonGraticule.mf">
             <fileset dir="${build.dir}/classes" includes="gov/nasa/latlongraticule/**"/>
+        </jar>
+        <echo message="[Layer] Ground cursor"/>
+        <jar destfile="${dist.dir}/lib/ext/layers/GroundCursor.jar" manifest="Manifests/layers/GroundCursor.mf">
+            <fileset dir="${build.dir}/classes" includes="org/worldwindearth/groundcursor/**"/>
         </jar>
         <echo message="[Layer] Scale"/>
         <jar destfile="${dist.dir}/lib/ext/layers/Scale.jar" manifest="Manifests/layers/Scale.mf">
