@@ -27,7 +27,7 @@
     <AuxValue name="FormSettings_listenerGenerationStyle" type="java.lang.Integer" value="0"/>
     <AuxValue name="FormSettings_variablesLocal" type="java.lang.Boolean" value="false"/>
     <AuxValue name="FormSettings_variablesModifier" type="java.lang.Integer" value="4"/>
-    <AuxValue name="designerSize" type="java.awt.Dimension" value="-84,-19,0,5,115,114,0,18,106,97,118,97,46,97,119,116,46,68,105,109,101,110,115,105,111,110,65,-114,-39,-41,-84,95,68,20,2,0,2,73,0,6,104,101,105,103,104,116,73,0,5,119,105,100,116,104,120,112,0,0,2,-108,0,0,1,-61"/>
+    <AuxValue name="designerSize" type="java.awt.Dimension" value="-84,-19,0,5,115,114,0,18,106,97,118,97,46,97,119,116,46,68,105,109,101,110,115,105,111,110,65,-114,-39,-41,-84,95,68,20,2,0,2,73,0,6,104,101,105,103,104,116,73,0,5,119,105,100,116,104,120,112,0,0,2,81,0,0,1,-16"/>
   </AuxValues>
 
   <Layout class="org.netbeans.modules.form.compat2.layouts.DesignBorderLayout"/>
@@ -49,7 +49,7 @@
                           <Component id="jLabel3" min="-2" max="-2" attributes="0"/>
                           <EmptySpace type="separate" max="-2" attributes="0"/>
                           <Component id="SP_MaxTiles" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace min="19" pref="207" max="32767" attributes="0"/>
+                          <EmptySpace min="19" pref="252" max="32767" attributes="0"/>
                       </Group>
                       <Group type="102" attributes="0">
                           <Group type="103" groupAlignment="0" attributes="0">
@@ -90,7 +90,7 @@
                                           <Component id="CB_FixedLighting" min="-2" max="-2" attributes="0"/>
                                       </Group>
                                   </Group>
-                                  <EmptySpace min="0" pref="201" max="32767" attributes="0"/>
+                                  <EmptySpace min="0" pref="246" max="32767" attributes="0"/>
                               </Group>
                           </Group>
                           <EmptySpace max="-2" attributes="0"/>
@@ -138,7 +138,7 @@
                       <Component id="CB_FixedLighting" alignment="1" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
-                  <Component id="jTabbedPane1" pref="305" max="32767" attributes="0"/>
+                  <Component id="jTabbedPane1" pref="205" max="32767" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="jLabel7" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
@@ -360,9 +360,16 @@
       <Layout>
         <DimensionLayout dim="0">
           <Group type="103" groupAlignment="0" attributes="0">
-              <Group type="102" alignment="0" attributes="0">
+              <Group type="102" attributes="0">
                   <EmptySpace max="-2" attributes="0"/>
-                  <Component id="SP_Opacity" pref="439" max="32767" attributes="0"/>
+                  <Group type="103" groupAlignment="0" attributes="0">
+                      <Group type="102" alignment="0" attributes="0">
+                          <Component id="CMB_Provider" pref="0" max="32767" attributes="0"/>
+                          <EmptySpace max="-2" attributes="0"/>
+                          <Component id="BT_Apply" min="-2" max="-2" attributes="0"/>
+                      </Group>
+                      <Component id="SP_Opacity" alignment="0" pref="484" max="32767" attributes="0"/>
+                  </Group>
                   <EmptySpace max="-2" attributes="0"/>
               </Group>
           </Group>
@@ -370,6 +377,11 @@
         <DimensionLayout dim="1">
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="102" alignment="0" attributes="0">
+                  <EmptySpace max="-2" attributes="0"/>
+                  <Group type="103" groupAlignment="3" attributes="0">
+                      <Component id="CMB_Provider" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="BT_Apply" alignment="3" min="-2" max="-2" attributes="0"/>
+                  </Group>
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="SP_Opacity" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="32767" attributes="0"/>
@@ -389,6 +401,27 @@
             <Property name="paintTicks" type="boolean" value="true"/>
             <Property name="toolTipText" type="java.lang.String" value="Opacity"/>
             <Property name="value" type="int" value="100"/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JComboBox" name="CMB_Provider">
+          <Properties>
+            <Property name="editable" type="boolean" value="true"/>
+            <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
+              <StringArray count="2">
+                <StringItem index="0" value="http://[abcd].data.osmbuildings.org/0.2/sx3pxpz6/tile/${Z}/${X}/${Y}.json"/>
+                <StringItem index="1" value="http://192.168.10.2:8088/osmbuildings/${Z}/${X}/${Y}.json"/>
+              </StringArray>
+            </Property>
+            <Property name="toolTipText" type="java.lang.String" value="&lt;html&gt;&#xa;The building structure (GeoJSON) provider, the following sequence will be replaced&#xa;&lt;table&gt;&#xa;&lt;tr&gt;&lt;td&gt;${Z}&lt;/td&gt;&lt;td&gt;The zoom level (ex. 15)&lt;/td&gt;&lt;/tr&gt;&#xa;&lt;tr&gt;&lt;td&gt;${X}&lt;/td&gt;&lt;td&gt;The X tile column&lt;/td&gt;&lt;/tr&gt;&#xa;&lt;tr&gt;&lt;td&gt;${Y}&lt;/td&gt;&lt;td&gt;The Y tile row&lt;/td&gt;&lt;/tr&gt;&#xa;&lt;/table&gt;&#xa;To have random server use &quot;[ab...]&quot; notation, which will use a or b or ... in a random way.&lt;br&gt;&#xa;Ex: http://[abcd].data.osmbuildings.org/0.2/sx3pxpz6/tile/${Z}/${X}/${Y}.json&#xa;&lt;/html&gt;"/>
+          </Properties>
+          <AuxValues>
+            <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;String&gt;"/>
+          </AuxValues>
+        </Component>
+        <Component class="javax.swing.JButton" name="BT_Apply">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Apply"/>
+            <Property name="actionCommand" type="java.lang.String" value="apply"/>
           </Properties>
         </Component>
       </SubComponents>

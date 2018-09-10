@@ -27,7 +27,7 @@ import javax.imageio.ImageIO;
  * @author sbodmer
  */
 public class OSMBuildingsTile {
-    
+
     /**
      * Special key for ww osm
      */
@@ -37,20 +37,22 @@ public class OSMBuildingsTile {
     /**
      * Fetch the root texture directly for virtualearth
      */
-    static final String BING_URL = "http://a[123].ortho.tiles.virtualearth.net/tiles";
-
+    // static final String BING_URL = "http://a[123].ortho.tiles.virtualearth.net/tiles";
     // 15/16942/11632.json"
+    static java.security.MessageDigest md = null;
+
     /**
      * The counter for the different servers
      */
     static int current = 0;
-    
+
     int x = 0;
     int y = 0;
     int level = 15;
     double defaultHeight = 10;
     boolean applyRoofTextures = false;
     ShapeAttributes defaultAttrs = null;
+    String provider = "";   //--- Base URL provider
     /**
      * The fetching URL
      */
@@ -89,7 +91,17 @@ public class OSMBuildingsTile {
     LatLon tr = null;   //--- Top right
     LatLon br = null;   //--- Bottom right
 
-    public OSMBuildingsTile(int level, int x, int y, OSMBuildingsTileListener listener, Position center, FileStore store, boolean retrieveRemoteData, long expireDate, double defaultHeight, boolean applyRoofTextures, ShapeAttributes defaultAttrs) {
+    static {
+        try {
+            md = java.security.MessageDigest.getInstance("MD5");
+
+        } catch (java.security.NoSuchAlgorithmException ex) {
+            ex.printStackTrace();
+
+        }
+    }
+
+    public OSMBuildingsTile(int level, int x, int y, OSMBuildingsTileListener listener, Position center, FileStore store, boolean retrieveRemoteData, long expireDate, double defaultHeight, boolean applyRoofTextures, ShapeAttributes defaultAttrs, String provider) {
         this.x = x;
         this.y = y;
         this.level = level;
@@ -101,15 +113,24 @@ public class OSMBuildingsTile {
         this.expireDate = expireDate;
         this.defaultAttrs = defaultAttrs;
         this.applyRoofTextures = applyRoofTextures;
+        this.provider = provider;
 
-        cachePath = OSMBuildingsLayer.CACHE_FOLDER + File.separatorChar + level + File.separatorChar + x + File.separatorChar + y + ".json";
+        //--- Find the hash of the provider string to determine the cache folder
+        byte[] array = md.digest(provider.getBytes());
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < array.length; ++i) {
+            sb.append(Integer.toHexString((array[i] & 0xFF) | 0x100).substring(1, 3));
+        }
+        String hash = sb.toString();
+
+        cachePath = OSMBuildingsLayer.CACHE_FOLDER + File.separatorChar + hash + File.separatorChar + level + File.separatorChar + x + File.separatorChar + y + ".json";
 
         BufferedImage tex = new BufferedImage(256, 256, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2 = (Graphics2D) tex.getGraphics();
         g2.setColor(Color.RED);
         g2.fillRect(0, 0, 256, 256);
         g2.setColor(Color.WHITE);
-        g2.drawString("" + x + "y" + y, 30, 30);
+        g2.drawString("" + x + "x" + y, 30, 30);
 
         //--- Create the surface box for tile information
         tile = new ExtrudedPolygon();
@@ -226,21 +247,7 @@ public class OSMBuildingsTile {
             }
 
             //--- Retreive data from remote server
-            String s = getOSMBuildingUrl();
-            //--- Find the current server to use
-            int i1 = s.indexOf('[');
-            if (i1 != -1) {
-                int i2 = s.indexOf(']');
-                String sub = s.substring(i1 + 1, i2);
-                int l = sub.length();
-                current++;
-                if (current >= sub.length())
-                    current = 0;
-                char c = sub.charAt(current);
-                s = s.replaceAll("\\[" + sub + "\\]", "" + c);
-            }
-
-            s += "/15/" + x + "/" + y + ".json";
+            String s = getOSMBuildingUrl(level, x, y);
             url = new URL(s);
             HTTPRetriever r = new HTTPRetriever(url, lbl);
             r.setConnectTimeout(10000);
@@ -263,8 +270,8 @@ public class OSMBuildingsTile {
 
     /**
      * If not null, the tile was loaded
-     * 
-     * @return 
+     *
+     * @return
      */
     public Renderable getRenderable() {
         /*
@@ -357,10 +364,33 @@ public class OSMBuildingsTile {
     //**************************************************************************
     //*** Private
     //**************************************************************************
-    private String getOSMBuildingUrl() {
-        return "http://[abcd].data.osmbuildings.org/0.2/"+OSMBuildingsLayer.osmBuildingKey+"/tile";
-        
+    /**
+     * Replace the ${Z},${X},${Y} with resolved values
+     *
+     * @return
+     */
+    private String getOSMBuildingUrl(int z, int x, int y) {
+        String s = provider.replaceAll("\\$\\{Z\\}", "" + level);
+        s = s.replaceAll("\\$\\{X\\}", "" + x);
+        s = s.replaceAll("\\$\\{Y\\}", "" + y);
+        int i1 = s.indexOf('[');
+        if (i1 != -1) {
+            int i2 = s.indexOf(']');
+            String sub = s.substring(i1 + 1, i2);
+            int l = sub.length();
+            current++;
+            if (current >= sub.length())
+                current = 0;
+            char c = sub.charAt(current);
+            s = s.replaceAll("\\[" + sub + "\\]", "" + c);
+        }
+        System.out.println("S:" + s);
+        return s;
+        // return "http://192.168.10.2:8088/osmbuildings";
+        // return "http://[abcd].data.osmbuildings.org/0.2/" + OSMBuildingsLayer.osmBuildingKey + "/tile";
+
     }
+
     /**
      * Load local cached file
      */
@@ -427,11 +457,11 @@ public class OSMBuildingsTile {
             } catch (IOException ex) {
                 //--- Failed
                 if (listener != null) listener.osmBuildingsLoadingFailed(ti, "Local .json file could not be found : " + cachePath);
-                
+
             } catch (Exception ex) {
                 //--- Other problems
-                if (listener != null) listener.osmBuildingsLoadingFailed(ti, "Local .json file could not be loaded : "+ex.getMessage());
-                
+                if (listener != null) listener.osmBuildingsLoadingFailed(ti, "Local .json file could not be loaded : " + ex.getMessage());
+
             }
             // System.out.println("<RUN");
             fetchTs = 0;

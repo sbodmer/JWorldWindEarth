@@ -8,13 +8,10 @@ package org.osmbuildings;
 import gov.nasa.worldwind.*;
 import gov.nasa.worldwind.event.*;
 import gov.nasa.worldwind.geom.Position;
-import gov.nasa.worldwind.geom.Vec4;
 import gov.nasa.worldwind.layers.RenderableLayer;
 import gov.nasa.worldwind.render.*;
-import gov.nasa.worldwind.terrain.Tessellator;
 import gov.nasa.worldwind.util.Logging;
 import gov.nasa.worldwind.view.firstperson.BasicFlyView;
-import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -32,18 +29,15 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
 
     public static final String CACHE_FOLDER = "Earth" + File.separatorChar + "OSMBuildings";
 
-     /**
+    /**
      * The api key
      */
     public static String osmBuildingKey = "sx3pxpz6";
-    
+
     public static final int ZOOM = 15;
 
     public static final double maxX = Math.pow(2, ZOOM);
     public static final double maxY = Math.pow(2, ZOOM);
-
-    protected int cols = 3;
-    protected int rows = 3;
 
     // LatLon center = null;
     // SurfacePolygon carpet = null;
@@ -78,21 +72,23 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
     protected boolean drawProcessingBox = true;
     protected boolean drawOutline = false;
     protected boolean applyRoofTextures = false;
-    
-    
+    protected int cols = 3;
+    protected int rows = 3;
+    protected String provider = "";
+
     javax.swing.Timer timer = null;
 
     /**
      * For tile progress listening
      */
     protected ArrayList<OSMBuildingsTileListener> tileListeners = new ArrayList<>();
-    
+
     /**
      * The list of pre renderer
      */
     protected ArrayList<PreBuildingsRenderer> preRenderer = new ArrayList<>();
-    protected ArrayList<PostBuildingsRenderer>postRenderer = new ArrayList<>();
-    
+    protected ArrayList<PostBuildingsRenderer> postRenderer = new ArrayList<>();
+
     // Cylinder c = null;
     public OSMBuildingsLayer() {
         super();
@@ -212,13 +208,21 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
         removeAllRenderables();
     }
 
+    public void setProvider(String provider) {
+        this.provider = provider;
+    }
+
+    public String getProvider() {
+        return provider;
+    }
+    
     public void setDrawProcessingBox(boolean draw) {
         this.drawProcessingBox = draw;
     }
 
     public void setDrawOutline(boolean drawOutline) {
         this.drawOutline = drawOutline;
-        for (Renderable r:renderables) {
+        for (Renderable r : renderables) {
             if (r instanceof OSMBuildingsRenderable) {
                 OSMBuildingsRenderable or = (OSMBuildingsRenderable) r;
                 ((OSMBuildingsRenderable) r).setDrawOutline(drawOutline);
@@ -226,10 +230,6 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
         }
     }
 
-    public void setOSMBuildingKey(String key) {
-        if (!key.equals("")) osmBuildingKey = key;
-    }
-    
     public void setApplyRoofTextures(boolean applyRoofTextures) {
         this.applyRoofTextures = applyRoofTextures;
 
@@ -243,44 +243,47 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
     public void addPreBuildingsRenderer(PreBuildingsRenderer pbr) {
         if (!preRenderer.contains(pbr)) preRenderer.add(pbr);
     }
-    
+
     public boolean removePreBuildingsRenderer(PreBuildingsRenderer pbr) {
         return preRenderer.remove(pbr);
     }
-    
+
     public void addPostBuildingsRenderer(PostBuildingsRenderer pbr) {
         if (!postRenderer.contains(pbr)) postRenderer.add(pbr);
     }
-    
+
     public boolean removePostBuildingsRenderer(PostBuildingsRenderer pbr) {
         return postRenderer.remove(pbr);
     }
-    
+
     public void addTileListener(OSMBuildingsTileListener listener) {
         if (!tileListeners.contains(listener)) tileListeners.add(listener);
     }
+
     public boolean removeTileListener(OSMBuildingsTileListener listener) {
         return tileListeners.remove(listener);
     }
+
     /**
      * Set the building resolution grid (rows)
-     * 
-     * @param rows 
+     *
+     * @param rows
      */
     public void setRows(int rows) {
         this.rows = Math.abs(rows);
         if (maxTiles < (this.rows * this.cols)) maxTiles = this.rows * this.cols;
     }
-    
+
     /**
      * Set the building resolution grid (cols)
-     * @param cols 
+     *
+     * @param cols
      */
     public void setCols(int cols) {
         this.cols = Math.abs(cols);
         if (maxTiles < (this.rows * this.cols)) maxTiles = this.rows * this.cols;
     }
-    
+
     public static int lon2x(double lon, int z) {
         return (int) (Math.floor((lon + 180.0) / 360.0 * Math.pow(2.0, z)));
     }
@@ -308,7 +311,7 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
      */
     public static String xy2quad(int x, int y, int zoom) {
         StringBuilder quadKey = new StringBuilder();
-        for (int i = zoom;i > 0;i--) {
+        for (int i = zoom; i > 0; i--) {
             char digit = '0';
             int mask = 1 << (i - 1);
             if ((x & mask) != 0) {
@@ -334,7 +337,7 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
     public static int[] quad2xy(String quad) {
         int xyz[] = {0, 0, 0};
         xyz[2] = quad.length();
-        for (int i = xyz[2];i > 0;i--) {
+        for (int i = xyz[2]; i > 0; i--) {
             int mask = 1 << (i - 1);
             switch (quad.charAt(xyz[2] - i)) {
                 case '0':
@@ -365,7 +368,7 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
     public void setOpacity(double opacity) {
         super.setOpacity(opacity);
 
-        for (Renderable r:renderables) {
+        for (Renderable r : renderables) {
             if (r instanceof OSMBuildingsRenderable) {
                 OSMBuildingsRenderable or = (OSMBuildingsRenderable) r;
                 ((OSMBuildingsRenderable) r).setOpacity(opacity);
@@ -377,7 +380,7 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
     public void dispose() {
         preRenderer.clear();
         postRenderer.clear();
-        
+
         timer.stop();
         clearTiles();
         super.dispose();
@@ -397,12 +400,12 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
      */
     @Override
     public void doRender(DrawContext dc) {
-        for (int i=0;i<preRenderer.size();i++) preRenderer.get(i).preBuildingsRender(dc);
-        
+        for (int i = 0; i < preRenderer.size(); i++) preRenderer.get(i).preBuildingsRender(dc);
+
         super.doRender(dc);
-        
-        for (int i=0;i<postRenderer.size();i++) postRenderer.get(i).postBuildingsRender(dc);
-        
+
+        for (int i = 0; i < postRenderer.size(); i++) postRenderer.get(i).postBuildingsRender(dc);
+
         center = dc.getViewportCenterPosition();
         //--- If Fly view, the center is the eye (no center postion available)
         if (dc.getView() instanceof BasicFlyView) {
@@ -470,7 +473,7 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
             double dy = 128 / Math.PI * maxY * (Math.PI - Math.log(tl));
             int y = (int) dy / 256;
              */
-            
+
             int x = lon2x(center.getLongitude().degrees, ZOOM);
             int y = lat2y(center.getLatitude().degrees, ZOOM);
             // System.out.println("X=" + x + ", Y=" + y);
@@ -478,8 +481,8 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
             //--- Take the total of x tile
             x = x - (rows / 2);
             y = y - (rows / 2);
-            for (int i = 0;i < rows;i++) {
-                for (int j = 0;j < cols;j++) {
+            for (int i = 0; i < rows; i++) {
+                for (int j = 0; j < cols; j++) {
                     //--- Check if max tiles are reached, if so, remove the oldest one
                     if (buildings.size() > maxTiles) {
                         Iterator<OSMBuildingsTile> it = buildings.values().iterator();
@@ -494,14 +497,25 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
                         removeRenderable(oldest.getTileSurfaceRenderable());
                         //--- Remove the ids for removed tile
                         ArrayList<String> removed = oldest.getIds();
-                        for (int k = 0;k < removed.size();k++) ids.remove(removed.get(k));
+                        for (int k = 0; k < removed.size(); k++) ids.remove(removed.get(k));
                         buildings.remove(oldest.toString());
                     }
 
                     String key = (x + i) + "x" + (y + j) + "@" + ZOOM;
                     OSMBuildingsTile t = buildings.get(key);
                     if (t == null) {
-                        t = new OSMBuildingsTile(ZOOM, (x + i), (y + j), this, center, getDataFileStore(), isNetworkRetrievalEnabled(), getExpiryTime(), defaultHeight, applyRoofTextures, produceDefaultShapeAttribute());
+                        t = new OSMBuildingsTile(ZOOM,
+                                 (x + i),
+                                 (y + j),
+                                 this,
+                                 center,
+                                 getDataFileStore(),
+                                 isNetworkRetrievalEnabled(),
+                                 getExpiryTime(),
+                                 defaultHeight,
+                                 applyRoofTextures,
+                                 produceDefaultShapeAttribute(),
+                                 provider);
                         buildings.put(key, t);
                         t.fetch();
                     }
@@ -518,8 +532,8 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
     public void osmBuildingsLoaded(OSMBuildingsTile btile) {
         removeRenderable(btile.getTileSurfaceRenderable());
         addRenderable(btile.getRenderable());
-        
-        for (OSMBuildingsTileListener tl: tileListeners) tl.osmBuildingsLoaded(btile);
+
+        for (OSMBuildingsTileListener tl : tileListeners) tl.osmBuildingsLoaded(btile);
     }
 
     @Override
@@ -527,8 +541,8 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
         //--- Loading in progress, display tile shadow
         if (drawProcessingBox) addRenderable(btile.getTileSurfaceRenderable());
         ww.redrawNow();
-        
-        for (OSMBuildingsTileListener tl: tileListeners) tl.osmBuildingsLoading(btile);
+
+        for (OSMBuildingsTileListener tl : tileListeners) tl.osmBuildingsLoading(btile);
     }
 
     @Override
@@ -538,7 +552,7 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
         Logging.logger().log(Level.WARNING, "OSMBuildingsLayer.osmBuildingsLoadingFailed for tile " + btile.toString() + ", " + btile.getFetchedURL(), new Object[]{reason});
         buildings.remove(btile);
 
-        for (OSMBuildingsTileListener tl: tileListeners) tl.osmBuildingsLoadingFailed(btile, reason);
+        for (OSMBuildingsTileListener tl : tileListeners) tl.osmBuildingsLoadingFailed(btile, reason);
     }
 
     /**
@@ -582,7 +596,7 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
                 }
 
             }
-            for (int i = 0;i < tooLong.size();i++) osmBuildingsLoadingFailed(tooLong.get(i), "No failed message received after 30s, force to failed loading...");
+            for (int i = 0; i < tooLong.size(); i++) osmBuildingsLoadingFailed(tooLong.get(i), "No failed message received after 30s, force to failed loading...");
         }
     }
 
@@ -602,7 +616,7 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
 
         defaultAttrs.setEnableLighting(true);
         defaultAttrs.setEnableAntialiasing(true);
-        
+
         return defaultAttrs;
     }
 
@@ -611,15 +625,18 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
     //**************************************************************************
     /**
      * Will be called just before the layer will render
-     * 
+     *
      */
     public static interface PreBuildingsRenderer {
+
         public void preBuildingsRender(DrawContext dc);
     }
+
     public static interface PostBuildingsRenderer {
+
         public void postBuildingsRender(DrawContext dc);
     }
-    
+
     //**************************************************************************
     //*** Debug
     //**************************************************************************

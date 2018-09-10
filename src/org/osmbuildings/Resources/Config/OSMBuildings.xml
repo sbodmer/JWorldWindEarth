@@ -12,5 +12,5 @@
     <Property name="DrawOutline" value="false"/>
     <Property name="DrawProcessingBox" value="true"/>
     <Property name="ApplyRoofTextures" value="false"/>
-    <Property name="OSMBuildingKey" value=""/>
+    <Property name="Provider" value="http://[abcd].data.osmbuildings.org/0.2/sx3pxpz6/tile/${Z}/${X}/${Y}.json"/>
 </Layer>

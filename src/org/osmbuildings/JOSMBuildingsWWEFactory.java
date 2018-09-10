@@ -18,8 +18,6 @@ import javax.swing.JComponent;
 import org.tinyrcp.App;
 import org.tinyrcp.TinyPlugin;
 import org.w3c.dom.Element;
-import org.worldwindearth.WWE;
-import org.worldwindearth.WWEPlugin;
 import org.worldwindearth.WWEFactory;
 
 /**
@@ -71,13 +69,9 @@ public class JOSMBuildingsWWEFactory extends javax.swing.JPanel implements WWEFa
 
     }
     
-    public String getOSMBuildingKey() {
-        return TF_OSMBuildingKey.getText();
-    }
     //**************************************************************************
     //*** WWEPluginFactory
     //**************************************************************************
-
     @Override
     public Icon getFactoryIcon(int size) {
         return LB_Name.getIcon();
@@ -120,7 +114,6 @@ public class JOSMBuildingsWWEFactory extends javax.swing.JPanel implements WWEFa
     public void configure(Element config) {
         if (config == null) return;
 
-        TF_OSMBuildingKey.setText(config.getAttribute("osmBuildingKey"));
         try {
             SP_ExpireDays.setValue(Integer.parseInt(config.getAttribute("expireDays")));
 
@@ -139,7 +132,7 @@ public class JOSMBuildingsWWEFactory extends javax.swing.JPanel implements WWEFa
         if (config == null) return;
 
         config.setAttribute("expireDays", SP_ExpireDays.getValue().toString());
-        config.setAttribute("osmBuildingKey", TF_OSMBuildingKey.getText());
+        
     }
 
     @Override
@@ -215,9 +208,6 @@ public class JOSMBuildingsWWEFactory extends javax.swing.JPanel implements WWEFa
         SP_ExpireDays = new javax.swing.JSpinner();
         jLabel3 = new javax.swing.JLabel();
         TF_CachePath = new javax.swing.JTextField();
-        jLabel4 = new javax.swing.JLabel();
-        TF_OSMBuildingKey = new javax.swing.JTextField();
-        jLabel1 = new javax.swing.JLabel();
 
         LB_Name.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/osmbuildings/Resources/Icons/22x22/osmbuildings.png"))); // NOI18N
         java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("org/osmbuildings/OSMBuildings"); // NOI18N
@@ -242,13 +232,6 @@ public class JOSMBuildingsWWEFactory extends javax.swing.JPanel implements WWEFa
 
         TF_CachePath.setEditable(false);
 
-        jLabel4.setText("OSM Building API key");
-
-        TF_OSMBuildingKey.setToolTipText("Enter your API Key (if empty a default key will be used)");
-
-        jLabel1.setForeground(java.awt.Color.red);
-        jLabel1.setText("<html>If you change the API key, you have to restart the app<br>\nand don't forget to save your configuration</html>");
-
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -267,16 +250,11 @@ public class JOSMBuildingsWWEFactory extends javax.swing.JPanel implements WWEFa
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(BT_Clear))
                             .addComponent(SP_ExpireDays, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(0, 187, Short.MAX_VALUE))
+                        .addGap(0, 200, Short.MAX_VALUE))
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                            .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, 165, Short.MAX_VALUE))
+                        .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 165, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(TF_OSMBuildingKey)
-                            .addComponent(TF_CachePath)
-                            .addComponent(jLabel1))))
+                        .addComponent(TF_CachePath)))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -295,13 +273,7 @@ public class JOSMBuildingsWWEFactory extends javax.swing.JPanel implements WWEFa
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(TF_CachePath, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(TF_OSMBuildingKey, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(130, Short.MAX_VALUE))
+                .addContainerGap(202, Short.MAX_VALUE))
         );
 
         add(jPanel1, java.awt.BorderLayout.CENTER);
@@ -316,11 +288,8 @@ public class JOSMBuildingsWWEFactory extends javax.swing.JPanel implements WWEFa
     protected javax.swing.JSpinner SP_ExpireDays;
     protected javax.swing.JTextField TF_CachePath;
     protected javax.swing.JTextField TF_CacheSize;
-    protected javax.swing.JTextField TF_OSMBuildingKey;
-    protected javax.swing.JLabel jLabel1;
     protected javax.swing.JLabel jLabel2;
     protected javax.swing.JLabel jLabel3;
-    protected javax.swing.JLabel jLabel4;
     protected javax.swing.JPanel jPanel1;
     // End of variables declaration//GEN-END:variables
 

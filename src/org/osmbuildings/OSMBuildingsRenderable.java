@@ -353,7 +353,7 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
             GeoJSONPoint pt = geom.asPoint();
             PointPlacemarkAttributes pa = new PointPlacemarkAttributes();
             fillRenderablePoint(f, pt, pt.getPosition(), pa, properties);
-
+            
         } else if (geom.isMultiPoint()) {
             GeoJSONMultiPoint mp = geom.asMultiPoint();
             PointPlacemarkAttributes pa = new PointPlacemarkAttributes();
@@ -474,6 +474,7 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
             String roofShape = "flat";
             double roofHeight = 0;
             String roofMaterial = "concrete";
+            int roofLevels = 0;
             String roofOrientation = "along";
             double roofDirection = 0;
             if (properties != null) {
@@ -490,7 +491,7 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
                     if (properties.getValue("roofDirection") != null) roofDirection = (Double) properties.getValue("roofDirection");
 
                 } catch (Exception ex) {
-                    ex.printStackTrace();
+                    // ex.printStackTrace();
 
                 }
             }

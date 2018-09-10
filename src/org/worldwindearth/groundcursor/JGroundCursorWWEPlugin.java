@@ -15,6 +15,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import org.w3c.dom.Element;
 import org.tinyrcp.App;
 import org.tinyrcp.TinyFactory;
@@ -25,7 +27,7 @@ import org.worldwindearth.WWEPlugin;
  * 
  * @author sbodmer
  */
-public class JGroundCursorWWEPlugin extends JPanel implements WWEPlugin, ActionListener {
+public class JGroundCursorWWEPlugin extends JPanel implements WWEPlugin, ActionListener, ChangeListener {
     App app = null;
     TinyFactory factory = null;
     WorldWindow ww = null;
@@ -57,7 +59,7 @@ public class JGroundCursorWWEPlugin extends JPanel implements WWEPlugin, ActionL
     
     @Override
     public JComponent getConfigComponent() {
-        return null;
+        return this;
     }
 
     @Override
@@ -68,6 +70,9 @@ public class JGroundCursorWWEPlugin extends JPanel implements WWEPlugin, ActionL
     @Override
     public void setup(App app, Object arg) {
         this.app = app;
+        
+        SP_Zoom.addChangeListener(this);
+        CB_DrawTileInfo.addActionListener(this);
         
         //--- Create layer form defaut config
         layer = new GroundCursorLayer();
@@ -83,7 +88,11 @@ public class JGroundCursorWWEPlugin extends JPanel implements WWEPlugin, ActionL
 
     @Override
     public void saveConfig(Element config) {
-        //---
+        if (config == null) return;
+
+        config.setAttribute("zoom", "" + SP_Zoom.getValue());
+        config.setAttribute("drawTileInfo", "" + CB_DrawTileInfo.isSelected());
+        
     }
 
     @Override
@@ -113,7 +122,18 @@ public class JGroundCursorWWEPlugin extends JPanel implements WWEPlugin, ActionL
 
     @Override
     public void configure(Element config) {
-        //---
+        if (config == null) return;
+
+        try {
+            SP_Zoom.setValue(Integer.parseInt(config.getAttribute("zoom")));
+            CB_DrawTileInfo.setSelected(config.getAttribute("drawTileInfo").equals("true"));
+
+            layer.setZoom(SP_Zoom.getValue());
+            layer.setDrawTileInfo(CB_DrawTileInfo.isSelected());
+            
+        } catch (NumberFormatException ex) {
+            //--- 
+        }
     }
     
     //**************************************************************************
@@ -139,7 +159,22 @@ public class JGroundCursorWWEPlugin extends JPanel implements WWEPlugin, ActionL
     //**************************************************************************
     @Override
     public void actionPerformed(ActionEvent e) {
-        //---
+        if (e.getActionCommand().equals("drawTileInfo")) {
+            layer.setDrawTileInfo(CB_DrawTileInfo.isSelected());
+            ww.redraw();
+
+        }
+    }
+    
+    //**************************************************************************
+    //*** ChangeListener
+    //**************************************************************************
+    @Override
+    public void stateChanged(ChangeEvent e) {
+        if (e.getSource() == SP_Zoom) {
+            layer.setZoom(SP_Zoom.getValue());
+            ww.redraw();
+        }
     }
     /**
      * This method is called from within the constructor to initialize the form.
@@ -150,12 +185,62 @@ public class JGroundCursorWWEPlugin extends JPanel implements WWEPlugin, ActionL
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        setLayout(new java.awt.BorderLayout());
+        SP_Zoom = new javax.swing.JSlider();
+        jLabel1 = new javax.swing.JLabel();
+        CB_DrawTileInfo = new javax.swing.JCheckBox();
+
+        SP_Zoom.setFont(new java.awt.Font("Monospaced", 0, 10)); // NOI18N
+        SP_Zoom.setMajorTickSpacing(1);
+        SP_Zoom.setMaximum(18);
+        SP_Zoom.setMinimum(12);
+        SP_Zoom.setMinorTickSpacing(1);
+        SP_Zoom.setPaintLabels(true);
+        SP_Zoom.setPaintTicks(true);
+        SP_Zoom.setSnapToTicks(true);
+        SP_Zoom.setToolTipText("Tile zoom");
+        SP_Zoom.setValue(15);
+
+        jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        jLabel1.setText("Draw tile info");
+        jLabel1.setPreferredSize(new java.awt.Dimension(140, 26));
+
+        CB_DrawTileInfo.setActionCommand("drawTileInfo");
+        CB_DrawTileInfo.setPreferredSize(new java.awt.Dimension(26, 26));
+
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
+        this.setLayout(layout);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(SP_Zoom, javax.swing.GroupLayout.DEFAULT_SIZE, 388, Short.MAX_VALUE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(CB_DrawTileInfo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 0, Short.MAX_VALUE)))
+                .addContainerGap())
+        );
+        layout.setVerticalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(SP_Zoom, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(CB_DrawTileInfo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(214, Short.MAX_VALUE))
+        );
     }// </editor-fold>//GEN-END:initComponents
 
     
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JCheckBox CB_DrawTileInfo;
+    private javax.swing.JSlider SP_Zoom;
+    private javax.swing.JLabel jLabel1;
     // End of variables declaration//GEN-END:variables
 }
