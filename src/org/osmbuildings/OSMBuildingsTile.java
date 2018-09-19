@@ -141,10 +141,10 @@ public class OSMBuildingsTile {
         double lon = (x*360d/OSMBuildingsLayer.maxX)-180d;
         double dx = 360d/OSMBuildingsLayer.maxX;
          */
-        double lat1 = OSMBuildingsLayer.y2lat(y + 1, OSMBuildingsLayer.ZOOM);
-        double lon1 = OSMBuildingsLayer.x2lon(x, OSMBuildingsLayer.ZOOM);
-        double lat2 = OSMBuildingsLayer.y2lat(y, OSMBuildingsLayer.ZOOM);
-        double lon2 = OSMBuildingsLayer.x2lon(x + 1, OSMBuildingsLayer.ZOOM);
+        double lat1 = OSMBuildingsLayer.y2lat(y + 1, level);
+        double lon1 = OSMBuildingsLayer.x2lon(x, level);
+        double lat2 = OSMBuildingsLayer.y2lat(y, level);
+        double lon2 = OSMBuildingsLayer.x2lon(x + 1, level);
         bl = LatLon.fromDegrees(lat1, lon1);       //--- Bottom left
         tl = LatLon.fromDegrees(lat2, lon1);     //--- Top left
         tr = LatLon.fromDegrees(lat2, lon2);  //--- Top right
@@ -248,6 +248,8 @@ public class OSMBuildingsTile {
 
             //--- Retreive data from remote server
             String s = getOSMBuildingUrl(level, x, y);
+            if (s.equals("")) return;
+                    
             url = new URL(s);
             HTTPRetriever r = new HTTPRetriever(url, lbl);
             r.setConnectTimeout(10000);
@@ -384,7 +386,7 @@ public class OSMBuildingsTile {
             char c = sub.charAt(current);
             s = s.replaceAll("\\[" + sub + "\\]", "" + c);
         }
-        System.out.println("S:" + s);
+        // System.out.println("S:" + s);
         return s;
         // return "http://192.168.10.2:8088/osmbuildings";
         // return "http://[abcd].data.osmbuildings.org/0.2/" + OSMBuildingsLayer.osmBuildingKey + "/tile";
@@ -445,7 +447,7 @@ public class OSMBuildingsTile {
                 GeoJSONDoc doc = new GeoJSONDoc(data);
                 doc.parse();
 
-                renderable = new OSMBuildingsRenderable(doc, defaultHeight, defaultAttrs, data.toString(), listener);
+                renderable = new OSMBuildingsRenderable(doc, defaultHeight, defaultAttrs, data.toString(), listener );
                 if (listener != null) listener.osmBuildingsLoaded(ti);
 
                 if (applyRoofTextures) fetchRoofTextures();

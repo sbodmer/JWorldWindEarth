@@ -3,6 +3,7 @@ package org.worldwindearth.groundcursor;
 import gov.nasa.worldwind.WorldWind;
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Position;
+import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.layers.RenderableLayer;
 import gov.nasa.worldwind.render.BasicShapeAttributes;
 import gov.nasa.worldwind.render.DrawContext;
@@ -13,6 +14,8 @@ import gov.nasa.worldwind.render.SurfaceCircle;
 import gov.nasa.worldwind.view.firstperson.BasicFlyView;
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.Rectangle;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,14 +40,14 @@ public class GroundCursorLayer extends RenderableLayer {
      * The last viewport center postion in world coordinates
      */
     Position center = null;
-    int zoom = 15;
-
+    int level = 15; //--- Fixed level
+    boolean dynamic = false;
     boolean drawTileInfo = false;
-    
+
     //--- Current x,y tile
     int cx = 0;
     int cy = 0;
-    
+
     /**
      * Sets fog range/density according to view altitude
      */
@@ -68,31 +71,24 @@ public class GroundCursorLayer extends RenderableLayer {
     //**************************************************************************
     //*** API
     //**************************************************************************
-    public void setZoom(int zoom) {
-        this.zoom = zoom;
-        if (tile != null) removeRenderable(tile);
-        if (drawTileInfo) {
-            tile = prepareTileInfo();
-            addRenderable(tile);
+    public void setLevel(int level) {
+        this.level = level;
+        //--- Force to draw tile
+        cx = -1;
+        cy = -1;
+    }
 
-        } else {
-            tile = null;
-        }
+    public void setDynamicLevel(boolean dynamic) {
+        this.dynamic = dynamic;
+        cx = -1;
+        cy = -1;
     }
 
     public void setDrawTileInfo(boolean drawTileInfo) {
         this.drawTileInfo = drawTileInfo;
-        if (drawTileInfo) {
-            if (tile == null) {
-                tile = prepareTileInfo();
-                addRenderable(tile);
-
-            }
-            
-        } else {
-            if (tile != null) removeRenderable(tile);
-            tile = null;
-        }
+        //--- Force to create the tile
+        cx = -1;
+        cy = -1;
     }
 
     //**************************************************************************
@@ -105,19 +101,44 @@ public class GroundCursorLayer extends RenderableLayer {
 
         //--- Move cursor to center of viewport
         if (center != null) cursor.moveTo(new Position(center, 0));
-        
+
         if (drawTileInfo) {
+            int zoom = level;
+            if (dynamic) {
+                /*
+                Sector s = dc.getVisibleSector();
+                Rectangle2D r = s.toRectangleDegrees();
+                // System.out.println("R:" + r);
+                double width = r.getWidth();
+                double height = r.getHeight();
+                 */
+
+                try {
+                    Rectangle r = dc.getView().getViewport();
+                    Position bl = dc.getView().computePositionFromScreenPoint((r.x/2)-128, (r.y/2)-128);
+                    Position br = dc.getView().computePositionFromScreenPoint(256, (r.y/2)-128);
+                    double w = br.getLongitude().degrees - bl.getLongitude().degrees;
+                    zoom = w2level(w);
+                    
+                } catch (NullPointerException ex) {
+
+                }
+            }
             int x = lon2x(center.getLongitude().degrees, zoom);
             int y = lat2y(center.getLatitude().degrees, zoom);
-            if ((cx != x) 
+            if ((cx != x)
                     || (cy != y)) {
                 if (tile != null) removeRenderable(tile);
-                tile = prepareTileInfo();
+                tile = prepareTileInfo(zoom);
                 addRenderable(tile);
-                        
-            } 
+
+            }
+
+        } else {
+            if (tile != null) removeRenderable(tile);
+            tile = null;
         }
-        
+
         super.doRender(dc);
     }
 
@@ -129,8 +150,7 @@ public class GroundCursorLayer extends RenderableLayer {
     //**************************************************************************
     //*** Private
     //**************************************************************************
-    private ExtrudedPolygon prepareTileInfo() {
-        
+    private ExtrudedPolygon prepareTileInfo(int zoom) {
         //--- Create the surface box for tile information
         ExtrudedPolygon tile = new ExtrudedPolygon();
         List<LatLon> list = new ArrayList<LatLon>();
@@ -177,11 +197,11 @@ public class GroundCursorLayer extends RenderableLayer {
         // tile.setCapAttributes(cap);
         BufferedImage tex = new BufferedImage(256, 256, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2 = (Graphics2D) tex.getGraphics();
-        Color t = new Color(0,255,0,128);
+        Color t = new Color(0, 255, 0, 128);
         g2.setColor(t);
         g2.fillRect(0, 0, 256, 256);
         g2.setColor(Color.WHITE);
-        g2.drawString("" + x + "x" + y, 30, 30);
+        g2.drawString("" + zoom + "x" + x + "x" + y, 30, 30);
         g2.drawString("Lat TL " + tl.latitude, 30, 60);
         g2.drawString("Lon TL " + tl.longitude, 30, 80);
         g2.drawString("Lat BR " + br.latitude, 30, 100);
@@ -189,7 +209,7 @@ public class GroundCursorLayer extends RenderableLayer {
         float[] texCoords = new float[]{0, 0, 1, 0, 1, 1, 0, 1};
         tile.setCapImageSource(tex, texCoords, 4);
         // tile.setCapAttributes(cap);
-        
+
         cx = x;
         cy = y;
         return tile;
@@ -212,5 +232,19 @@ public class GroundCursorLayer extends RenderableLayer {
         return 180.0 / Math.PI * Math.atan(0.5 * (Math.exp(n) - Math.exp(-n)));
     }
 
-    
+    /**
+     * Convert the passed width (in decimal degrees) to the tile level
+     *
+     * @param w
+     * @return
+     */
+    public static int w2level(double w) {
+        for (int i = 0; i <= 18; i++) {
+            int tiles = (int) Math.pow(2, i);
+            double oneTile = 360d / tiles;
+            if (oneTile <= w) return i;
+        }
+        return 18;
+
+    }
 }

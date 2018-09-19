@@ -8,12 +8,15 @@ package org.osmbuildings;
 import gov.nasa.worldwind.*;
 import gov.nasa.worldwind.event.*;
 import gov.nasa.worldwind.geom.Position;
+import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.layers.RenderableLayer;
 import gov.nasa.worldwind.render.*;
 import gov.nasa.worldwind.util.Logging;
 import gov.nasa.worldwind.view.firstperson.BasicFlyView;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -29,16 +32,15 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
 
     public static final String CACHE_FOLDER = "Earth" + File.separatorChar + "OSMBuildings";
 
+    
     /**
      * The api key
      */
-    public static String osmBuildingKey = "sx3pxpz6";
+    // public static String osmBuildingKey = "sx3pxpz6";
 
-    public static final int ZOOM = 15;
-
-    public static final double maxX = Math.pow(2, ZOOM);
-    public static final double maxY = Math.pow(2, ZOOM);
-
+    // public static final int ZOOM = 15;
+    // public static final double maxX = Math.pow(2, ZOOM);
+    // public static final double maxY = Math.pow(2, ZOOM);
     // LatLon center = null;
     // SurfacePolygon carpet = null;
     protected ExtrudedPolygon box = null;
@@ -75,7 +77,10 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
     protected int cols = 3;
     protected int rows = 3;
     protected String provider = "";
-
+    protected int minLevel = 15;
+    protected int maxLevel = 15;
+    protected int lastLevel = 15;
+    
     javax.swing.Timer timer = null;
 
     /**
@@ -89,6 +94,12 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
     protected ArrayList<PreBuildingsRenderer> preRenderer = new ArrayList<>();
     protected ArrayList<PostBuildingsRenderer> postRenderer = new ArrayList<>();
 
+    
+    /**
+     * Manually added entries
+     */
+    protected ArrayList<GeoJSONEntry> entries = new ArrayList<GeoJSONEntry>();
+    
     // Cylinder c = null;
     public OSMBuildingsLayer() {
         super();
@@ -206,16 +217,29 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
         buildings.clear();
         ids.clear();
         removeAllRenderables();
+        
+        //--- Add the manual entries again
+        for (int i=0;i<entries.size();i++) {
+            addRenderable(entries.get(i).getRenderable());
+        }
     }
 
     public void setProvider(String provider) {
         this.provider = provider;
     }
 
+    public void setMinLevel(int minLevel) {
+        this.minLevel = minLevel;
+    }
+
+    public void setMaxLevel(int maxLevel) {
+        this.maxLevel = maxLevel;
+    }
+
     public String getProvider() {
         return provider;
     }
-    
+
     public void setDrawProcessingBox(boolean draw) {
         this.drawProcessingBox = draw;
     }
@@ -274,6 +298,30 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
         if (maxTiles < (this.rows * this.cols)) maxTiles = this.rows * this.cols;
     }
 
+    public void addGeoJSONEntry(GeoJSONEntry entry) {
+        entries.add(entry);
+        addRenderable(entry.getRenderable());
+        if (ww != null) ww.redraw();
+    }
+    
+    public GeoJSONEntry removeGeoJSONEntry(GeoJSONEntry entry) {
+        int index = entries.indexOf(entry);
+        if (index == -1) return null;
+        
+        GeoJSONEntry e = entries.remove(index);
+        removeRenderable(e.getRenderable());
+        if (ww != null) ww.redraw();
+        return e;
+    }
+    
+    public GeoJSONEntry getGeoJSONEntry(int index) {
+        return entries.get(index);
+    }
+    
+    public int getGeoJSONEntryCount() {
+        return entries.size();
+    }
+    
     /**
      * Set the building resolution grid (cols)
      *
@@ -299,6 +347,16 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
     public static double y2lat(int y, int z) {
         double n = Math.PI - 2.0 * Math.PI * y / Math.pow(2.0, z);
         return 180.0 / Math.PI * Math.atan(0.5 * (Math.exp(n) - Math.exp(-n)));
+    }
+
+    public static int w2level(double w) {
+        for (int i = 0; i <= 18; i++) {
+            int tiles = (int) Math.pow(2, i);
+            double oneTile = 360d / tiles;
+            if (oneTile <= w) return (i + 2);
+        }
+        return 18;
+
     }
 
     /**
@@ -474,8 +532,27 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
             int y = (int) dy / 256;
              */
 
-            int x = lon2x(center.getLongitude().degrees, ZOOM);
-            int y = lat2y(center.getLatitude().degrees, ZOOM);
+            //--- Find current view tile level
+            int zoom = 15;
+            try {
+                //--- Is there a better way ?
+                Rectangle r = ww.getView().getViewport();
+                Position bl = ww.getView().computePositionFromScreenPoint(r.x, r.y/2);
+                Position br = ww.getView().computePositionFromScreenPoint(r.width, r.y/2);
+                double w = br.getLongitude().degrees - bl.getLongitude().degrees;
+                zoom = w2level(w);
+                
+            } catch (NullPointerException ex) {
+                //---
+            }
+            
+            // System.out.println("Zoom:" + zoom);
+            if (zoom < minLevel) zoom = minLevel;
+            if (zoom > maxLevel) zoom = maxLevel;
+            if (lastLevel != zoom) clearTiles();
+            lastLevel = zoom;
+            int x = lon2x(center.getLongitude().degrees, zoom);
+            int y = lat2y(center.getLatitude().degrees, zoom);
             // System.out.println("X=" + x + ", Y=" + y);
 
             //--- Take the total of x tile
@@ -501,21 +578,21 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
                         buildings.remove(oldest.toString());
                     }
 
-                    String key = (x + i) + "x" + (y + j) + "@" + ZOOM;
+                    String key = (x + i) + "x" + (y + j) + "@" + zoom;
                     OSMBuildingsTile t = buildings.get(key);
                     if (t == null) {
-                        t = new OSMBuildingsTile(ZOOM,
-                                 (x + i),
-                                 (y + j),
-                                 this,
-                                 center,
-                                 getDataFileStore(),
-                                 isNetworkRetrievalEnabled(),
-                                 getExpiryTime(),
-                                 defaultHeight,
-                                 applyRoofTextures,
-                                 produceDefaultShapeAttribute(),
-                                 provider);
+                        t = new OSMBuildingsTile(zoom,
+                                (x + i),
+                                (y + j),
+                                this,
+                                center,
+                                getDataFileStore(),
+                                isNetworkRetrievalEnabled(),
+                                getExpiryTime(),
+                                defaultHeight,
+                                applyRoofTextures,
+                                produceDefaultShapeAttribute(),
+                                provider);
                         buildings.put(key, t);
                         t.fetch();
                     }

@@ -12,6 +12,9 @@ import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.event.Message;
 import gov.nasa.worldwind.event.SelectEvent;
 import gov.nasa.worldwind.event.SelectListener;
+import gov.nasa.worldwind.formats.geojson.GeoJSONDoc;
+import gov.nasa.worldwind.geom.Angle;
+import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.geom.Vec4;
 import gov.nasa.worldwind.layers.BasicLayerFactory;
 import gov.nasa.worldwind.layers.Layer;
@@ -24,19 +27,26 @@ import gov.nasa.worldwind.render.LightingModel;
 import gov.nasa.worldwind.render.Material;
 import gov.nasa.worldwind.render.Polygon;
 import gov.nasa.worldwind.terrain.Tessellator;
+import gov.nasa.worldwind.view.orbit.BasicOrbitView;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.DefaultListModel;
 import javax.swing.JComponent;
+import javax.swing.JFileChooser;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.filechooser.FileFilter;
 import org.tinyrcp.App;
 import org.w3c.dom.Element;
 import org.worldwindearth.WWE;
@@ -52,8 +62,16 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
     WWEFactory factory = null;
     App app = null;
     WorldWindow ww = null;
+    File lastDir = new File(System.getProperty("user.home"), "Sources/netbeans/JWorldWindEarth/Resources/GeoJSON");
 
-    OSMBuildingsLayer layer = null;
+    DefaultListModel model = new DefaultListModel();
+    protected OSMBuildingsLayer layer = null;
+
+    /**
+     * Current selected provider (cnnot use combobox model which is shared for
+     * all layers)
+     */
+    protected OSMBuildingProvider provider = null;
 
     protected Vec4 defaultSunDirection = null;
     protected Material defaultSunMat = null;
@@ -61,11 +79,15 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
     /**
      * Creates new form OSMBuildingsWWELayerPlugin
      */
-    public JOSMBuildingsWWEPlugin(WWEFactory factory, WorldWindow ww) {
+    public JOSMBuildingsWWEPlugin(WWEFactory factory, WorldWindow ww, DefaultComboBoxModel<OSMBuildingProvider> list) {
         this.factory = factory;
         this.ww = ww;
 
         initComponents();
+
+        LI_Entries.setModel(model);
+
+        CMB_Providers.setModel(list);
 
     }
 
@@ -144,10 +166,16 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
         layer.setExpiryTime(((JOSMBuildingsWWEFactory) factory).getExpireDays() * 24L * 60L * 60L * 1000L);
         // System.out.println("PICK:"+layer.isPickEnabled());
         // layer.setPickEnabled(true);
-        layer.setProvider(CMB_Provider.getSelectedItem().toString());
+        provider = (OSMBuildingProvider) CMB_Providers.getSelectedItem();
+        if (provider == null) provider = new OSMBuildingProvider("www.osmbuildings.org","https://[abcd].data.osmbuildings.org/0.2/sx3pxpz6/tile/${Z}/${X}/${Y}.json", 15, 15);
+        layer.setMinLevel(provider.getMinLevel());
+        layer.setMaxLevel(provider.getMaxLevel());
+        layer.setProvider(provider.getUrl());
         layer.addPreBuildingsRenderer(this);
         layer.addTileListener(this);
         ww.addSelectListener(this);
+
+        LB_Provider.setText(provider.getTitle());
 
         SP_DefaultHeight.addChangeListener(this);
         CB_DrawProcessingBox.addActionListener(this);
@@ -159,11 +187,16 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
         CB_ApplyRoofTextures.addActionListener(this);
 
         BT_Clear.addActionListener(this);
+        BT_Delete.addActionListener(this);
+
+        BT_Add.addActionListener(this);
 
         TA_Logs.addMouseListener(this);
         MN_ClearLogs.addActionListener(this);
 
         BT_Apply.addActionListener(this);
+
+        LI_Entries.addMouseListener(this);
     }
 
     @Override
@@ -184,10 +217,22 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
             SP_Rows.setValue(Integer.parseInt(config.getAttribute("rows")));
             CB_FixedLighting.setSelected(config.getAttribute("fixedLighting").equals("true"));
 
-            String provider = config.getAttribute("provider");
-            if (!provider.equals("")) {
-                CMB_Provider.setSelectedItem(provider);
-                layer.setProvider(provider);
+            String prov = config.getAttribute("provider");
+            if (!prov.equals("")) {
+                //--- Find  the provider
+                DefaultComboBoxModel<OSMBuildingProvider> model = (DefaultComboBoxModel<OSMBuildingProvider>) CMB_Providers.getModel();
+
+                for (int i = 0; i < model.getSize(); i++) {
+                    OSMBuildingProvider pr = model.getElementAt(i);
+                    if (pr.getTitle().equals(prov)) {
+                        this.provider = pr;
+                        break;
+                    }
+                }
+                LB_Provider.setText(provider.getTitle());
+                layer.setProvider(provider.getUrl());
+                layer.setMinLevel(provider.getMinLevel());
+                layer.setMaxLevel(provider.getMaxLevel());
             }
             layer.setRows((int) SP_Rows.getValue());
             layer.setCols((int) SP_Rows.getValue());
@@ -215,7 +260,7 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
         config.setAttribute("applyRoofTextures", "" + CB_ApplyRoofTextures.isSelected());
         config.setAttribute("rows", SP_Rows.getValue().toString());
         config.setAttribute("fixedLighting", "" + CB_FixedLighting.isSelected());
-        config.setAttribute("provider", CMB_Provider.getSelectedItem().toString());
+        config.setAttribute("provider", provider.getTitle());
 
     }
 
@@ -270,9 +315,54 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
             TA_Logs.setText("");
 
         } else if (e.getActionCommand().equals("apply")) {
-            String provider = CMB_Provider.getSelectedItem().toString();
-            layer.setProvider(provider);
+            provider = (OSMBuildingProvider) CMB_Providers.getSelectedItem();
+            LB_Provider.setText(provider.getTitle());
+            layer.setProvider(provider.getUrl());
+            layer.setMinLevel(provider.getMinLevel());
+            layer.setMaxLevel(provider.getMaxLevel());
             layer.clearTiles();
+
+        } else if (e.getActionCommand().equals("add")) {
+            //--- Add a custom geojson object
+            JFileChooser jchooser = new JFileChooser(lastDir);
+            jchooser.setFileFilter(new FileFilter() {
+                @Override
+                public boolean accept(File pathname) {
+                    if (pathname.isDirectory()) return true;
+                    if (pathname.getName().endsWith(".json")) return true;
+                    return false;
+                }
+
+                @Override
+                public String getDescription() {
+                    return "GeoJSON objects";
+                }
+
+            });
+            int rep = jchooser.showOpenDialog(this);
+            if (rep == JFileChooser.APPROVE_OPTION) {
+                try {
+                    File f = jchooser.getSelectedFile();
+                    lastDir = f.getParentFile();
+                    GeoJSONDoc doc = new GeoJSONDoc(f);
+                    doc.parse();
+                    GeoJSONEntry entry = new GeoJSONEntry(f.getName(), doc, null);
+                    model.addElement(entry);
+                    layer.addGeoJSONEntry(entry);
+                    doc.close();
+
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+            }
+
+        } else if (e.getActionCommand().equals("delete")) {
+            GeoJSONEntry entry = LI_Entries.getSelectedValue();
+            if (entry != null) {
+                model.removeElement(entry);
+                layer.removeGeoJSONEntry(entry);
+            }
+
         }
         ww.redraw();
     }
@@ -425,7 +515,29 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
     //**************************************************************************
     @Override
     public void mouseClicked(MouseEvent e) {
-        //---
+        if (e.getSource() == LI_Entries) {
+            if (e.getClickCount() >= 2) {
+                GeoJSONEntry ge = LI_Entries.getSelectedValue();
+                if (ge != null) {
+                    try {
+                        //--- Could be another renderable...
+                        OSMBuildingsRenderable renderable = (OSMBuildingsRenderable) ge.getRenderable();
+                        Position ref = renderable.getReferencePosition();
+                        View v = ww.getView();
+                        if (v instanceof BasicOrbitView) {
+                            BasicOrbitView view = (BasicOrbitView) v;
+                            view.addPanToAnimator(ref, view.getHeading(), view.getPitch(), view.getZoom());
+
+                        } else {
+                            v.goTo(ref, 1000);
+                        }
+                        
+                    } catch (Exception ex) {
+
+                    }
+                }
+            }
+        }
     }
 
     @Override
@@ -483,10 +595,19 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
         TA_Object = new javax.swing.JTextArea();
         jScrollPane2 = new javax.swing.JScrollPane();
         TA_Logs = new javax.swing.JTextArea();
+        jPanel3 = new javax.swing.JPanel();
+        TB_Tools = new javax.swing.JToolBar();
+        BT_Add = new javax.swing.JButton();
+        BT_Edit = new javax.swing.JButton();
+        jSeparator9 = new javax.swing.JToolBar.Separator();
+        BT_Delete = new javax.swing.JButton();
+        jScrollPane4 = new javax.swing.JScrollPane();
+        LI_Entries = new javax.swing.JList<>();
         jPanel2 = new javax.swing.JPanel();
         SP_Opacity = new javax.swing.JSlider();
-        CMB_Provider = new javax.swing.JComboBox<>();
+        CMB_Providers = new javax.swing.JComboBox<>();
         BT_Apply = new javax.swing.JButton();
+        LB_Provider = new javax.swing.JLabel();
 
         MN_ClearLogs.setText("Clear logs");
         MN_ClearLogs.setActionCommand("clearLogs");
@@ -567,6 +688,45 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
 
         jTabbedPane1.addTab("Logs", jScrollPane2);
 
+        jPanel3.setLayout(new java.awt.BorderLayout());
+
+        TB_Tools.setBorder(null);
+        TB_Tools.setFloatable(false);
+
+        BT_Add.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
+        BT_Add.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/add.png"))); // NOI18N
+        BT_Add.setToolTipText("add");
+        BT_Add.setActionCommand("add");
+        BT_Add.setPreferredSize(new java.awt.Dimension(26, 26));
+        TB_Tools.add(BT_Add);
+
+        BT_Edit.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
+        BT_Edit.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/edit.png"))); // NOI18N
+        BT_Edit.setToolTipText("edit");
+        BT_Edit.setActionCommand("edit");
+        BT_Edit.setFocusable(false);
+        BT_Edit.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        BT_Edit.setPreferredSize(new java.awt.Dimension(26, 26));
+        BT_Edit.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        TB_Tools.add(BT_Edit);
+        TB_Tools.add(jSeparator9);
+
+        BT_Delete.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
+        BT_Delete.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/remove.png"))); // NOI18N
+        BT_Delete.setToolTipText("delete");
+        BT_Delete.setActionCommand("delete");
+        BT_Delete.setPreferredSize(new java.awt.Dimension(26, 26));
+        TB_Tools.add(BT_Delete);
+
+        jPanel3.add(TB_Tools, java.awt.BorderLayout.PAGE_START);
+
+        LI_Entries.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        jScrollPane4.setViewportView(LI_Entries);
+
+        jPanel3.add(jScrollPane4, java.awt.BorderLayout.CENTER);
+
+        jTabbedPane1.addTab("Custom GeoJson", jPanel3);
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -645,7 +805,7 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
                     .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(CB_FixedLighting, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jTabbedPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 205, Short.MAX_VALUE)
+                .addComponent(jTabbedPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 184, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -663,12 +823,17 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
         SP_Opacity.setToolTipText("Opacity");
         SP_Opacity.setValue(100);
 
-        CMB_Provider.setEditable(true);
-        CMB_Provider.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "http://[abcd].data.osmbuildings.org/0.2/sx3pxpz6/tile/${Z}/${X}/${Y}.json", "http://192.168.10.2:8088/osmbuildings/${Z}/${X}/${Y}.json" }));
-        CMB_Provider.setToolTipText("<html>\nThe building structure (GeoJSON) provider, the following sequence will be replaced\n<table>\n<tr><td>${Z}</td><td>The zoom level (ex. 15)</td></tr>\n<tr><td>${X}</td><td>The X tile column</td></tr>\n<tr><td>${Y}</td><td>The Y tile row</td></tr>\n</table>\nTo have random server use \"[ab...]\" notation, which will use a or b or ... in a random way.<br>\nEx: http://[abcd].data.osmbuildings.org/0.2/sx3pxpz6/tile/${Z}/${X}/${Y}.json\n</html>");
+        CMB_Providers.setEditable(true);
 
         BT_Apply.setText("Apply");
         BT_Apply.setActionCommand("apply");
+
+        LB_Provider.setBackground(new java.awt.Color(144, 202, 249));
+        LB_Provider.setFont(new java.awt.Font("DejaVu Sans", 1, 12)); // NOI18N
+        LB_Provider.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        LB_Provider.setText("...");
+        LB_Provider.setOpaque(true);
+        LB_Provider.setPreferredSize(new java.awt.Dimension(15, 26));
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -678,10 +843,11 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
                 .addContainerGap()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addComponent(CMB_Provider, 0, 1, Short.MAX_VALUE)
+                        .addComponent(CMB_Providers, 0, 1, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(BT_Apply))
-                    .addComponent(SP_Opacity, javax.swing.GroupLayout.DEFAULT_SIZE, 484, Short.MAX_VALUE))
+                    .addComponent(SP_Opacity, javax.swing.GroupLayout.DEFAULT_SIZE, 484, Short.MAX_VALUE)
+                    .addComponent(LB_Provider, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
@@ -689,8 +855,10 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(CMB_Provider, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(CMB_Providers, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(BT_Apply))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(LB_Provider, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(SP_Opacity, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -701,13 +869,18 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    protected javax.swing.JButton BT_Add;
     protected javax.swing.JButton BT_Apply;
     protected javax.swing.JButton BT_Clear;
+    protected javax.swing.JButton BT_Delete;
+    protected javax.swing.JButton BT_Edit;
     protected javax.swing.JCheckBox CB_ApplyRoofTextures;
     protected javax.swing.JCheckBox CB_DrawOutline;
     protected javax.swing.JCheckBox CB_DrawProcessingBox;
     protected javax.swing.JCheckBox CB_FixedLighting;
-    protected javax.swing.JComboBox<String> CMB_Provider;
+    protected javax.swing.JComboBox<OSMBuildingProvider> CMB_Providers;
+    protected javax.swing.JLabel LB_Provider;
+    protected javax.swing.JList<GeoJSONEntry> LI_Entries;
     protected javax.swing.JMenuItem MN_ClearLogs;
     protected javax.swing.JPopupMenu PU_Logs;
     protected javax.swing.JSpinner SP_DefaultHeight;
@@ -716,6 +889,7 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
     protected javax.swing.JSpinner SP_Rows;
     protected javax.swing.JTextArea TA_Logs;
     protected javax.swing.JTextArea TA_Object;
+    protected javax.swing.JToolBar TB_Tools;
     protected javax.swing.JLabel jLabel1;
     protected javax.swing.JLabel jLabel2;
     protected javax.swing.JLabel jLabel3;
@@ -726,8 +900,11 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
     protected javax.swing.JLabel jLabel8;
     protected javax.swing.JPanel jPanel1;
     protected javax.swing.JPanel jPanel2;
+    protected javax.swing.JPanel jPanel3;
     protected javax.swing.JScrollPane jScrollPane1;
     protected javax.swing.JScrollPane jScrollPane2;
+    protected javax.swing.JScrollPane jScrollPane4;
+    protected javax.swing.JToolBar.Separator jSeparator9;
     protected javax.swing.JTabbedPane jTabbedPane1;
     // End of variables declaration//GEN-END:variables
 

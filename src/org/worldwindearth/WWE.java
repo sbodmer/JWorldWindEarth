@@ -26,6 +26,7 @@ public class WWE {
      */
     public static String TESSELATOR_KEY_SUN_AMBIENT_COLOR = "wwe.sun.ambient.color";
     
+    
     /**
      * Returns the distance in meters between two location
      * 
