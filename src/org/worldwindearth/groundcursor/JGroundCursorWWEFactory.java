@@ -107,6 +107,12 @@ public class JGroundCursorWWEFactory extends JPanel implements WWEFactory {
         return null;
     }
     
+    /**
+     * To restrict only for planet Earth, handle the passed object
+     * @param obj
+     * @return 
+     */
+    @Override
     public boolean doesFactorySupport(Object obj) {
         if (obj != null) return obj.toString().equals(WWEFactory.PLANET_EARTH);
         return false;

@@ -89,6 +89,14 @@ The passed argument will be an instance of a world wind window
 
     gov.nas.worldwind.WorldWindow
 
+
+To restrict the layer to only planet Earth, the factory method
+
+    public boolean doesFactorySupport(Object obj); 
+
+should return true if the passed object is WWEFactory.PLANET_EARTH
+        
+
 ### Plugin
 The plugin instance returned by the factory will be used for handling by
 the WorldWindEarth and TinyTCP frameworks.
@@ -107,3 +115,4 @@ The main JDesktopPane on which the world wind window is used is passed as the
 argument in the setup method.
 
     public void setup(Object argument);
+
