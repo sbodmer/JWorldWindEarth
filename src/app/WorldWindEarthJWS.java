@@ -31,6 +31,7 @@ public class WorldWindEarthJWS {
         "-factory", "org.worldwindearth.flatearth.JFlatEarthFactory",
         "-factory", "org.osmbuildings.JOSMBuildingsWWEFactory",
         "-factory", "org.worldwindearth.geocode.JGeocodeWWEFactory",
+        "-factory", "org.worldwindearth.groundcursor.JGroundCursorWWEFactory",
         "-factory", "org.nominatim.JNominatimWWEFactory",
         "-factory", "org.geonames.JGeonamesWWEFactory",
         "-factory", "de.komoot.photon.JPhotonGazetteerWWEFactory",
@@ -52,6 +53,7 @@ public class WorldWindEarthJWS {
         "-factory", "gov.nasa.earthatnight.JEarthAtNightWWEFactory",
         "-factory", "gov.nasa.wms.JWMSWWEFactory",
         "-factory", "gov.nasa.yahoo.search.JYahooGazetteerWWEFactory",
+        
         "-main", "org.worldwindearth.JWorldWindEarth"
     };
 

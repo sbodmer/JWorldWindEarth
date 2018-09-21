@@ -1,0 +1,2 @@
+[2018-09-21]
+  Added the osmbuilding multiple source configuration

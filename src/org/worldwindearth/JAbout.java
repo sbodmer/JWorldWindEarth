@@ -9,6 +9,7 @@ import gov.nasa.worldwind.WorldWind;
 import gov.nasa.worldwind.cache.FileStore;
 import java.awt.Desktop;
 import java.io.File;
+import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
@@ -49,7 +50,7 @@ public class JAbout extends javax.swing.JDialog implements HyperlinkListener {
         }
         TA_Contributors.setText(txt);
         TA_Contributors.setCaretPosition(0);
-        
+
         try {
             FileStore fs = WorldWind.getDataFileStore();
             List<? extends File> list = fs.getLocations();
@@ -64,8 +65,17 @@ public class JAbout extends javax.swing.JDialog implements HyperlinkListener {
         } catch (NullPointerException ex) {
             ex.printStackTrace();
         }
-        
+
         TP_WorldWind.addHyperlinkListener(this);
+
+        try {
+            URL url = getClass().getResource("/app/Resources/CHANGELOG.TXT");
+            TP_ChangeLog.setPage(url);
+            TP_ChangeLog.setCaretPosition(0);
+            
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
 
     //**************************************************************************
@@ -77,13 +87,13 @@ public class JAbout extends javax.swing.JDialog implements HyperlinkListener {
             try {
                 Desktop dt = Desktop.getDesktop();
                 dt.browse(e.getURL().toURI());
-                
+
             } catch (Exception ex) {
-                
+
             }
         }
     }
-    
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -103,6 +113,8 @@ public class JAbout extends javax.swing.JDialog implements HyperlinkListener {
         jPanel2 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         TA_Paths = new javax.swing.JTextArea();
+        jScrollPane5 = new javax.swing.JScrollPane();
+        TP_ChangeLog = new javax.swing.JTextPane();
         jPanel3 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
 
@@ -146,23 +158,30 @@ public class JAbout extends javax.swing.JDialog implements HyperlinkListener {
 
         jTabbedPane1.addTab("Paths", jPanel2);
 
+        TP_ChangeLog.setFont(new java.awt.Font("Monospaced", 0, 11)); // NOI18N
+        jScrollPane5.setViewportView(TP_ChangeLog);
+
+        jTabbedPane1.addTab("ChangeLog", jScrollPane5);
+
         getContentPane().add(jTabbedPane1, java.awt.BorderLayout.SOUTH);
+
+        jPanel3.setBackground(new java.awt.Color(144, 202, 249));
 
         jLabel1.setFont(new java.awt.Font("Arial", 0, 24)); // NOI18N
         jLabel1.setText("<html>\n<b>JWorldWindEarth</b> Preview<br>\n</html>");
         jPanel3.add(jLabel1);
 
-        getContentPane().add(jPanel3, java.awt.BorderLayout.PAGE_START);
+        getContentPane().add(jPanel3, java.awt.BorderLayout.NORTH);
 
         setBounds(0, 0, 650, 510);
     }// </editor-fold>//GEN-END:initComponents
 
-    
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel LB_Image;
     private javax.swing.JTextArea TA_Contributors;
     private javax.swing.JTextArea TA_Paths;
+    private javax.swing.JTextPane TP_ChangeLog;
     private javax.swing.JTextPane TP_WorldWind;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JPanel jPanel1;
@@ -171,8 +190,8 @@ public class JAbout extends javax.swing.JDialog implements HyperlinkListener {
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
+    private javax.swing.JScrollPane jScrollPane5;
     private javax.swing.JTabbedPane jTabbedPane1;
     // End of variables declaration//GEN-END:variables
 
-    
 }
