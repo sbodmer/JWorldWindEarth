@@ -40,7 +40,7 @@ Work in progress, but enough for a Preview...
 The project is a Netbeans project, for manual compiling, use the ant build.xml
 
     cd {cwd}
-    ant jar
+    ant build
 
 To run the application cd in the newly created dist dir
 
@@ -65,8 +65,8 @@ The manifest of the jar must be
 
 The jar itself should be placed in the WorldWindEarth lib folder
 
-    {wwe}/lib/layers
-    {www}/lib/...
+    {wwe}/lib/ext/layers
+    {www}/lib/ext/...
 
 ## Classes
 Your layer must be composed of
@@ -76,7 +76,7 @@ Your layer must be composed of
 - A WorldWind layer instance class returned by the plugin instance
 
 ### Plugin factory
-Your factory class must implement the tiny rcp framework factory
+Your factory class must implement the tinyrcp framework factory
 
     org.tinyrcp.PluginFactory
 
