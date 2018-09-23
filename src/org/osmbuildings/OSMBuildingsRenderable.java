@@ -544,6 +544,53 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
      * @param properties
      */
     protected void fillRenderablePolygon(GeoJSONFeature parent, GeoJSONPolygon owner, Iterable<? extends Position> outerBoundary, Iterable<? extends Position>[] innerBoundaries, ShapeAttributes attrs, AVList properties) {
+        // --- The polygon should be a volume
+        double height = 0;
+        double minHeight = 0;
+        double levels = 0;
+        double minLevels = 0;
+        String shape = "box";
+        String roofColor = "gray";
+        String roofShape = "flat";
+        double roofHeight = 0;
+        String roofMaterial = "concrete";
+        int roofLevels = 0;
+        String roofOrientation = "along";
+        double roofDirection = 0;
+        if (properties != null) {
+            try {
+                if (properties.getValue("height") != null) height = (Double) properties.getValue("height");
+                if (properties.getValue("levels") != null) levels = (Double) properties.getValue("levels");
+                if (properties.getValue("minHeight") != null) minHeight = (Double) properties.getValue("minHeight");
+                if (properties.getValue("shape") != null) shape = (String) properties.getValue("shape");
+                // --- Roof
+                if (properties.getValue("roofColor") != null) roofColor = (String) properties.getValue("roofColor");
+                if (properties.getValue("roofShape") != null) roofShape = (String) properties.getValue("roofShape");
+                if (properties.getValue("roofHeight") != null) roofHeight = (Double) properties.getValue("roofHeight");
+                if (properties.getValue("roofMaterial") != null) roofMaterial = (String) properties.getValue("roofMaterial");
+                if (properties.getValue("roofOrientation") != null) roofOrientation = (String) properties.getValue("roofOrientation");
+                if (properties.getValue("roofDirection") != null) roofDirection = (Double) properties.getValue("roofDirection");
+
+            } catch (Exception ex) {
+                // ex.printStackTrace();
+
+            }
+        }
+        if (roofColor == null) roofColor = "gray";
+
+        // --- Check if height is correct
+        if (height <= 0) {
+            // --- Sometimes level are set, but no height
+            // --- Consider 1 level to be 4 meters
+            height = (levels == 0 ? defaultHeight : levels * 4);
+            minHeight = 0;
+            if (height <= 0) height = defaultHeight;
+
+        }
+        if (minHeight >= height) {
+            // height = minHeight + 1;
+            minHeight = 0;
+        }
 
         if (hasNonzeroAltitude(outerBoundary)) {
             // --- It's a polygon with height (not a flat foot print)
@@ -560,54 +607,9 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
             poly.setValue(AVKEY_OSMBUILDING_FEATURE_ID, parent != null ? parent.getValue("id") : "");
             renderables.add(poly);
 
-        } else if (defaultHeight > 0) {
-            // --- The polygon should be a volume
-            double height = 0;
-            double minHeight = 0;
-            double levels = 0;
-            double minLevels = 0;
-            String shape = "box";
-            String roofColor = "gray";
-            String roofShape = "flat";
-            double roofHeight = 0;
-            String roofMaterial = "concrete";
-            int roofLevels = 0;
-            String roofOrientation = "along";
-            double roofDirection = 0;
-            if (properties != null) {
-                try {
-                    if (properties.getValue("height") != null) height = (Double) properties.getValue("height");
-                    if (properties.getValue("levels") != null) levels = (Double) properties.getValue("levels");
-                    if (properties.getValue("minHeight") != null) minHeight = (Double) properties.getValue("minHeight");
-                    if (properties.getValue("shape") != null) shape = (String) properties.getValue("shape");
-                    // --- Roof
-                    if (properties.getValue("roofColor") != null) roofColor = (String) properties.getValue("roofColor");
-                    if (properties.getValue("roofShape") != null) roofShape = (String) properties.getValue("roofShape");
-                    if (properties.getValue("roofHeight") != null) roofHeight = (Double) properties.getValue("roofHeight");
-                    if (properties.getValue("roofMaterial") != null) roofMaterial = (String) properties.getValue("roofMaterial");
-                    if (properties.getValue("roofOrientation") != null) roofOrientation = (String) properties.getValue("roofOrientation");
-                    if (properties.getValue("roofDirection") != null) roofDirection = (Double) properties.getValue("roofDirection");
-
-                } catch (Exception ex) {
-                    // ex.printStackTrace();
-
-                }
-            }
-            if (roofColor == null) roofColor = "gray";
-
-            // --- Check if height is correct
-            if (height <= 0) {
-                // --- Sometimes level are set, but no height
-                // --- Consider 1 level to be 4 meters
-                height = (levels == 0 ? defaultHeight : levels * 4);
-                minHeight = 0;
-                if (height <= 0) height = defaultHeight;
-
-            } else if (minHeight >= height) {
-                // height = minHeight + 1;
-                minHeight = 0;
-            }
-
+        } else if (height > 0) {
+            //--- The building has a height
+            
             // ShapeAttributes at = new BasicShapeAttributes();
             // attrs.setInteriorMaterial(Material.WHITE);
             // at.setOutlineOpacity(0.5);
@@ -709,7 +711,7 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
                     }
                     box.setValue(AVKEY_OSMBUILDING_HAS_INNER_BOUNDS, true);
                 }
-                
+
                 /*
                 box.setReferencePosition(null);
                 Position pos = box.getReferencePosition();
@@ -794,6 +796,7 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
 
             } else if (roofShape.equals("skillion")) {
                 //--- This algo is too complexe, please fix me...
+                /*
                 roofHeight = (roofHeight == 0 ? 2 : roofHeight);
                 // --- Polygon, first and last corner is the same
                 ArrayList<Position> corners = new ArrayList<>();
@@ -832,7 +835,7 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
                     LatLon ll = LatLon.fromDegrees(c1.latitude.degrees, c1.longitude.degrees);
                     Position c = Position.fromDegrees(ll.latitude.degrees, ll.longitude.degrees, elevation);
                     corners.add(c);
-                    
+
                 } else {
                     corners.add(c1);
                 }
@@ -841,7 +844,7 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
                     LatLon ll = LatLon.fromDegrees(c2.latitude.degrees, c2.longitude.degrees);
                     Position c = Position.fromDegrees(ll.latitude.degrees, ll.longitude.degrees, elevation);
                     corners.add(c);
-                    
+
                 } else {
                     corners.add(c2);
                 }
@@ -850,7 +853,7 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
                     LatLon ll = LatLon.fromDegrees(c3.latitude.degrees, c3.longitude.degrees);
                     Position c = Position.fromDegrees(ll.latitude.degrees, ll.longitude.degrees, elevation);
                     corners.add(c);
-                    
+
                 } else {
                     corners.add(c3);
                 }
@@ -859,12 +862,11 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
                     LatLon ll = LatLon.fromDegrees(c4.latitude.degrees, c4.longitude.degrees);
                     Position c = Position.fromDegrees(ll.latitude.degrees, ll.longitude.degrees, elevation);
                     corners.add(c);
-                    
+
                 } else {
                     corners.add(c4);
                 }
-                
-                
+
                 Polygon polygon = new Polygon(corners);
                 polygon.setAttributes(ra);
                 polygon.setAltitudeMode(WorldWind.RELATIVE_TO_GROUND);
@@ -874,8 +876,8 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
                 polygon.setValue(AVKEY_OSMBUILDING_COMMENT, comment);
                 polygon.setValue(AVKEY_OSMBUILDING_FEATURE_ID, parent != null ? parent.getValue("id") : "");
                 renderables.add(polygon);
-                 
-
+                */
+                
             } else if (roofShape.equals("hipped")) {
 
             } else if (roofShape.equals("flat")) {
