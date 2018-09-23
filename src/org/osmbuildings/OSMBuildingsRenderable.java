@@ -14,6 +14,7 @@ import gov.nasa.worldwind.formats.geojson.GeoJSONFeature;
 import gov.nasa.worldwind.formats.geojson.GeoJSONFeatureCollection;
 import gov.nasa.worldwind.formats.geojson.GeoJSONGeometry;
 import gov.nasa.worldwind.formats.geojson.GeoJSONGeometryCollection;
+import gov.nasa.worldwind.formats.geojson.GeoJSONLineString;
 import gov.nasa.worldwind.formats.geojson.GeoJSONMultiLineString;
 import gov.nasa.worldwind.formats.geojson.GeoJSONMultiPoint;
 import gov.nasa.worldwind.formats.geojson.GeoJSONMultiPolygon;
@@ -49,6 +50,7 @@ import java.awt.Color;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -65,7 +67,7 @@ import org.worldwindearth.WWE;
  * @author sbodmer
  */
 public class OSMBuildingsRenderable implements Renderable, PreRenderable, Disposable {
-    
+
     /**
      * The tile comment (like the file/url of the tile)
      */
@@ -83,16 +85,16 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
     public static final String AVKEY_OSMBUILDING_HAS_INNER_BOUNDS = "org.osmbuildings.hasInnerBounds";
 
     /**
-     * When the buildings was rendererd for thefirst time, the locatio reference is
-     * calculated so the extruded polygin is correctly draw on different soil elevation.
-     
+     * When the buildings was rendererd for thefirst time, the locatio reference
+     * is calculated so the extruded polygin is correctly draw on different soil
+     * elevation.
+     *
      */
     public static final String AVKEY_OSMBUILDING_REFERENCE_LOCATION = "org.osmbuildings.referenceLocation";
-    
+
     protected static final Map<String, String> COLORS = new HashMap<String, String>();
 
     protected static Random random = new Random();
-
 
     // protected PickSupport pickSupport = new PickSupport();
     /**
@@ -127,7 +129,7 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
      * Some reference position (first ExtrudedPolygon reference postion)
      */
     protected Position reference = null;
-    
+
     static {
         COLORS.put("lightbrown", "#ac6b25");
         COLORS.put("yellowbrown", "#bb9613");
@@ -185,19 +187,22 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
 
     /**
      * Return the tile reference position (first processed extruded polygon)
-     * @return 
+     *
+     * @return
      */
     public Position getReferencePosition() {
         return reference;
     }
-    
+
     /**
      * Return the list of internale renderables primitives objects
-     * @return 
+     *
+     * @return
      */
     public ArrayList<Renderable> getRenderables() {
         return renderables;
     }
+
     /**
      * Return the original list of rendered ids
      *
@@ -336,7 +341,7 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
                 if (reference == null) this.reference = ref;
                 if (ref != null) {
                     box.setReferenceLocation(LatLon.fromDegrees(ref.getLatitude().degrees, ref.getLongitude().degrees));
-                    
+
                 } else {
                     Iterator<Position> it = (Iterator<Position>) box.getOuterBoundary().iterator();
                     double max = -1000;
@@ -351,7 +356,7 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
                     box.setValue(AVKEY_OSMBUILDING_REFERENCE_LOCATION, ref);
                     box.setReferenceLocation(LatLon.fromDegrees(ref.getLatitude().degrees, ref.getLongitude().degrees));
                 }
-                
+                box.moveTo(ref);
             }
 
             r.render(dc);
@@ -449,9 +454,13 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
             }
 
         } else if (geom.isLineString()) {
-            String msg = Logging.getMessage("Geometry rendering of line not supported");
-            Logging.logger().warning(msg);
+            GeoJSONLineString line = geom.asLineString();
+            GeoJSONPositionArray ar = line.getCoordinates();
+            // String msg = Logging.getMessage("Geometry rendering of line not supported");
+            // Logging.logger().warning(msg);
             // this.addRenderableForLineString(geom.asLineString(), layer, properties);
+
+            fillRenderablePolyline(f, geom, ar, defaultAttrs, properties);
 
         } else if (geom.isMultiLineString()) {
             GeoJSONMultiLineString ms = geom.asMultiLineString();
@@ -537,7 +546,7 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
     protected void fillRenderablePolygon(GeoJSONFeature parent, GeoJSONPolygon owner, Iterable<? extends Position> outerBoundary, Iterable<? extends Position>[] innerBoundaries, ShapeAttributes attrs, AVList properties) {
 
         if (hasNonzeroAltitude(outerBoundary)) {
-            // --- It's a ploygon with height (not a flat foot print)
+            // --- It's a polygon with height (not a flat foot print)
             Polygon poly = new Polygon(outerBoundary);
             poly.setValue(AVKEY_OSMBUILDING_HAS_INNER_BOUNDS, false);
             poly.setAttributes(attrs);
@@ -700,7 +709,7 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
                     }
                     box.setValue(AVKEY_OSMBUILDING_HAS_INNER_BOUNDS, true);
                 }
-
+                
                 /*
                 box.setReferencePosition(null);
                 Position pos = box.getReferencePosition();
@@ -723,6 +732,7 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
                 System.out.println("REF:"+ref);
                 box.setReferencePosition(ref);
                  */
+                // box.moveTo(reference);
                 //--- FOR DEBUG, DISPLAY ONLY NOT FLAT ROOF
                 // if (roofShape.equals("pyramid") && (minHeight > 100)) renderables.add(box);
                 renderables.add(box);
@@ -781,6 +791,90 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
                  */
             } else if (roofShape.equals("gabled")) {
                 roofHeight = (roofHeight == 0 ? 2 : roofHeight);
+
+            } else if (roofShape.equals("skillion")) {
+                //--- This algo is too complexe, please fix me...
+                roofHeight = (roofHeight == 0 ? 2 : roofHeight);
+                // --- Polygon, first and last corner is the same
+                ArrayList<Position> corners = new ArrayList<>();
+                Iterator<? extends Position> it = outerBoundary.iterator();
+                Position top = Position.fromDegrees(0.0d, 0.0d, roofHeight);
+                int cnt = 0;
+                HashMap<Double, Position[]> lines = new HashMap<>();
+                //---  Find the shortes distances
+                Position c1 = it.next();
+                Position c2 = it.next();
+                Position c3 = it.next();
+                Position c4 = it.next();
+                // Position c1bis = it.next();
+                Position v1 = c2.subtract(c1);
+                Position v2 = c3.subtract(c2);
+                Position v3 = c4.subtract(c3);
+                Position v4 = c1.subtract(c4);
+                //--- Find the length of the vectors
+                double v1b = Math.sqrt(Math.pow(v1.latitude.degrees, 2) + Math.pow(v1.longitude.degrees, 2));
+                lines.put(v1b, new Position[]{c1, c2});
+                double v2b = Math.sqrt(Math.pow(v2.latitude.degrees, 2) + Math.pow(v2.longitude.degrees, 2));
+                lines.put(v2b, new Position[]{c2, c3});
+                double v3b = Math.sqrt(Math.pow(v3.latitude.degrees, 2) + Math.pow(v3.longitude.degrees, 2));
+                lines.put(v3b, new Position[]{c3, c4});
+                double v4b = Math.sqrt(Math.pow(v4.latitude.degrees, 2) + Math.pow(v4.longitude.degrees, 2));
+                lines.put(v4b, new Position[]{c4, c1});
+                double order[] = {v1b, v2b, v3b, v4b};
+                //--- Order the length (shortest => longest)
+                Arrays.sort(order);
+
+                //--- The longest is [3], the one to change height is [2]
+                //--- This is a supposition that the top line is the second longest one (???)
+                Position pos[] = lines.get(order[2]);
+                if ((c1 == pos[0]) || (c1 == pos[1])) {
+                    double elevation = roofHeight;
+                    LatLon ll = LatLon.fromDegrees(c1.latitude.degrees, c1.longitude.degrees);
+                    Position c = Position.fromDegrees(ll.latitude.degrees, ll.longitude.degrees, elevation);
+                    corners.add(c);
+                    
+                } else {
+                    corners.add(c1);
+                }
+                if ((c2 == pos[0]) || (c2 == pos[1])) {
+                    double elevation = roofHeight;
+                    LatLon ll = LatLon.fromDegrees(c2.latitude.degrees, c2.longitude.degrees);
+                    Position c = Position.fromDegrees(ll.latitude.degrees, ll.longitude.degrees, elevation);
+                    corners.add(c);
+                    
+                } else {
+                    corners.add(c2);
+                }
+                if ((c3 == pos[0]) || (c3 == pos[1])) {
+                    double elevation = roofHeight;
+                    LatLon ll = LatLon.fromDegrees(c3.latitude.degrees, c3.longitude.degrees);
+                    Position c = Position.fromDegrees(ll.latitude.degrees, ll.longitude.degrees, elevation);
+                    corners.add(c);
+                    
+                } else {
+                    corners.add(c3);
+                }
+                if ((c4 == pos[0]) || (c4 == pos[1])) {
+                    double elevation = roofHeight;
+                    LatLon ll = LatLon.fromDegrees(c4.latitude.degrees, c4.longitude.degrees);
+                    Position c = Position.fromDegrees(ll.latitude.degrees, ll.longitude.degrees, elevation);
+                    corners.add(c);
+                    
+                } else {
+                    corners.add(c4);
+                }
+                
+                
+                Polygon polygon = new Polygon(corners);
+                polygon.setAttributes(ra);
+                polygon.setAltitudeMode(WorldWind.RELATIVE_TO_GROUND);
+                polygon.move(Position.fromDegrees(0, 0, height));
+
+                if (properties != null) polygon.setValue(AVKey.PROPERTIES, properties);
+                polygon.setValue(AVKEY_OSMBUILDING_COMMENT, comment);
+                polygon.setValue(AVKEY_OSMBUILDING_FEATURE_ID, parent != null ? parent.getValue("id") : "");
+                renderables.add(polygon);
+                 
 
             } else if (roofShape.equals("hipped")) {
 

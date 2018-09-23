@@ -239,6 +239,12 @@
             <fileset dir="${build.dir}/classes" includes="org/osmbuildings/OSMBuildingsTile*"/>
             <fileset dir="${build.dir}/classes" includes="org/osmbuildings/Resources/"/>        
         </jar>
+        <echo message="[WorldWindLayer] GroudCursor"/>
+        <mkdir dir="${dist.dir}/dist"/>
+        <jar destfile="${dist.dir}/dist/GroundCursor.jar">
+            <fileset dir="${build.dir}/classes" includes="org/worldwindearth/groundcursor/GroundCursorLayer*"/>
+            <fileset dir="${build.dir}/classes" includes="org/worldwindearth/groundcursor/Resources/"/>        
+        </jar>
     </target>
     
     <!-- If the TinyRCP project is available use it to get the latest version -->
