@@ -340,7 +340,7 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
                 Position ref = (Position) box.getValue(AVKEY_OSMBUILDING_REFERENCE_LOCATION);
                 if (reference == null) this.reference = ref;
                 if (ref != null) {
-                    box.setReferenceLocation(LatLon.fromDegrees(ref.getLatitude().degrees, ref.getLongitude().degrees));
+                    box.setReferencePosition(Position.fromDegrees(ref.getLatitude().degrees, ref.getLongitude().degrees));
 
                 } else {
                     Iterator<Position> it = (Iterator<Position>) box.getOuterBoundary().iterator();
@@ -354,9 +354,10 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
                         }
                     }
                     box.setValue(AVKEY_OSMBUILDING_REFERENCE_LOCATION, ref);
-                    box.setReferenceLocation(LatLon.fromDegrees(ref.getLatitude().degrees, ref.getLongitude().degrees));
+                    box.setReferencePosition(Position.fromDegrees(ref.getLatitude().degrees, ref.getLongitude().degrees));
                 }
                 box.moveTo(ref);
+
             }
 
             r.render(dc);
@@ -609,7 +610,7 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
 
         } else if (height > 0) {
             //--- The building has a height
-            
+
             // ShapeAttributes at = new BasicShapeAttributes();
             // attrs.setInteriorMaterial(Material.WHITE);
             // at.setOutlineOpacity(0.5);
@@ -734,6 +735,7 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
                 System.out.println("REF:"+ref);
                 box.setReferencePosition(ref);
                  */
+                // box.move(Position.fromDegrees(0, 0, height - minHeight));        
                 // box.moveTo(reference);
                 //--- FOR DEBUG, DISPLAY ONLY NOT FLAT ROOF
                 // if (roofShape.equals("pyramid") && (minHeight > 100)) renderables.add(box);
@@ -868,6 +870,8 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
                 }
 
                 Polygon polygon = new Polygon(corners);
+                ra.setOutlineMaterial(Material.RED);
+                ra.setInteriorMaterial(Material.RED);
                 polygon.setAttributes(ra);
                 polygon.setAltitudeMode(WorldWind.RELATIVE_TO_GROUND);
                 polygon.move(Position.fromDegrees(0, 0, height));
@@ -876,8 +880,8 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
                 polygon.setValue(AVKEY_OSMBUILDING_COMMENT, comment);
                 polygon.setValue(AVKEY_OSMBUILDING_FEATURE_ID, parent != null ? parent.getValue("id") : "");
                 renderables.add(polygon);
-                */
-                
+                 */
+
             } else if (roofShape.equals("hipped")) {
 
             } else if (roofShape.equals("flat")) {
@@ -950,6 +954,15 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
         }
     }
 
+    /**
+     * Render polyline, if height, consider th be a polygon
+     *
+     * @param parent
+     * @param owner
+     * @param positions
+     * @param attrs
+     * @param properties
+     */
     protected void fillRenderablePolyline(GeoJSONFeature parent, GeoJSONGeometry owner, Iterable<? extends Position> positions, ShapeAttributes attrs, AVList properties) {
         if (hasNonzeroAltitude(positions)) {
             Path p = new Path();
@@ -963,11 +976,55 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
             renderables.add(p);
 
         } else {
-            SurfacePolyline sp = new SurfacePolyline(attrs, positions);
-            if (properties != null) sp.setValue(AVKey.PROPERTIES, properties);
-            sp.setValue(AVKEY_OSMBUILDING_COMMENT, comment);
-            sp.setValue(AVKEY_OSMBUILDING_FEATURE_ID, parent != null ? parent.getValue("id") : "");
-            renderables.add(sp);
+            double height = 0;
+            double levels = 0;
+
+            if (properties.getValue("height") != null) height = (Double) properties.getValue("height");
+            if (properties.getValue("levels") != null) levels = (Double) properties.getValue("levels");
+            if (height == 0) {
+                if (levels > 0) height = levels * 4;
+            }
+
+            if (height > 0) {
+                /*
+                //--- Draw a polygon with thepassed height
+                ArrayList<Position> corners = new ArrayList<Position>();
+                Iterator<? extends Position> it = positions.iterator();
+                while (it.hasNext()) {
+                    Position p = it.next();
+                    corners.add(p);
+                    
+                    
+                }
+                int len = corners.size();
+                for (int i=len-1;i<=0;i--) {
+                    Position p = corners.get(i);
+                    Position np = Position.fromDegrees(p.latitude.degrees, p.longitude.degrees, height);
+                    corners.add(np);
+                    
+                }
+                corners.add(corners.get(0));
+                Polygon poly = new Polygon(corners);
+                poly.setValue(AVKEY_OSMBUILDING_HAS_INNER_BOUNDS, false);
+                poly.setAltitudeMode(WorldWind.RELATIVE_TO_GROUND);
+                // box.setAttributes(attrs);
+                poly.setAttributes(attrs);
+                poly.setVisible(true);
+                
+                if (properties != null) poly.setValue(AVKey.PROPERTIES, properties);
+                poly.setValue(AVKEY_OSMBUILDING_COMMENT, comment);
+                poly.setValue(AVKEY_OSMBUILDING_FEATURE_ID, parent != null ? parent.getValue("id") : "");
+                renderables.add(poly);
+                // System.out.println(">>>>>>>>>>< THERE, draw polygon with height:"+height);
+                */
+                
+            } else {
+                SurfacePolyline sp = new SurfacePolyline(attrs, positions);
+                if (properties != null) sp.setValue(AVKey.PROPERTIES, properties);
+                sp.setValue(AVKEY_OSMBUILDING_COMMENT, comment);
+                sp.setValue(AVKEY_OSMBUILDING_FEATURE_ID, parent != null ? parent.getValue("id") : "");
+                renderables.add(sp);
+            }
 
         }
     }
