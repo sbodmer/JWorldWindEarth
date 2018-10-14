@@ -11,25 +11,20 @@ import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.WorldWind;
 import gov.nasa.worldwind.awt.WorldWindowGLJPanel;
 import gov.nasa.worldwind.event.InputHandler;
-import gov.nasa.worldwind.event.NoOpInputHandler;
 import gov.nasa.worldwind.event.RenderingEvent;
 import gov.nasa.worldwind.event.RenderingListener;
 import gov.nasa.worldwind.geom.Angle;
-import gov.nasa.worldwind.geom.Line;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.geom.Vec4;
-import gov.nasa.worldwind.globes.Earth;
-import gov.nasa.worldwind.globes.Globe;
 import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.layers.LayerList;
 import gov.nasa.worldwind.render.DrawContext;
-import gov.nasa.worldwind.render.Renderable;
-import gov.nasa.worldwind.view.BasicView;
 import gov.nasa.worldwind.view.firstperson.BasicFlyView;
 import gov.nasa.worldwind.view.orbit.BasicOrbitView;
-import gov.nasa.worldwind.view.orbit.OrbitView;
-import gov.nasa.worldwind.view.orbit.OrbitViewInputSupport.OrbitViewState;
 import java.awt.*;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
@@ -38,6 +33,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.image.BufferedImage;
@@ -46,7 +42,6 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.*;
-import javafx.scene.input.KeyCode;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
@@ -65,9 +60,10 @@ import org.worldwindearth.WWEPlugin;
 import org.tinyrcp.TinyPlugin;
 import org.worldwindearth.BasicWalkFlyView;
 import org.worldwindearth.JWWEPluginCellRenderer;
+import static org.worldwindearth.WWE.STORAGE_DATA_JPLANETS;
+import static org.worldwindearth.WWE.STORAGE_DATA_JPLANETS_RELATIONS;
 import org.worldwindearth.WWEFactory;
 import static org.worldwindearth.WWEPlugin.AVKEY_WORLDWIND_LAYER_PLUGIN;
-import org.worldwindearth.WWEViewInputHandler;
 import org.worldwindearth.WorldWindLayersTableModel;
 import org.worldwindearth.components.renderers.JCameraCellRenderer;
 import org.worldwindearth.components.renderers.JCameraSmallCellRenderer;
@@ -77,7 +73,9 @@ import org.worldwindearth.components.renderers.JCameraSmallCellRenderer;
  *
  * @author sbodmer
  */
-public class JPlanet extends JPanel implements KeyListener, ComponentListener, ActionListener, ListSelectionListener, ChangeListener, MouseListener, MouseWheelListener, TableModelListener, RenderingListener {
+public class JPlanet extends JPanel implements KeyListener, ComponentListener, ActionListener, ListSelectionListener, ChangeListener, MouseListener, MouseWheelListener, MouseMotionListener, TableModelListener, RenderingListener, Transferable {
+
+    public static DataFlavor DATAFLAVOR_JPLANET = null;
 
     NumberFormat nf = new DecimalFormat("#.########");
 
@@ -85,11 +83,16 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
     ArrayList<ActionListener> listeners = new ArrayList<ActionListener>();
     ResourceBundle bundle = null;
 
+    //--- Signature to store relation between JPlanet panels
+    String signature = "" + hashCode();
+
     /**
      * World wind window
      */
     // WorldWindowGLCanvas wwd = null;
     WorldWindowGLJPanel wwd = null;
+
+    JPlanetTransferHandler cth = null;
 
     /**
      * Initial camera position for the BasicOrbitView
@@ -102,6 +105,14 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
     DefaultListModel<Camera> cameras = new DefaultListModel<Camera>();
 
     /**
+     * The linked planets (when move occured here, forward same move to other
+     * planets)
+     *
+     */
+    ArrayList<JPlanet> attachedPlanets = new ArrayList<>();
+    JPlanet parentPlanet = null;
+
+    /**
      * The layers list
      */
     WorldWindLayersTableModel layers = null;
@@ -112,6 +123,9 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
     BasicOrbitView orbit = null;
     BasicFlyView fly = null;
     BasicWalkFlyView walk = null;
+
+    WWEInputHandler wweih = new WWEInputHandler();
+
     /**
      * The worldwindmodel
      */
@@ -163,6 +177,16 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
     int wsad = 0000;
     int iteration = 0;
 
+    static {
+        try {
+            DATAFLAVOR_JPLANET = new DataFlavor(DataFlavor.javaJVMLocalObjectMimeType + "; class=org.worldwindearth.components.JPlanet");
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+
+        }
+    }
+
     /**
      * Creates new form JTerminals
      */
@@ -177,9 +201,10 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         LB_FPKeys.setVisible(false);
 
         BT_Configure.setVisible(false);
-
         PN_Cameras.setVisible(false);
         LI_Cameras.setModel(cameras);
+
+        MN_ClearAttached.addActionListener(this);
 
         //--- Set a custom desktop manager, which will block the layers internal frame if sticky
         TB_Layers.getSelectionModel().addListSelectionListener(this);
@@ -229,6 +254,52 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
     }
 
     /**
+     * Link a JPlanet panel (camera view).
+     *
+     * THis component movement will be forwared to all attached planet
+     *
+     * @param linked
+     */
+    public void addAttachedPlanet(JPlanet linked) {
+        if (!attachedPlanets.contains(linked)) {
+            attachedPlanets.add(linked);
+
+        }
+
+    }
+
+    public boolean removeAttachedPlanet(JPlanet linked) {
+        return attachedPlanets.remove(linked);
+    }
+
+    /**
+     * Set the parent JPlanet which this component is attached to
+     *
+     * @param jp
+     */
+    public void setParentPlanet(JPlanet jp) {
+        this.parentPlanet = jp;
+        BT_Attach.setVisible(jp == null);
+    }
+
+    public JPlanet getParentPlanet() {
+        return parentPlanet;
+    }
+
+    /**
+     * Return this panel signature (for relation)
+     *
+     * @return
+     */
+    public String getSignature() {
+        return signature;
+    }
+
+    public WorldWindowGLJPanel getWorldWindowGLJPanel() {
+        return wwd;
+    }
+
+    /**
      * The passed obj is the planet string (WWEFactory.PLUGIN_PLANET.xxx)
      */
     public void initialize(App app, Model model, String planet) {
@@ -243,8 +314,11 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         // WWEViewInputHandler vhh = new WWEViewInputHandler();
         // view.setViewInputHandler(vhh);
         wwd.setView(orbit);
-        wwd.setInputHandler(new WWEInputHandler());
+        wwd.setInputHandler(wweih);
         wwd.addRenderingListener(this);
+        wweih.addMouseListener(this);
+        wweih.addMouseMotionListener(this);
+        wweih.addMouseWheelListener(this);
 
         cameraCellRenderer = new JCameraCellRenderer(app);
         cameraSmallCellRenderer = new JCameraSmallCellRenderer(app);
@@ -285,6 +359,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         MN_HideStatusBar.addActionListener(this);
         MN_HideLayers.addActionListener(this);
         MN_HideTopBar.addActionListener(this);
+        MN_SwitchSide.addActionListener(this);
 
         MN_Fullscreen.addActionListener(this);
         MN_ScreenIdentifier.addActionListener(this);
@@ -297,9 +372,27 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         ih.addMouseListener(this);
         ih.addMouseWheelListener(this);
 
+        //--- Register drag and drop action for camera (view) link
+        cth = new JPlanetTransferHandler(this);
+        BT_Attach.addMouseMotionListener(this);
+        BT_Attach.addMouseListener(this);
+        BT_Attach.putClientProperty("jplanet", this);
+        BT_Attach.setTransferHandler(cth);
+        DP_Main.setTransferHandler(cth);
+
+        //--- Register the JPlanet is global storage
+        HashMap<String, JPlanet> hm = (HashMap<String, JPlanet>) app.fetchData(STORAGE_DATA_JPLANETS);
+        if (hm == null) {
+            hm = new HashMap<String, JPlanet>();
+            app.storeData(STORAGE_DATA_JPLANETS, hm);
+        }
+        hm.put(signature, this);
+
     }
 
     public void configure(Element config) {
+        HashMap<String, JPlanet> hm = (HashMap<String, JPlanet>) app.fetchData(STORAGE_DATA_JPLANETS);
+
         //------------------------------------------------------------------------
         //--- Find "layer" category in jars and create the new layer menu
         //------------------------------------------------------------------------
@@ -328,8 +421,13 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         TB_Layers.getColumnModel().getColumn(0).setMaxWidth(26);
         TB_Layers.getColumnModel().getColumn(0).setMinWidth(26);
 
-        //--- Instantiate layers
+        //--- Instantiate layers and panels
         if (config != null) {
+            //--- Store the jplanet in global storage
+            signature = config.getAttribute("signature");
+            if (signature.equals("")) signature = "" + hashCode();
+            hm.put(signature, this);
+
             NodeList nl = config.getChildNodes();
             for (int i = 0; i < nl.getLength(); i++) {
                 if (nl.item(i).getNodeName().equals("Center")) {
@@ -392,6 +490,8 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
                         int loc = Integer.parseInt(e.getAttribute("mainDividerLocation"));
                         SP_Main.setDividerLocation(loc);
                         SP_Main.setLastDividerLocation(300);
+                        boolean hidden = e.getAttribute("hideLayers").equals("true");
+                        MN_HideLayers.setSelected(hidden);
 
                         loc = Integer.parseInt(e.getAttribute("dividerLocation"));
                         SP_Layers.setDividerLocation(loc);
@@ -428,6 +528,74 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
                         System.err.println("(E) No factory found for WorldWindPluginLayer " + e.getAttribute("factory"));
 
                     }
+
+                } else if (nl.item(i).getNodeName().equals("Panel")) {
+                    //--- Instanciate panels
+                    Element e = (Element) nl.item(i);
+                    TinyFactory fac = app.getFactory(e.getAttribute("factory"));
+                    if (fac != null) {
+                        TinyPlugin p = fac.newPlugin(null);
+                        if (p != null) {
+                            p.setup(app, DP_Main);
+                            p.configure(e);
+
+                            JComponent jcomp = p.getVisualComponent();
+                            jcomp.putClientProperty("plugin", p);
+                            JInternalFrame iframe = new JInternalFrame(p.getPluginName());
+                            iframe.setClosable(true);
+                            iframe.setMaximizable(true);
+                            iframe.setResizable(true);
+                            iframe.setIconifiable(true);
+                            iframe.getContentPane().add(jcomp);
+                            iframe.addInternalFrameListener(new InternalFrameAdapter() {
+                                @Override
+                                public void internalFrameClosing(InternalFrameEvent e) {
+                                    JInternalFrame ifr = e.getInternalFrame();
+                                    JComponent jcomp = (JComponent) ifr.getContentPane().getComponent(0);
+                                    ifr.removeAll();
+
+                                    TinyPlugin p = (TinyPlugin) jcomp.getClientProperty("plugin");
+                                    if (p != null) p.cleanup();
+
+                                    ifr.setVisible(false);
+                                    ifr.dispose();
+                                }
+                            });
+                            DP_Main.add(iframe, JLayeredPane.PALETTE_LAYER);
+                            iframe.setBounds(100, 100, 320, 240);
+                            try {
+                                int x = Integer.parseInt(e.getAttribute("x"));
+                                int y = Integer.parseInt(e.getAttribute("y"));
+                                int w = Integer.parseInt(e.getAttribute("width"));
+                                int h = Integer.parseInt(e.getAttribute("height"));
+                                iframe.setBounds(x, y, w, h);
+
+                            } catch (NumberFormatException ex) {
+                                //---
+                            }
+                            iframe.setVisible(true);
+
+                        } else {
+                            System.err.println("(E) WorldWindLayerPlugin could not be instantiated (" + fac.getFactoryName() + ")");
+
+                        }
+                    }
+
+                } else if (nl.item(i).getNodeName().equals("AttachedPlanet")) {
+                    Element e = (Element) nl.item(i);
+
+                    //--- Store the relations for later us
+                    HashMap<String, ArrayList<String>> li = (HashMap<String, ArrayList<String>>) app.fetchData(STORAGE_DATA_JPLANETS_RELATIONS);
+                    if (li == null) {
+                        li = new HashMap<>();
+                        app.storeData(STORAGE_DATA_JPLANETS_RELATIONS, li);
+                    }
+                    ArrayList<String> pl = li.get(signature);
+                    if (pl == null) {
+                        pl = new ArrayList<>();
+                        li.put(signature, pl);
+                    }
+                    pl.add(e.getAttribute("signature"));
                 }
             }
 
@@ -436,6 +604,16 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         //--- Refresh list last
         layers.fireTableDataChanged();
         layers.addTableModelListener(this);
+
+        //--- If layers are hidden, hide the split bar
+        boolean hide = MN_HideLayers.isSelected();
+        if (hide) {
+            PN_Left.setVisible(false);
+            SP_Main.setDividerSize(0);
+
+        }
+        SP_Main.revalidate();
+
         timer.start();
     }
 
@@ -446,15 +624,15 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
 
         JInternalFrame fr[] = DP_Main.getAllFrames();
         for (int i = 0; i < fr.length; i++) {
-            JComponent jcomp = (JComponent) fr[0].getContentPane().getComponent(0);
+            JComponent jcomp = (JComponent) fr[i].getContentPane().getComponent(0);
             fr[0].removeAll();
 
             //--- If plugin, cleanup
             TinyPlugin p = (TinyPlugin) jcomp.getClientProperty("plugin");
             if (p != null) p.cleanup();
 
-            fr[0].setVisible(false);
-            fr[0].dispose();
+            fr[i].setVisible(false);
+            fr[i].dispose();
         }
 
         m.getLayers().clear();
@@ -489,10 +667,12 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
      */
     public void save(Element config) {
         if (config == null) return;
+        config.setAttribute("signature", signature);
 
         Element e = config.getOwnerDocument().createElement("Layers");
         e.setAttribute("mainDividerLocation", "" + SP_Main.getDividerLocation());
         e.setAttribute("dividerLocation", "" + SP_Layers.getDividerLocation());
+        e.setAttribute("hideLayers", "" + MN_HideLayers.isSelected());
         config.appendChild(e);
 
         e = config.getOwnerDocument().createElement("Center");
@@ -556,6 +736,33 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
             }
         }
 
+        //--- Get the panel configs
+        JInternalFrame ji[] = DP_Main.getAllFrames();
+        for (int i = 0; i < ji.length; i++) {
+            JInternalFrame j = ji[i];
+
+            JComponent jcomp = (JComponent) j.getContentPane().getComponent(0);
+
+            TinyPlugin p = (TinyPlugin) jcomp.getClientProperty("plugin");
+            if (p == null) continue;
+
+            e = config.getOwnerDocument().createElement("Panel");
+            e.setAttribute("factory", p.getPluginFactory().getClass().getName());
+            e.setAttribute("name", p.getPluginName());
+            e.setAttribute("x", "" + j.getX());
+            e.setAttribute("y", "" + j.getY());
+            e.setAttribute("width", "" + j.getWidth());
+            e.setAttribute("height", "" + j.getHeight());
+            p.saveConfig(e);
+            config.appendChild(e);
+        }
+
+        //--- Store the JPlanet relations
+        for (JPlanet jp : attachedPlanets) {
+            e = config.getOwnerDocument().createElement("AttachedPlanet");
+            e.setAttribute("signature", jp.getSignature());
+            config.appendChild(e);
+        }
     }
 
     //**************************************************************************
@@ -737,9 +944,13 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
                 layers.fireTableDataChanged();
 
             } else {
+                String name = JOptionPane.showInputDialog(this, "Name", factory.getFactoryName());
+                if (name == null) return;
+
                 TinyPlugin p = factory.newPlugin(null);
                 p.setup(app, null);
                 p.configure(null);
+                p.setPluginName(name);
 
                 JComponent jcomp = p.getVisualComponent();
                 jcomp.putClientProperty("plugin", p);
@@ -788,6 +999,16 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
 
             }
             SP_Main.revalidate();
+
+        } else if (e.getActionCommand().equals("switch")) {
+            JComponent left = (JComponent) SP_Main.getLeftComponent();
+            JComponent right = (JComponent) SP_Main.getRightComponent();
+            int lo = SP_Main.getDividerLocation();
+            SP_Main.remove(left);
+            SP_Main.remove(right);
+            SP_Main.setLeftComponent(right);
+            SP_Main.setRightComponent(left);
+            SP_Main.setDividerLocation(SP_Main.getWidth() - lo);
 
         } else if (e.getActionCommand().equals("renameLayer")) {
             int index = TB_Layers.getSelectedRow();
@@ -1056,6 +1277,9 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
             orbit.setPitch(Angle.fromDMdS(45, 0));
             wwd.redraw();
 
+        } else if (e.getActionCommand().equals("clearAttached")) {
+            for (JPlanet jp : attachedPlanets) jp.setParentPlanet(null);
+            attachedPlanets.clear();
         }
 
     }
@@ -1096,13 +1320,13 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
 
         } else if (e.getKeyCode() == KeyEvent.VK_S) {
             wsad = wsad | KEY_S;
-            
+
         } else if (e.getKeyCode() == KeyEvent.VK_A) {
             wsad = wsad | KEY_A;
-            
+
         } else if (e.getKeyCode() == KeyEvent.VK_D) {
             wsad = wsad | KEY_D;
-            
+
         } else if (e.getKeyCode() == KeyEvent.VK_Q) {
             View v = wwd.getView();
             v.setRoll(Angle.fromDegrees(v.getRoll().getDegrees() - 1));
@@ -1129,13 +1353,13 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
 
         } else if (e.getKeyCode() == KeyEvent.VK_S) {
             wsad = wsad & ~KEY_S;
-            
+
         } else if (e.getKeyCode() == KeyEvent.VK_A) {
             wsad = wsad & ~KEY_A;
-            
+
         } else if (e.getKeyCode() == KeyEvent.VK_D) {
             wsad = wsad & ~KEY_D;
-            
+
         }
         // Syst.out.println("WSAD:" + wsad);
     }
@@ -1268,15 +1492,32 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
                 Camera c = LI_Cameras.getSelectedValue();
                 if (c != null) {
                     View v = wwd.getView();
-                    if (v  instanceof BasicOrbitView) {
+                    if (v instanceof BasicOrbitView) {
                         BasicOrbitView view = (BasicOrbitView) v;
                         view.addPanToAnimator(c.getCenterPosition(), Angle.fromDegrees(c.getHeading()), Angle.fromDegrees(c.getPitch()), c.getZoom());
-                        
+
+                        for (JPlanet jp : attachedPlanets) {
+                            View tv = jp.getWorldWindowGLJPanel().getView();
+                            if (tv instanceof BasicOrbitView) {
+                                BasicOrbitView tview = (BasicOrbitView) tv;
+                                tview.addPanToAnimator(c.getCenterPosition(), Angle.fromDegrees(c.getHeading()), Angle.fromDegrees(c.getPitch()), c.getZoom());
+
+                            } else {
+                                tv.goTo(c.getCenterPosition(), 1000);
+                            }
+
+                        }
+
                     } else {
                         v.goTo(c.getCenterPosition(), 1000);
                     }
                 }
 
+            }
+
+        } else if (e.getSource() == BT_Attach) {
+            if (attachedPlanets.size() > 0) {
+                PU_Attached.show(BT_Attach, 10, 10);
             }
 
         } else if (e.getSource() == wwd) {
@@ -1324,7 +1565,54 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
     //**************************************************************************
     @Override
     public void mouseWheelMoved(MouseWheelEvent e) {
+        View v = wwd.getView();
+        for (JPlanet jp : attachedPlanets) {
+            try {
+                View tmp = jp.getWorldWindowGLJPanel().getView();
+                // tmp.setEyePosition(v.getEyePosition());
+                tmp.setHeading(v.getHeading());
+                tmp.setPitch(v.getPitch());
+                tmp.setRoll(v.getRoll());
+                tmp.setOrientation(v.getEyePosition(), v.computePositionFromScreenPoint(wwd.getWidth() / 2, wwd.getHeight() / 2));
+
+                jp.getWorldWindowGLJPanel().redrawNow();
+
+            } catch (IllegalArgumentException ex) {
+
+            }
+        }
         vtimer.restart();
+    }
+
+    //**************************************************************************
+    //*** MouseMotionListener
+    //**************************************************************************
+    @Override
+    public void mouseDragged(MouseEvent e) {
+        if (e.getSource() == BT_Attach) {
+            cth.exportAsDrag((JButton) e.getSource(), e, TransferHandler.LINK);
+        }
+        View v = wwd.getView();
+        for (JPlanet jp : attachedPlanets) {
+
+            try {
+                View tmp = jp.getWorldWindowGLJPanel().getView();
+                // tmp.setEyePosition(v.getEyePosition());
+                tmp.setHeading(v.getHeading());
+                tmp.setPitch(v.getPitch());
+                tmp.setRoll(v.getRoll());
+                tmp.setOrientation(v.getEyePosition(), v.computePositionFromScreenPoint(wwd.getWidth() / 2, wwd.getHeight() / 2));
+                jp.getWorldWindowGLJPanel().redrawNow();
+
+            } catch (IllegalArgumentException ex) {
+
+            }
+        }
+    }
+
+    @Override
+    public void mouseMoved(MouseEvent e) {
+        //---
     }
 
     //**************************************************************************
@@ -1366,6 +1654,29 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
 
     }
 
+    //**************************************************************************
+    //*** Transferable
+    //**************************************************************************
+    @Override
+    public DataFlavor[] getTransferDataFlavors() {
+        DataFlavor df[] = new DataFlavor[]{DATAFLAVOR_JPLANET};
+        return df;
+    }
+
+    @Override
+    public boolean isDataFlavorSupported(DataFlavor flavor) {
+        if (flavor.equals(DATAFLAVOR_JPLANET)) return true;
+        return false;
+    }
+
+    @Override
+    public Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException, IOException {
+        if (flavor.equals(DATAFLAVOR_JPLANET)) {
+            return this;
+        }
+        return null;
+    }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -1385,6 +1696,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         MN_HideTopBar = new javax.swing.JCheckBoxMenuItem();
         MN_HideStatusBar = new javax.swing.JCheckBoxMenuItem();
         MN_HideLayers = new javax.swing.JCheckBoxMenuItem();
+        MN_SwitchSide = new javax.swing.JMenuItem();
         jSeparator11 = new javax.swing.JPopupMenu.Separator();
         MN_Screens = new javax.swing.JMenu();
         MN_Fullscreen = new javax.swing.JCheckBoxMenuItem();
@@ -1393,6 +1705,8 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         btgscreens = new javax.swing.ButtonGroup();
         btgmodel = new javax.swing.ButtonGroup();
         btgviews = new javax.swing.ButtonGroup();
+        PU_Attached = new javax.swing.JPopupMenu();
+        MN_ClearAttached = new javax.swing.JMenuItem();
         SP_Main = new javax.swing.JSplitPane();
         PN_Left = new javax.swing.JPanel();
         SP_Layers = new javax.swing.JSplitPane();
@@ -1444,6 +1758,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         BT_Cameras = new javax.swing.JToggleButton();
         jPanel7 = new javax.swing.JPanel();
         BT_More = new javax.swing.JButton();
+        BT_Attach = new javax.swing.JButton();
         PN_StatusBar = new javax.swing.JPanel();
         PN_Status = new javax.swing.JPanel();
         PB_Downloading = new javax.swing.JProgressBar();
@@ -1484,6 +1799,10 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         MN_HideLayers.setText("Hide layers panel");
         MN_HideLayers.setActionCommand("hideLayers");
         PU_More.add(MN_HideLayers);
+
+        MN_SwitchSide.setText("Switch layer and world side");
+        MN_SwitchSide.setActionCommand("switch");
+        PU_More.add(MN_SwitchSide);
         PU_More.add(jSeparator11);
 
         MN_Screens.setText("Screens");
@@ -1499,6 +1818,10 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         MN_Screens.add(jSeparator6);
 
         PU_More.add(MN_Screens);
+
+        MN_ClearAttached.setText("Clear attached views");
+        MN_ClearAttached.setActionCommand("clearAttached");
+        PU_Attached.add(MN_ClearAttached);
 
         setLayout(new java.awt.BorderLayout());
 
@@ -1784,6 +2107,13 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         BT_More.setPreferredSize(new java.awt.Dimension(32, 32));
         jPanel7.add(BT_More);
 
+        BT_Attach.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
+        BT_Attach.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/components/Resources/Icons/22x22/attached.png"))); // NOI18N
+        BT_Attach.setToolTipText("Drag and drop the button to another view to link the camera");
+        BT_Attach.setActionCommand("link");
+        BT_Attach.setPreferredSize(new java.awt.Dimension(32, 32));
+        jPanel7.add(BT_Attach);
+
         PN_TopBar.add(jPanel7, java.awt.BorderLayout.WEST);
 
         PN_Right.add(PN_TopBar, java.awt.BorderLayout.PAGE_START);
@@ -1849,6 +2179,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
     }// </editor-fold>//GEN-END:initComponents
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton BT_AddLayer;
+    private javax.swing.JButton BT_Attach;
     private javax.swing.JButton BT_CameraDown;
     private javax.swing.JButton BT_CameraUp;
     private javax.swing.JToggleButton BT_Cameras;
@@ -1874,6 +2205,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
     private javax.swing.JLabel LB_LayerIcon;
     private javax.swing.JLabel LB_Licence;
     private javax.swing.JList<Camera> LI_Cameras;
+    private javax.swing.JMenuItem MN_ClearAttached;
     private javax.swing.JCheckBoxMenuItem MN_Fullscreen;
     private javax.swing.JCheckBoxMenuItem MN_HideLayers;
     private javax.swing.JCheckBoxMenuItem MN_HideStatusBar;
@@ -1883,6 +2215,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
     private javax.swing.JMenuItem MN_Rename;
     private javax.swing.JMenuItem MN_ScreenIdentifier;
     private javax.swing.JMenu MN_Screens;
+    private javax.swing.JMenuItem MN_SwitchSide;
     private javax.swing.JProgressBar PB_Downloading;
     private javax.swing.JPanel PN_Cameras;
     private javax.swing.JPanel PN_LayersButtons;
@@ -1895,6 +2228,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
     private javax.swing.JPanel PN_StatusBar;
     private javax.swing.JPanel PN_TopBar;
     private javax.swing.JPanel PN_Tray;
+    private javax.swing.JPopupMenu PU_Attached;
     private javax.swing.JPopupMenu PU_Layers;
     private javax.swing.JPopupMenu PU_More;
     private javax.swing.JSplitPane SP_Layers;

@@ -42,6 +42,7 @@ import org.tinyrcp.tabs.JTabsPlugin;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
+import org.worldwindearth.components.JPlanet;
 import org.xml.sax.InputSource;
 
 /**
@@ -76,7 +77,7 @@ public class JWorldWindEarth extends javax.swing.JFrame implements ActionListene
 
         //--- To avoid some exception width JDK8 new order implementation
         System.setProperty("java.util.Arrays.useLegacyMergeSort", "true");
-        
+
         initComponents();
 
         MN_New.addActionListener(this);
@@ -92,7 +93,7 @@ public class JWorldWindEarth extends javax.swing.JFrame implements ActionListene
         MN_Plugins.addActionListener(this);
 
         MN_About.addActionListener(this);
-        
+
         jplugins = new JPluginsFrame();
         jplugins.initialize(app);
 
@@ -239,8 +240,7 @@ public class JWorldWindEarth extends javax.swing.JFrame implements ActionListene
             JAbout jb = new JAbout((Frame) getParent(), true, app);
             jb.setLocationRelativeTo(this);
             jb.setVisible(true);
-            
-            
+
         } else if (e.getActionCommand().equals("exit")) {
             close();
 
@@ -374,12 +374,12 @@ public class JWorldWindEarth extends javax.swing.JFrame implements ActionListene
             root.setAttribute("width", "" + getWidth());
             root.setAttribute("height", "" + getHeight());
             app.store(root);
-            
+
             //--- Store the main GUI
             Element m = document.createElement("Main");
             main.saveConfig(m);
             root.appendChild(m);
-            
+
             //--- Store the open frames
             for (int i = 0; i < frames.size(); i++) {
                 JFrame jframe = frames.get(i);
@@ -399,9 +399,9 @@ public class JWorldWindEarth extends javax.swing.JFrame implements ActionListene
 
                 root.appendChild(f);
             }
-            
+
             document.appendChild(root);
-            
+
             TransformerFactory tfactory = TransformerFactory.newInstance();
             Transformer transformer = tfactory.newTransformer();
             transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
@@ -432,6 +432,7 @@ public class JWorldWindEarth extends javax.swing.JFrame implements ActionListene
      * @param load
      */
     protected void load(File load) {
+        System.out.println("(I) Loading config from " + load.getPath());
         Element root = null;
         try {
             FileInputStream in = new FileInputStream(load);
@@ -444,7 +445,7 @@ public class JWorldWindEarth extends javax.swing.JFrame implements ActionListene
             HashMap<String, Element> confs = new HashMap<>();
             ArrayList<Element> windowConfs = new ArrayList<>();
             Element mainNode = null;
-            
+
             NodeList nl = root.getChildNodes();
             //--- Store the configuration nodes
             for (int i = 0; i < nl.getLength(); i++) {
@@ -457,7 +458,7 @@ public class JWorldWindEarth extends javax.swing.JFrame implements ActionListene
 
                 } else if (nl.item(i).getNodeName().equals("Frame")) {
                     windowConfs.add((Element) nl.item(i));
-                    
+
                 }
             }
 
@@ -537,6 +538,28 @@ public class JWorldWindEarth extends javax.swing.JFrame implements ActionListene
                     });
                     jframe.setVisible(true);
                     frames.add(jframe);
+                }
+
+            }
+
+            //--- Post loading process
+            HashMap<String, ArrayList<String>> li = (HashMap<String, ArrayList<String>>) app.fetchData(WWE.STORAGE_DATA_JPLANETS_RELATIONS);
+            HashMap<String, JPlanet> hm = (HashMap<String, JPlanet>) app.fetchData(WWE.STORAGE_DATA_JPLANETS);
+            if ((hm != null) && (li != null)) {
+                Iterator<String> it = li.keySet().iterator();
+                while (it.hasNext()) {
+                    String parent = it.next();
+                    ArrayList<String> children = li.get(parent);
+                    JPlanet jp = hm.get(parent);
+                    if (jp != null) {
+                        for (int i = 0; i < children.size(); i++) {
+                            JPlanet ch = hm.get(children.get(i));
+                            if (ch != null) {
+                                jp.addAttachedPlanet(ch);
+                                ch.setParentPlanet(jp);
+                            }
+                        }
+                    }
                 }
 
             }

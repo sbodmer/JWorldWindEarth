@@ -38,12 +38,14 @@ public class JFlatEarthPlugin extends JPanel implements TinyPlugin {
      */
     JPlanet jplanet = null;
     
+    String name = "";
     /**
      * Creates new form JTerminals
      */
     public JFlatEarthPlugin(TinyFactory factory) {
         this.factory = factory;
         jplanet = new JPlanet();
+        name =  factory.getFactoryName();
         
         initComponents();
         
@@ -61,17 +63,22 @@ public class JFlatEarthPlugin extends JPanel implements TinyPlugin {
         listeners.remove(listener);
     }
 
+    @Override
+    public String toString() {
+        return getPluginName();
+    }
+    
     //***************************************************************************
     //*** WWEPlugin
     //***************************************************************************    
     @Override
     public String getPluginName() {
-        return factory.getFactoryName();
+        return name;
     }
 
     @Override
     public void setPluginName(String name) {
-        //---
+        this.name = name.equals("")?factory.getFactoryName():name;
     }
 
     @Override

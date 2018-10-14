@@ -102,7 +102,7 @@ public class JGroundCursorWWEFactory extends JPanel implements WWEFactory {
     @Override
     public Object getProperty(String property) {
         if (property.equals(PROPERTY_AUTHOR)) {
-            return "Stephan Bodmer";
+            return "Stephan Bodmer (sbodmer@les-studios-inexistants.ch)";
         }
         return null;
     }

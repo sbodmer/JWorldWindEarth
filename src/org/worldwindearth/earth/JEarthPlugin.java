@@ -34,6 +34,8 @@ public class JEarthPlugin extends JPanel implements TinyPlugin {
     ArrayList<ActionListener> listeners = new ArrayList<ActionListener>();
     TinyFactory factory = null;
 
+    String name = "";
+    
     /**
      * Main planet panel
      */
@@ -49,6 +51,7 @@ public class JEarthPlugin extends JPanel implements TinyPlugin {
         initComponents();
 
         add(jplanet, BorderLayout.CENTER);
+        name = factory.getFactoryName();
     }
 
     //**************************************************************************
@@ -62,17 +65,23 @@ public class JEarthPlugin extends JPanel implements TinyPlugin {
         listeners.remove(listener);
     }
 
+    @Override
+    public String toString() {
+        return getPluginName();
+    }
+    
     //***************************************************************************
     //*** WWEPlugin
     //***************************************************************************    
     @Override
     public String getPluginName() {
-        return factory.getFactoryName();
+        return name;
     }
 
     @Override
     public void setPluginName(String name) {
-        //---
+        this.name = name.equals("")?factory.getFactoryName():name;
+        
     }
 
     @Override

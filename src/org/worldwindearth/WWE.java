@@ -26,6 +26,18 @@ public class WWE {
      */
     public static String TESSELATOR_KEY_SUN_AMBIENT_COLOR = "wwe.sun.ambient.color";
     
+    /**
+     * The data is a HashMap<String, JPlanet>, the key is the JPlanet signature
+     * 
+     */
+    public static String STORAGE_DATA_JPLANETS= "org.worldwindearth.components.JPlanet";
+    /**
+     * The list of relation to create for the linked planets panels
+     * 
+     * The data is a HashMap<String, ArrayList<String>>, the key is the parent signature
+     * the value the list of attached planet signature
+     */
+    public static String STORAGE_DATA_JPLANETS_RELATIONS = "org.worldwindearth.components.JPlanet.relations";
     
     /**
      * Returns the distance in meters between two location
