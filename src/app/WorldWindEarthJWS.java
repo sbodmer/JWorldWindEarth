@@ -34,6 +34,7 @@ public class WorldWindEarthJWS {
         "-factory", "org.worldwindearth.groundcursor.JGroundCursorWWEFactory",
         "-factory", "org.nominatim.JNominatimWWEFactory",
         "-factory", "org.geonames.JGeonamesWWEFactory",
+        "-factory", "org.osm.JOSMWWEFactory",
         "-factory", "de.komoot.photon.JPhotonGazetteerWWEFactory",
         "-factory", "gov.nasa.skygradient.JSkyGradientWWEFactory",
         "-factory", "gov.nasa.atmosphere.JAtmosphereWWEFactory",
