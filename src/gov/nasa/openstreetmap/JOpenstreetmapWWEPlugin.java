@@ -93,6 +93,7 @@ public class JOpenstreetmapWWEPlugin extends JPanel implements WWEPlugin, Action
         layer = (TiledImageLayer) bl.createFromConfigSource("config/Earth/OpenStreetMap.xml", null);
         layer.setName("Open street map");
         
+            
     }
 
     @Override

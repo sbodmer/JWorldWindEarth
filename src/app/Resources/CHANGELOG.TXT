@@ -1,2 +1,6 @@
+[2018-10-16]
+  Added the grid, split panels
+  Implemented the attached view concept (shared view)
+
 [2018-09-21]
   Added the osmbuilding multiple source configuration

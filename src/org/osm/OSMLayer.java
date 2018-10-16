@@ -30,7 +30,7 @@ public class OSMLayer extends BasicMercatorTiledImageLayer {
     public OSMLayer() {
         super(makeLevels());
         
-        setDrawTileIDs(true);
+        setDrawTileIDs(false);
         
     }
 
@@ -60,7 +60,7 @@ public class OSMLayer extends BasicMercatorTiledImageLayer {
             int z = tile.getLevelNumber();
             int maxT = (int) Math.pow(2, z);
             s += "/"+z+"/"+ x+"/"+(maxT-y-1)+""+tile.getFormatSuffix();
-            System.out.println("S:"+s);
+            // System.out.println("S:"+s);
             
             return new URL(s);
 
@@ -81,7 +81,7 @@ public class OSMLayer extends BasicMercatorTiledImageLayer {
         params.setValue(AVKey.LEVEL_ZERO_TILE_DELTA, new LatLon(Angle.fromDegrees(180d), Angle.fromDegrees(360d)));
         params.setValue(AVKey.SECTOR, MercatorSector.fromSector(Sector.FULL_SPHERE)); //new MercatorSector(-1.0, 1.0, Angle.NEG180, Angle.POS180));
         params.setValue(AVKey.TILE_URL_BUILDER, new OSMLayer.URLBuilder());
-
+        
         return new LevelSet(params);
     }
     
