@@ -92,6 +92,14 @@
             </MenuItem>
           </SubComponents>
         </Menu>
+        <Component class="javax.swing.JPopupMenu$Separator" name="jSeparator12">
+        </Component>
+        <MenuItem class="javax.swing.JMenuItem" name="MN_GoTo">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Go to coordinates"/>
+            <Property name="actionCommand" type="java.lang.String" value="goto"/>
+          </Properties>
+        </MenuItem>
       </SubComponents>
     </Container>
     <Component class="javax.swing.ButtonGroup" name="btgscreens">
@@ -464,7 +472,7 @@
               <SubComponents>
                 <Container class="javax.swing.JPanel" name="PN_Cameras">
                   <AuxValues>
-                    <AuxValue name="JLayeredPane.layer" type="java.lang.Integer" value="100"/>
+                    <AuxValue name="JLayeredPane.layer" type="java.lang.Integer" value="300"/>
                   </AuxValues>
                   <Constraints>
                     <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout" value="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout$AbsoluteConstraintsDescription">

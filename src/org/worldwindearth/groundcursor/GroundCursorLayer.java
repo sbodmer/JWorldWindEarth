@@ -63,7 +63,8 @@ public class GroundCursorLayer extends RenderableLayer {
         a1.setDrawInterior(true);
         a1.setDrawOutline(true);
         cursor = new SurfaceCircle(a1, LatLon.ZERO, 20d);
-        cursor.setVisible(true);
+        cursor.setVisible(true);    
+        cursor.setDragEnabled(false);
         addRenderable(cursor);
 
     }
