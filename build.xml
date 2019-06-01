@@ -94,6 +94,7 @@
         <echo message="[Desktop] WorldWindEarth main frame and panels"/>
         <jar destfile="${dist.dir}/lib/ext/worldwindearth.jar" manifest="Manifests/worldwindearth.mf">
             <fileset dir="${build.dir}/classes" includes="org/worldwindearth/**"/>
+            <fileset dir="${build.dir}/classes" includes="osm/**"/>
         </jar>
         
         <!-- Layers -->
@@ -187,6 +188,22 @@
         <jar destfile="${dist.dir}/lib/ext/layers/OSMBuildings.jar" manifest="Manifests/layers/OSMBuildings.mf">
             <fileset dir="${build.dir}/classes" includes="org/osmbuildings/**"/>
         </jar>
+        <!--
+        <echo message="[Layer] Buildings"/>
+        <jar destfile="${dist.dir}/lib/ext/layers/Buildings.jar" manifest="Manifests/layers/Buildings.mf">
+            <fileset dir="${build.dir}/classes" includes="org/buildings/**"/>
+        </jar>
+        -->
+        <echo message="[Layer] Models"/>
+        <jar destfile="${dist.dir}/lib/ext/layers/Models.jar" manifest="Manifests/layers/Models.mf">
+            <fileset dir="${build.dir}/classes" includes="org/worldwindearth/models/**"/>
+        </jar>
+        <!--
+        <echo message="[Layer] PaysDeBrest"/>
+        <jar destfile="${dist.dir}/lib/ext/layers/PaysDeBrest.jar" manifest="Manifests/layers/PaysDeBrest.mf">
+            <fileset dir="${build.dir}/classes" includes="fr/paysdebrest/**"/>
+        </jar>
+        -->
         <echo message="[Layer] Geocode"/>
         <jar destfile="${dist.dir}/lib/ext/layers/Geocode.jar" manifest="Manifests/layers/Geocode.mf">
             <fileset dir="${build.dir}/classes" includes="org/worldwindearth/geocode/**"/>
@@ -226,6 +243,9 @@
             <fileset file="lib/worldwind/worldwind.jar"/>
             <fileset file="lib/worldwind/worldwindx.jar"/>
         </copy>
+        <copy todir="${dist.dir}/lib">
+            <fileset file="../../../Libraries/Java/lambert-java/build/libs/lambert-java-1.1.jar"/>
+        </copy>
     </target>
     
     <target name="wwlayersonly">
@@ -237,7 +257,19 @@
             <fileset dir="${build.dir}/classes" includes="org/osmbuildings/OSMBuildingsLayer*"/>
             <fileset dir="${build.dir}/classes" includes="org/osmbuildings/OSMBuildingsRenderable*"/>
             <fileset dir="${build.dir}/classes" includes="org/osmbuildings/OSMBuildingsTile*"/>
+            <fileset dir="${build.dir}/classes" includes="org/osmbuildings/GeoJSONEntry*"/>        
             <fileset dir="${build.dir}/classes" includes="org/osmbuildings/Resources/"/>        
+        </jar>
+        <echo message="[WorldWindLayer] Buildings"/>
+        <mkdir dir="${dist.dir}/dist"/>
+        <jar destfile="${dist.dir}/dist/Buildings.jar">
+            <fileset dir="${build.dir}/classes" includes="org/buildings/BuildingsLayer*"/>
+            <!--
+            <fileset dir="${build.dir}/classes" includes="org/buildings/OSMBuildingsRenderable*"/>
+            <fileset dir="${build.dir}/classes" includes="org/buildings/OSMBuildingsTile*"/>
+            <fileset dir="${build.dir}/classes" includes="org/buildings/GeoJSONEntry*"/>        
+            -->
+            <fileset dir="${build.dir}/classes" includes="org/buildings/Resources/"/>        
         </jar>
         <echo message="[WorldWindLayer] GroudCursor"/>
         <mkdir dir="${dist.dir}/dist"/>
@@ -250,10 +282,46 @@
     <!-- If the TinyRCP project is available use it to get the latest version -->
     <target name="update_libs">
         <echo message="Update libs from TinyRCP project"/>
-        <copy failonerror="false" todir="lib">
+        <copy failonerror="false" todir="lib" overwrite="true">
             <fileset file="../TinyRCP/dist/TinyRCP.jar"/>
         </copy>
-       
+       <echo message="Update libs from WorldWindObj project"/>
+        <copy failonerror="false" todir="lib" overwrite="true">
+            <fileset file="../WorldWindObj/dist/WorldWindObj.jar"/>
+        </copy>
+    </target>
+    
+    
+    <!--          -->
+    <!-- Packages -->
+    <!--          -->
+    <target name="package_jworldwindearth" depends="-init-project" description="Build debian jworldwindearth package">
+        <!-- Platform -->
+        <echo message="[deb] Create jworldwindearth package for platform ${platform}"/>
+        <delete dir="${dist.dir}/Packages/jworldwindearth"/>
+        <mkdir dir="${dist.dir}/Packages/jworldwindearth/DEBIAN"/>
+        <copy todir="${dist.dir}/Packages/jworldwindearth/DEBIAN" overwrite="true" >
+            <fileset dir="Packages/deb/jworldwindearth/DEBIAN"/>
+        </copy>
+        <chmod file="${dist.dir}/Packages/jworldwindearth/DEBIAN/postinst" perm="0755"/> 
+        <mkdir dir="${dist.dir}/Packages/jworldwindearth/usr/share/jworldwindearth"/>
+        <copy todir="${dist.dir}/Packages/jworldwindearth/usr/share/jworldwindearth">
+            <fileset file="${dist.dir}/WWEarth.jar"/>
+        </copy>
+        <mkdir dir="${dist.dir}/Packages/jworldwindearth/usr/share/jworldwindearth/lib"/>
+        <copy todir="${dist.dir}/Packages/jworldwindearth/usr/share/jworldwindearth/lib">
+            <fileset dir="${dist.dir}/lib"/>
+        </copy>
+        <mkdir dir="${dist.dir}/Packages/jworldwindearth/usr/bin"/>
+        <copy todir="${dist.dir}/Packages/jworldwindearth/usr/bin">
+            <fileset file="bin/${platform}/jworldwindearth"/>
+        </copy>
+        <exec executable="dpkg-deb" dir="${dist.dir}/Packages">
+            <arg value="--build"/>
+            <arg value="jworldwindearth"/>
+        </exec>
+        <mkdir dir="Releases/Packages"/>
+        <move file="${dist.dir}/Packages/jworldwindearth.deb" tofile="Releases/Packages/jworldwindearth_all.deb"/>
     </target>
     
 </project>
