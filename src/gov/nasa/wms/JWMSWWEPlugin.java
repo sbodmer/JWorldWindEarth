@@ -191,7 +191,7 @@ public class JWMSWWEPlugin extends JPanel implements WWEPlugin, ActionListener, 
             ex.printStackTrace();
 
         }
-        String sw = config.getAttribute("wms");
+        String sw = config!=null?config.getAttribute("wms"):"";
         for (int i = 0; i < CMB_Server.getItemCount(); i++) {
             wms = (WMSServer) CMB_Server.getItemAt(i);
             if (wms.getTitle().equals(sw)) {
