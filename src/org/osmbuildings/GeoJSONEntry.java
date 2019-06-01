@@ -41,7 +41,7 @@ public class GeoJSONEntry {
 
         defaultAttrs.setEnableLighting(true);
         defaultAttrs.setEnableAntialiasing(true);
-        renderable = new OSMBuildingsRenderable(doc, 10, defaultAttrs, title, listener);
+        renderable = new OSMBuildingsRenderable(doc, 10, false, defaultAttrs, title, listener, null);
         
     }
     

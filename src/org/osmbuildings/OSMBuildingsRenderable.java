@@ -35,6 +35,7 @@ import gov.nasa.worldwind.render.DrawContext;
 import gov.nasa.worldwind.render.Ellipsoid;
 import gov.nasa.worldwind.render.ExtrudedPolygon;
 import gov.nasa.worldwind.render.Material;
+import gov.nasa.worldwind.render.OrderedRenderable;
 import gov.nasa.worldwind.render.Path;
 import gov.nasa.worldwind.render.PointPlacemark;
 import gov.nasa.worldwind.render.PointPlacemarkAttributes;
@@ -47,6 +48,7 @@ import gov.nasa.worldwind.render.SurfacePolyline;
 import gov.nasa.worldwind.util.Logging;
 
 import java.awt.Color;
+import java.awt.Point;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
@@ -102,6 +104,8 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
      */
     protected double defaultHeight = 10;
 
+    protected boolean draggable = false;
+    
     /**
      * Some comment (like the x,y value of the tile), useful for debug
      */
@@ -130,6 +134,11 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
      */
     protected Position reference = null;
 
+    /**
+     * The tile which englobes these buildings
+     */
+    protected ExtrudedPolygon tile = null;
+
     static {
         COLORS.put("lightbrown", "#ac6b25");
         COLORS.put("yellowbrown", "#bb9613");
@@ -144,15 +153,20 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
     /**
      * If the height is 0, then no building are extruded
      *
+     * The passed extruded polygon is the tile bounding box (or null if manually
+     * loaded GeoJSON)
+     *
      * @param doc
      * @param defaultHeight
      * @param opacity
      */
-    public OSMBuildingsRenderable(final GeoJSONDoc doc, final double defaultHeight, final ShapeAttributes defaultAttrs, final String comment, final OSMBuildingsTileListener listener) {
+    public OSMBuildingsRenderable(final GeoJSONDoc doc, final double defaultHeight, final boolean draggable, final ShapeAttributes defaultAttrs, final String comment, final OSMBuildingsTileListener listener, final ExtrudedPolygon tile) {
         this.defaultHeight = defaultHeight;
         this.defaultAttrs = defaultAttrs;
+        this.draggable = draggable;
         this.comment = comment;
         this.listener = listener;
+        this.tile = tile;
 
         // --- Prepare the renderable
         if (doc.getRootObject() instanceof GeoJSONObject) {
@@ -185,6 +199,32 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
         ids.clear();
     }
 
+    public void setDragEnabled(boolean draggable) {
+        this.draggable = draggable;
+        
+        for (Renderable renderable : renderables) {
+            if (renderable instanceof Polygon) {
+                Polygon polygon = (Polygon) renderable;
+                polygon.setDragEnabled(draggable);
+
+            } else if (renderable instanceof ExtrudedPolygon) {
+                ExtrudedPolygon polygon = (ExtrudedPolygon) renderable;
+                polygon.setDragEnabled(draggable);
+
+
+            } else if (renderable instanceof Ellipsoid) {
+                Ellipsoid elli = (Ellipsoid) renderable;
+                elli.setDragEnabled(draggable);
+
+            } else {
+                // System.out.println("setOpacity not handled on :" + renderable);
+            }
+        }
+    }
+    
+    public boolean isDragEnabled() {
+        return draggable;
+    }
     /**
      * Return the tile reference position (first processed extruded polygon)
      *
@@ -195,7 +235,8 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
     }
 
     /**
-     * Return the list of internale renderables primitives objects
+     * Return the list of internale renderables primitives objects (original list)
+     * 
      *
      * @return
      */
@@ -331,36 +372,63 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
     @Override
     public void render(DrawContext dc) {
         Globe globe = dc.getGlobe();
-        for (Renderable r : renderables) {
-            //--- For extruded polygon, for the geometry to be correct, the reference
-            //--- position must be defined as the point which has the highest elevation
-            //--- Resolve the position only once
-            if (r instanceof ExtrudedPolygon) {
-                ExtrudedPolygon box = (ExtrudedPolygon) r;
-                Position ref = (Position) box.getValue(AVKEY_OSMBUILDING_REFERENCE_LOCATION);
-                if (reference == null) this.reference = ref;
-                if (ref != null) {
-                    box.setReferencePosition(Position.fromDegrees(ref.getLatitude().degrees, ref.getLongitude().degrees));
 
-                } else {
-                    Iterator<Position> it = (Iterator<Position>) box.getOuterBoundary().iterator();
-                    double max = -1000;
-                    while (it.hasNext()) {
-                        Position pos = it.next();
-                        double elevation = globe.getElevation(pos.getLatitude(), pos.getLongitude());
-                        if (elevation >= max) {
-                            max = elevation;
-                            ref = pos;
+        if (reference == null) {
+            for (Renderable r : renderables) {
+                //--- For extruded polygon, for the geometry to be correct, the reference
+                //--- position must be defined as the point which has the highest elevation
+                //--- Resolve the position only once
+                if (r instanceof ExtrudedPolygon) {
+                    ExtrudedPolygon box = (ExtrudedPolygon) r;
+                    Position ref = (Position) box.getValue(AVKEY_OSMBUILDING_REFERENCE_LOCATION);
+                    if (reference == null) this.reference = ref;
+
+                    if (ref != null) {
+                        box.setReferencePosition(Position.fromDegrees(ref.getLatitude().degrees, ref.getLongitude().degrees));
+
+                    } else {
+                        Iterator<Position> it = (Iterator<Position>) box.getOuterBoundary().iterator();
+                        double max = -1000;
+                        while (it.hasNext()) {
+                            Position pos = it.next();
+                            double elevation = globe.getElevation(pos.getLatitude(), pos.getLongitude());
+                            if (elevation >= max) {
+                                max = elevation;
+                                ref = pos;
+                            }
                         }
+                        box.setValue(AVKEY_OSMBUILDING_REFERENCE_LOCATION, ref);
+                        box.setReferencePosition(Position.fromDegrees(ref.getLatitude().degrees, ref.getLongitude().degrees));
                     }
-                    box.setValue(AVKEY_OSMBUILDING_REFERENCE_LOCATION, ref);
-                    box.setReferencePosition(Position.fromDegrees(ref.getLatitude().degrees, ref.getLongitude().degrees));
-                }
-                box.moveTo(ref);
+                    box.moveTo(ref);
 
+                }
+
+                // r.render(dc);
+            }
+        }
+
+        // double elevation = globe.getElevation(reference.getLatitude(), reference.getLongitude());
+        // Position pos = Position.fromDegrees(reference.getLatitude().degrees, reference.getLongitude().degrees, elevation);
+        // Vec4 loc = dc.getGlobe().computePointFromPosition(pos);
+        // System.out.println("REFERENCE:" + pos.latitude + "," + pos.longitude + "," + pos.elevation);
+        // System.out.println("EX:"+tile.getExtent());
+        
+        //--- Draw only if in visible frustum
+        if (tile.getExtent() != null) {
+            if (dc.getView().getFrustumInModelCoordinates().intersects(tile.getExtent())) {
+                for (Renderable r : renderables) {
+                    r.render(dc);
+                }
+            
             }
 
-            r.render(dc);
+        } else {
+            //--- Draw it anyway
+            for (Renderable r : renderables) {
+                r.render(dc);
+            }
+
         }
 
     }
@@ -432,6 +500,9 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
 
             }
         }
+        
+        //--- Default not draggable
+        setDragEnabled(draggable);
     }
 
     /**
@@ -625,13 +696,6 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
             ra.copy(attrs);
             ra.setInteriorMaterial(new Material(stringToColor(roofColor)));
             ra.setOutlineMaterial(new Material(stringToColor(roofColor)));
-
-            // Color c = stringToColor(roofColor);
-            // Color tran = new Color(0,0,0,255);
-            // Material m = new Material(c, c, c, c, 0);
-            // ra.setInteriorMaterial(m);
-            // ra.setOutlineMaterial(m);
-            // ra.setOutlineMaterial(Material.RED);
             ra.setInteriorOpacity(roofMaterial.equals("glass") ? 0.7 : 1.0d);
             ra.setOutlineOpacity(roofMaterial.equals("glass") ? 0.7 : 1.0d);
             ra.setDrawInterior(true);
@@ -639,7 +703,7 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
             ra.setDrawOutline(false);
             // ra.setEnableAntialiasing(true);
 
-            // --- If levels, try some texture on it
+            //--- If levels, try some texture on it
             /*
             BufferedImage tex = null;
             if (levels > 0) {
@@ -955,7 +1019,7 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
     }
 
     /**
-     * Render polyline, if height, consider th be a polygon
+     * Render polyline, if height, consider to be a polygon
      *
      * @param parent
      * @param owner
@@ -1016,8 +1080,8 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
                 poly.setValue(AVKEY_OSMBUILDING_FEATURE_ID, parent != null ? parent.getValue("id") : "");
                 renderables.add(poly);
                 // System.out.println(">>>>>>>>>>< THERE, draw polygon with height:"+height);
-                */
-                
+                 */
+
             } else {
                 SurfacePolyline sp = new SurfacePolyline(attrs, positions);
                 if (properties != null) sp.setValue(AVKey.PROPERTIES, properties);
@@ -1077,22 +1141,9 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
             if (mat.equals("glass")) sa.setDrawOutline(true);
         }
         if (v == null) v = "#bbbbbb";   //--
-        // Color c = stringToColor(v);
 
-        // Material m = new Material(c.brighter(), c, c.darker(), c.darker(), 0);
-        // sa.setInteriorMaterial(m);
         sa.setInteriorMaterial(new Material(stringToColor(v)));
-        /*
-        sa.setInteriorOpacity(opacity);
-        sa.setOutlineMaterial(Material.GRAY);
-        // sa.setOutlineOpacity(opacity);
-        sa.setDrawInterior(true);
-        sa.setDrawOutline(true);
 
-        sa.setEnableLighting(true);
-        sa.setEnableAntialiasing(true);
-         */
-        // sa.setOutlineMaterial(new Material(stringToColor(v)));
     }
 
     /**

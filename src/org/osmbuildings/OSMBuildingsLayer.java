@@ -32,12 +32,10 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
 
     public static final String CACHE_FOLDER = "Earth" + File.separatorChar + "OSMBuildings";
 
-    
     /**
      * The api key
      */
     // public static String osmBuildingKey = "sx3pxpz6";
-
     // public static final int ZOOM = 15;
     // public static final double maxX = Math.pow(2, ZOOM);
     // public static final double maxY = Math.pow(2, ZOOM);
@@ -69,18 +67,19 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
 
     protected File cacheFolder = null;
 
-    protected int maxTiles = 10;
+    protected int maxTiles = 9;
     protected double defaultHeight = 10;
     protected boolean drawProcessingBox = true;
     protected boolean drawOutline = false;
     protected boolean applyRoofTextures = false;
+    protected boolean draggable = false;
     protected int cols = 3;
     protected int rows = 3;
-    protected String provider = "";
+    protected String provider = "https://[abcd].data.osmbuildings.org/0.2/sx3pxpz6/tile/${Z}/${X}/${Y}.json";
     protected int minLevel = 15;
     protected int maxLevel = 15;
     protected int lastLevel = 15;
-    
+
     javax.swing.Timer timer = null;
 
     /**
@@ -94,12 +93,11 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
     protected ArrayList<PreBuildingsRenderer> preRenderer = new ArrayList<>();
     protected ArrayList<PostBuildingsRenderer> postRenderer = new ArrayList<>();
 
-    
     /**
      * Manually added entries
      */
     protected ArrayList<GeoJSONEntry> entries = new ArrayList<GeoJSONEntry>();
-    
+
     // Cylinder c = null;
     public OSMBuildingsLayer() {
         super();
@@ -205,6 +203,59 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
     //**************************************************************************
     //*** API
     //*************************************************************************
+    /**
+     * To fetch the tile at the given location
+     *
+     * User 15 as the zoom (common for www.osmbuildings.org)
+     *
+     * If the tile could be fetched/produced, null will be returned
+     * The method could be long to return (max 60s)
+     * @param lat
+     * @param lon
+     * @return
+     */
+    public ArrayList<Renderable> fetchTileAt(double lat, double lon, int zoom) {
+
+        int x = lon2x(lon, zoom);
+        int y = lat2y(lat, zoom);
+        String key = x + "x" + y  + "@" + zoom;
+        OSMBuildingsTile t = buildings.get(key);
+        if (t == null) {
+            t = new OSMBuildingsTile(zoom,
+                    x,
+                    y,
+                    this,
+                    center,
+                    getDataFileStore(),
+                    isNetworkRetrievalEnabled(),
+                    getExpiryTime(),
+                    defaultHeight,
+                    applyRoofTextures,
+                    draggable,
+                    produceDefaultShapeAttribute(),
+                    provider);
+            buildings.put(key, t);
+            t.fetch();
+        }
+        try {
+            int cnt = 0;
+            while (t.isLoaded() == false) {
+                Thread.sleep(1000);
+                cnt++;
+                if (cnt >= 60) break;
+            }
+            OSMBuildingsRenderable re = t.getRenderable();
+            if (re != null) return re.getRenderables();
+            
+        } catch (InterruptedException ex) {
+            //---
+            
+        }
+        
+        return null;
+
+    }
+
     public void setDefaultBuildingHeight(double defaultHeight) {
         this.defaultHeight = defaultHeight;
     }
@@ -217,9 +268,9 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
         buildings.clear();
         ids.clear();
         removeAllRenderables();
-        
+
         //--- Add the manual entries again
-        for (int i=0;i<entries.size();i++) {
+        for (int i = 0; i < entries.size(); i++) {
             addRenderable(entries.get(i).getRenderable());
         }
     }
@@ -254,6 +305,16 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
         }
     }
 
+    public void setDraggable(boolean draggable) {
+        this.draggable = draggable;
+        for (Renderable r : renderables) {
+            if (r instanceof OSMBuildingsRenderable) {
+                OSMBuildingsRenderable or = (OSMBuildingsRenderable) r;
+                ((OSMBuildingsRenderable) r).setDragEnabled(draggable);
+            }
+        }
+    }
+    
     public void setApplyRoofTextures(boolean applyRoofTextures) {
         this.applyRoofTextures = applyRoofTextures;
 
@@ -303,25 +364,25 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
         addRenderable(entry.getRenderable());
         if (ww != null) ww.redraw();
     }
-    
+
     public GeoJSONEntry removeGeoJSONEntry(GeoJSONEntry entry) {
         int index = entries.indexOf(entry);
         if (index == -1) return null;
-        
+
         GeoJSONEntry e = entries.remove(index);
         removeRenderable(e.getRenderable());
         if (ww != null) ww.redraw();
         return e;
     }
-    
+
     public GeoJSONEntry getGeoJSONEntry(int index) {
         return entries.get(index);
     }
-    
+
     public int getGeoJSONEntryCount() {
         return entries.size();
     }
-    
+
     /**
      * Set the building resolution grid (cols)
      *
@@ -537,15 +598,15 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
             try {
                 //--- Is there a better way ?
                 Rectangle r = ww.getView().getViewport();
-                Position bl = ww.getView().computePositionFromScreenPoint(r.x, r.y/2);
-                Position br = ww.getView().computePositionFromScreenPoint(r.width, r.y/2);
+                Position bl = ww.getView().computePositionFromScreenPoint(r.x, r.y / 2);
+                Position br = ww.getView().computePositionFromScreenPoint(r.width, r.y / 2);
                 double w = br.getLongitude().degrees - bl.getLongitude().degrees;
                 zoom = w2level(w);
-                
+
             } catch (NullPointerException ex) {
                 //---
             }
-            
+
             // System.out.println("Zoom:" + zoom);
             if (zoom < minLevel) zoom = minLevel;
             if (zoom > maxLevel) zoom = maxLevel;
@@ -591,6 +652,7 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
                                 getExpiryTime(),
                                 defaultHeight,
                                 applyRoofTextures,
+                                draggable,
                                 produceDefaultShapeAttribute(),
                                 provider);
                         buildings.put(key, t);

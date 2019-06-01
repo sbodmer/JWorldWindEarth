@@ -7,6 +7,7 @@ package org.osmbuildings;
 
 import gov.nasa.worldwind.*;
 import gov.nasa.worldwind.cache.FileStore;
+import gov.nasa.worldwind.drag.Draggable;
 import gov.nasa.worldwind.formats.geojson.GeoJSONDoc;
 import gov.nasa.worldwind.geom.*;
 import gov.nasa.worldwind.render.*;
@@ -51,6 +52,7 @@ public class OSMBuildingsTile {
     int level = 15;
     double defaultHeight = 10;
     boolean applyRoofTextures = false;
+    boolean draggable = false;
     ShapeAttributes defaultAttrs = null;
     String provider = "";   //--- Base URL provider
     /**
@@ -80,7 +82,7 @@ public class OSMBuildingsTile {
      * The loaded buildings
      */
     OSMBuildingsRenderable renderable = null;
-
+    boolean loaded = false;
     /**
      * The tile bounding box
      */
@@ -101,7 +103,7 @@ public class OSMBuildingsTile {
         }
     }
 
-    public OSMBuildingsTile(int level, int x, int y, OSMBuildingsTileListener listener, Position center, FileStore store, boolean retrieveRemoteData, long expireDate, double defaultHeight, boolean applyRoofTextures, ShapeAttributes defaultAttrs, String provider) {
+    public OSMBuildingsTile(int level, int x, int y, OSMBuildingsTileListener listener, Position center, FileStore store, boolean retrieveRemoteData, long expireDate, double defaultHeight, boolean applyRoofTextures, boolean draggable, ShapeAttributes defaultAttrs, String provider) {
         this.x = x;
         this.y = y;
         this.level = level;
@@ -111,6 +113,7 @@ public class OSMBuildingsTile {
         this.retrieveRemoteData = retrieveRemoteData;
         this.defaultHeight = defaultHeight;
         this.expireDate = expireDate;
+        this.draggable = draggable;
         this.defaultAttrs = defaultAttrs;
         this.applyRoofTextures = applyRoofTextures;
         this.provider = provider;
@@ -200,6 +203,9 @@ public class OSMBuildingsTile {
         return url;
     }
 
+    public boolean isLoaded () {
+        return loaded;
+    }
     /**
      * Returns the start of the tile loading (fetch call)
      *
@@ -275,7 +281,7 @@ public class OSMBuildingsTile {
      *
      * @return
      */
-    public Renderable getRenderable() {
+    public OSMBuildingsRenderable getRenderable() {
         /*
         ShapeAttributes a4 = new BasicShapeAttributes();
         a4.setInteriorOpacity(1);
@@ -447,11 +453,13 @@ public class OSMBuildingsTile {
                 GeoJSONDoc doc = new GeoJSONDoc(data);
                 doc.parse();
 
-                renderable = new OSMBuildingsRenderable(doc, defaultHeight, defaultAttrs, data.toString(), listener );
+                renderable = new OSMBuildingsRenderable(doc, defaultHeight, draggable, defaultAttrs, data.toString(), listener, tile );
                 if (listener != null) listener.osmBuildingsLoaded(ti);
 
                 if (applyRoofTextures) fetchRoofTextures();
 
+                loaded = true;
+                
             } catch (NullPointerException ex) {
                 //--- File is no more in local storage ?
                 if (listener != null) listener.osmBuildingsLoadingFailed(ti, "Local .json file could not be found : " + cachePath);
@@ -492,11 +500,13 @@ public class OSMBuildingsTile {
                     GeoJSONDoc doc = new GeoJSONDoc(f.toURI().toURL());
                     doc.parse();
 
-                    renderable = new OSMBuildingsRenderable(doc, defaultHeight, defaultAttrs, f.toString(), listener);
+                    renderable = new OSMBuildingsRenderable(doc, defaultHeight, draggable, defaultAttrs, f.toString(), listener, tile);
                     if (listener != null) listener.osmBuildingsLoaded(ti);
 
                     if (applyRoofTextures) fetchRoofTextures();
 
+                    loaded = true;
+                    
                 } else {
                     //--- Wrong http response
                     if (listener != null)

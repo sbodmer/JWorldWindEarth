@@ -5,10 +5,13 @@
     <Property name="MaxActiveAltitude" value="8000"/>
     <Property name="MinActiveAltitude" value="1"/>
     <Property name="NetworkRetrievalEnabled" value="true"/>
+    <Property name="ExpiryTime" value="2592000000"/> <!-- 30 days -->
     <Property name="DefaultBuildingHeight" value="10"/>
     <Property name="MaxTiles" value="30"/>
     <Property name="Rows" value="3"/>
     <Property name="Cols" value="3"/>
+    <Property name="MinLevel" value="15"/>
+    <Property name="MaxLevel" value="15"/>
     <Property name="DrawOutline" value="false"/>
     <Property name="DrawProcessingBox" value="true"/>
     <Property name="ApplyRoofTextures" value="false"/>
