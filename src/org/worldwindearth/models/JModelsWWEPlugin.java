@@ -102,8 +102,8 @@ public class JModelsWWEPlugin extends javax.swing.JPanel implements WWEPlugin, C
         initComponents();
 
         //--- Visual representation fine tuning (8 decimals)
-        SP_Latitude.setEditor(new JSpinner.NumberEditor(SP_Latitude, "0.00000000"));
-        SP_Longitude.setEditor(new JSpinner.NumberEditor(SP_Longitude, "0.00000000"));
+        SP_Latitude.setEditor(new JSpinner.NumberEditor(SP_Latitude, "0.000000000"));
+        SP_Longitude.setEditor(new JSpinner.NumberEditor(SP_Longitude, "0.000000000"));
 
     }
 

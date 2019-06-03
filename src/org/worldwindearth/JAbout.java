@@ -9,15 +9,11 @@ import gov.nasa.worldwind.WorldWind;
 import gov.nasa.worldwind.cache.FileStore;
 import java.awt.Desktop;
 import java.io.File;
-import java.io.InputStream;
-import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
-import org.osmbuildings.OSMBuildingsLayer;
 import org.tinyrcp.App;
 import org.tinyrcp.TinyFactory;
 

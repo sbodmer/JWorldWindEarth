@@ -2133,7 +2133,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         btgviews.add(BT_Fly);
         BT_Fly.setText("Fly");
         BT_Fly.setActionCommand("fly");
-        BT_Fly.setPreferredSize(new java.awt.Dimension(44, 32));
+        BT_Fly.setPreferredSize(new java.awt.Dimension(60, 32));
         PN_Tray.add(BT_Fly);
 
         btgviews.add(BT_Walk);

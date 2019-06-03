@@ -160,7 +160,6 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
         BasicLayerFactory bl = new BasicLayerFactory();
 
         InputStream in = getClass().getResourceAsStream("/org/osmbuildings/Resources/Config/OSMBuildings.xml");
-        // InputStream in = app.getLoader().getResourceAsStream("org/osmbuildings/Resources/Config/OSMBuildings.xml");
         layer = (OSMBuildingsLayer) bl.createFromConfigSource(in, null);
         layer.setName("OSMBuildings");
         layer.setExpiryTime(((JOSMBuildingsWWEFactory) factory).getExpireDays() * 24L * 60L * 60L * 1000L);

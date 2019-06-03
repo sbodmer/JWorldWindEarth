@@ -30,6 +30,7 @@ public class WorldWindEarthJWS {
         "-factory", "org.worldwindearth.earth.JEarthFactory",
         "-factory", "org.worldwindearth.flatearth.JFlatEarthFactory",
         "-factory", "org.osmbuildings.JOSMBuildingsWWEFactory",
+        "-factory", "org.worldwindearth.models.JModelsWWEFactory",
         "-factory", "org.worldwindearth.geocode.JGeocodeWWEFactory",
         "-factory", "org.worldwindearth.groundcursor.JGroundCursorWWEFactory",
         "-factory", "org.nominatim.JNominatimWWEFactory",
