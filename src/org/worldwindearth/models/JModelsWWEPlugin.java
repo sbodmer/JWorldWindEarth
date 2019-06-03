@@ -7,37 +7,17 @@ package org.worldwindearth.models;
 
 import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.WorldWindow;
-import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.event.Message;
-import gov.nasa.worldwind.event.SelectEvent;
-import gov.nasa.worldwind.event.SelectListener;
-import gov.nasa.worldwind.geom.Angle;
-import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.geom.Vec4;
-import gov.nasa.worldwind.globes.Globe;
 import gov.nasa.worldwind.layers.BasicLayerFactory;
 import gov.nasa.worldwind.layers.Layer;
-import gov.nasa.worldwind.pick.PickedObject;
-import gov.nasa.worldwind.render.AbstractSurfaceShape;
-import gov.nasa.worldwind.render.AnnotationAttributes;
 import gov.nasa.worldwind.render.BasicShapeAttributes;
 import gov.nasa.worldwind.render.Material;
-import gov.nasa.worldwind.render.ScreenAnnotation;
 import gov.nasa.worldwind.render.ShapeAttributes;
-import gov.nasa.worldwind.render.SurfacePolygon;
-import gov.nasa.worldwind.render.SurfaceQuad;
-import gov.nasa.worldwind.render.SurfaceShape;
-import gov.nasa.worldwind.util.BasicDragger;
-import gov.nasa.worldwind.util.Logging;
-import gov.nasa.worldwind.util.WWUtil;
 import gov.nasa.worldwind.view.orbit.BasicOrbitView;
 import java.awt.CardLayout;
-import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.IllegalComponentStateException;
-import java.awt.Insets;
-import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -45,16 +25,11 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.File;
 import java.io.InputStream;
-import java.util.Arrays;
-import java.util.List;
-import javax.media.opengl.GL2;
 import javax.swing.JComponent;
 import javax.swing.JDesktopPane;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JSpinner;
-import javax.swing.ListSelectionModel;
-import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
@@ -67,8 +42,6 @@ import org.w3c.dom.NodeList;
 import org.worldwindearth.WWEFactory;
 import org.worldwindearth.WWEPlugin;
 import org.worldwindearth.components.DragSurfacePolygon;
-import osm.map.worldwind.gl.obj.ObjLoader;
-import osm.map.worldwind.gl.obj.ObjRenderable;
 
 /**
  *
@@ -184,8 +157,6 @@ public class JModelsWWEPlugin extends javax.swing.JPanel implements WWEPlugin, C
         // System.out.println("PICK:"+layer.isPickEnabled());
         // layer.setPickEnabled(true);
 
-        SP_Opacity.addChangeListener(this);
-
         BT_Clear.addActionListener(this);
         BT_Delete.addActionListener(this);
         BT_Edit.addActionListener(this);
@@ -249,14 +220,6 @@ public class JModelsWWEPlugin extends javax.swing.JPanel implements WWEPlugin, C
     public void configure(Element config) {
         if (config == null) return;
 
-        try {
-            SP_Opacity.setValue(Integer.parseInt(config.getAttribute("opacity")));
-            layer.setOpacity(SP_Opacity.getValue() / 100d);
-
-        } catch (NumberFormatException ex) {
-            //---
-        }
-
         DefaultTableModel mo = (DefaultTableModel) TB_Models.getModel();
         NodeList nl = config.getChildNodes();
         for (int i = 0; i < nl.getLength(); i++) {
@@ -300,7 +263,7 @@ public class JModelsWWEPlugin extends javax.swing.JPanel implements WWEPlugin, C
     public void saveConfig(Element config) {
         if (config == null) return;
 
-        config.setAttribute("opacity", "" + SP_Opacity.getValue());
+        // config.setAttribute("opacity", "" + SP_Opacity.getValue());
 
         for (int i = 0; i < TB_Models.getRowCount(); i++) {
             Boolean show = (Boolean) TB_Models.getValueAt(i, 0);
@@ -335,10 +298,7 @@ public class JModelsWWEPlugin extends javax.swing.JPanel implements WWEPlugin, C
     //**************************************************************************
     @Override
     public void stateChanged(ChangeEvent e) {
-        if (e.getSource() == SP_Opacity) {
-            layer.setOpacity(SP_Opacity.getValue() / 100d);
-
-        } else if (e.getSource() == SP_Latitude) {
+        if (e.getSource() == SP_Latitude) {
             //--- One by one, so the widget event are correctly fired
             int index = TB_Models.getSelectedRow();
             if (index == -1) return;
@@ -545,6 +505,7 @@ public class JModelsWWEPlugin extends javax.swing.JPanel implements WWEPlugin, C
     @Override
     public void modelLoaded(String file, String message) {
         // desktop.remove(PN_Loading);
+        PN_Loading.setVisible(false);
     }
 
     @Override
@@ -614,7 +575,7 @@ public class JModelsWWEPlugin extends javax.swing.JPanel implements WWEPlugin, C
         PN_Loading = new javax.swing.JPanel();
         jLabel2 = new javax.swing.JLabel();
         jPanel2 = new javax.swing.JPanel();
-        SP_Opacity = new javax.swing.JSlider();
+        jLabel10 = new javax.swing.JLabel();
         jTabbedPane1 = new javax.swing.JTabbedPane();
         jPanel3 = new javax.swing.JPanel();
         TB_Tools = new javax.swing.JToolBar();
@@ -657,14 +618,10 @@ public class JModelsWWEPlugin extends javax.swing.JPanel implements WWEPlugin, C
 
         setLayout(new java.awt.BorderLayout());
 
-        SP_Opacity.setFont(new java.awt.Font("Monospaced", 0, 10)); // NOI18N
-        SP_Opacity.setMajorTickSpacing(10);
-        SP_Opacity.setMinorTickSpacing(5);
-        SP_Opacity.setPaintLabels(true);
-        SP_Opacity.setPaintTicks(true);
-        SP_Opacity.setToolTipText("Opacity");
-        SP_Opacity.setValue(100);
-        SP_Opacity.setEnabled(false);
+        jLabel10.setBackground(java.awt.Color.orange);
+        jLabel10.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel10.setText("!!! Loading textures can freeze the interface, so be patient !!!");
+        jLabel10.setOpaque(true);
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -672,14 +629,14 @@ public class JModelsWWEPlugin extends javax.swing.JPanel implements WWEPlugin, C
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(SP_Opacity, javax.swing.GroupLayout.DEFAULT_SIZE, 535, Short.MAX_VALUE)
+                .addComponent(jLabel10, javax.swing.GroupLayout.DEFAULT_SIZE, 535, Short.MAX_VALUE)
                 .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(SP_Opacity, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jLabel10)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -926,13 +883,13 @@ public class JModelsWWEPlugin extends javax.swing.JPanel implements WWEPlugin, C
     protected javax.swing.JSpinner SP_Elevation;
     protected javax.swing.JSpinner SP_Latitude;
     protected javax.swing.JSpinner SP_Longitude;
-    protected javax.swing.JSlider SP_Opacity;
     protected javax.swing.JSpinner SP_Roll;
     protected javax.swing.JSpinner SP_Scale;
     protected javax.swing.JTextArea TA_Logs;
     protected javax.swing.JTable TB_Models;
     protected javax.swing.JToolBar TB_Tools;
     protected javax.swing.JLabel jLabel1;
+    protected javax.swing.JLabel jLabel10;
     protected javax.swing.JLabel jLabel2;
     protected javax.swing.JLabel jLabel3;
     protected javax.swing.JLabel jLabel4;

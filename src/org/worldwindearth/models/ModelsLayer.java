@@ -149,8 +149,9 @@ public class ModelsLayer extends RenderableLayer implements ActionListener, ObjL
             if (f.getRenderable() == null) {
                 Rectangle vp = dc.getView().getViewport();
                 Position pos = dc.getView().computePositionFromScreenPoint(vp.width / 2, vp.height / 2);
-                // Position pos = Position.fromDegrees(0.0d, 0.0d);
                 if (f.getFile().getName().endsWith(".obj")) {
+                    //--- The loading of the model in the GL context can be long and
+                    //--- freeze the the Event thread
                     ObjRenderable r = new ObjRenderable(pos, f.getFile().getPath(), true, false, this);
                     f.setRenderable(r);
                     loaded.add(f);
