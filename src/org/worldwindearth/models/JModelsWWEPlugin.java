@@ -77,7 +77,8 @@ public class JModelsWWEPlugin extends javax.swing.JPanel implements WWEPlugin, C
         //--- Visual representation fine tuning (8 decimals)
         SP_Latitude.setEditor(new JSpinner.NumberEditor(SP_Latitude, "0.000000000"));
         SP_Longitude.setEditor(new JSpinner.NumberEditor(SP_Longitude, "0.000000000"));
-
+        SP_Scale.setEditor(new JSpinner.NumberEditor(SP_Scale, "0.0000"));
+        
     }
 
     //**************************************************************************
@@ -629,7 +630,7 @@ public class JModelsWWEPlugin extends javax.swing.JPanel implements WWEPlugin, C
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jLabel10, javax.swing.GroupLayout.DEFAULT_SIZE, 535, Short.MAX_VALUE)
+                .addComponent(jLabel10, javax.swing.GroupLayout.DEFAULT_SIZE, 457, Short.MAX_VALUE)
                 .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
@@ -780,7 +781,7 @@ public class JModelsWWEPlugin extends javax.swing.JPanel implements WWEPlugin, C
         SP_Scale.setFont(new java.awt.Font("Monospaced", 0, 11)); // NOI18N
         SP_Scale.setModel(new javax.swing.SpinnerNumberModel(1.0d, 0.0d, null, 0.1d));
         SP_Scale.setToolTipText("Size");
-        SP_Scale.setPreferredSize(new java.awt.Dimension(60, 26));
+        SP_Scale.setPreferredSize(new java.awt.Dimension(100, 26));
 
         jLabel8.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         jLabel8.setText("S");
@@ -813,7 +814,7 @@ public class JModelsWWEPlugin extends javax.swing.JPanel implements WWEPlugin, C
                                 .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(SP_Roll, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 220, Short.MAX_VALUE))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                             .addGroup(PN_CoordinatesLayout.createSequentialGroup()
                                 .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -828,7 +829,7 @@ public class JModelsWWEPlugin extends javax.swing.JPanel implements WWEPlugin, C
                         .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(SP_Azimuth, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 124, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(SP_Scale, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
