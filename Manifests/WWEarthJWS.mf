@@ -4,6 +4,7 @@ Permissions: all-permissions
 Application-Name: WWEarthJWS
 Codebase: *
 Class-Path: lib/TinyRCP.jar
+  lib/ext/WorldWindObj.jar
   lib/ext/worldwind.jar
   lib/ext/worldwindx.jar
   lib/ext/worldwindearth.jar

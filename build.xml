@@ -188,10 +188,12 @@
         <jar destfile="${dist.dir}/lib/ext/layers/OSMBuildings.jar" manifest="Manifests/layers/OSMBuildings.mf">
             <fileset dir="${build.dir}/classes" includes="org/osmbuildings/**"/>
         </jar>
+        <!--
         <echo message="[Layer] Buildings"/>
         <jar destfile="${dist.dir}/lib/ext/layers/Buildings.jar" manifest="Manifests/layers/Buildings.mf">
             <fileset dir="${build.dir}/classes" includes="org/buildings/**"/>
         </jar>
+        -->
         <echo message="[Layer] Models"/>
         <jar destfile="${dist.dir}/lib/ext/layers/Models.jar" manifest="Manifests/layers/Models.mf">
             <fileset dir="${build.dir}/classes" includes="org/worldwindearth/models/**"/>
