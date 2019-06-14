@@ -162,7 +162,8 @@ public class OSMBuildingsTile {
         tile.setHeight(100d);
         tile.setAltitudeMode(WorldWind.CONSTANT);
         tile.setEnableCap(true);
-
+        tile.setDragEnabled(false);
+        
         ShapeAttributes att = new BasicShapeAttributes();
         att.setInteriorOpacity(0.1d);
         att.setEnableLighting(false);

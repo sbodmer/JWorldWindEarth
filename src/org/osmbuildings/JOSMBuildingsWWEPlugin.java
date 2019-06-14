@@ -27,6 +27,7 @@ import gov.nasa.worldwind.render.LightingModel;
 import gov.nasa.worldwind.render.Material;
 import gov.nasa.worldwind.render.Polygon;
 import gov.nasa.worldwind.terrain.Tessellator;
+import gov.nasa.worldwind.util.BasicDragger;
 import gov.nasa.worldwind.view.orbit.BasicOrbitView;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
@@ -76,6 +77,8 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
     protected Vec4 defaultSunDirection = null;
     protected Material defaultSunMat = null;
 
+    protected BasicDragger dragger = null;
+            
     /**
      * Creates new form OSMBuildingsWWELayerPlugin
      */
@@ -89,6 +92,7 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
 
         CMB_Providers.setModel(list);
 
+        dragger = new BasicDragger(ww);
     }
 
     //**************************************************************************
@@ -219,6 +223,12 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
             CB_FixedLighting.setSelected(config.getAttribute("fixedLighting").equals("true"));
             CB_Draggable.setSelected(config.getAttribute("draggable").equals("true"));
             layer.setDraggable(CB_Draggable.isSelected());
+            if (CB_Draggable.isSelected()) {
+                ww.addSelectListener(dragger);
+                
+            } else {
+                ww.removeSelectListener(dragger);
+            }
             
             String prov = config.getAttribute("provider");
             if (!prov.equals("")) {
@@ -315,6 +325,12 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
 
         } else if (e.getActionCommand().equals("draggable")) {
             layer.setDraggable(CB_Draggable.isSelected());
+            if (CB_Draggable.isSelected()) {
+                ww.addSelectListener(dragger);
+                
+            } else {
+                ww.removeSelectListener(dragger);
+            }
             
         } else if (e.getActionCommand().equals("clear")) {
             layer.clearTiles();

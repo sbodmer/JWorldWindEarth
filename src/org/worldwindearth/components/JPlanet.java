@@ -323,7 +323,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         wwd.setView(orbit);
         wwd.setInputHandler(wweih);
         wwd.addRenderingListener(this);
-        wwd.addSelectListener(new BasicDragger(wwd));
+
         
         wweih.addMouseListener(this);
         wweih.addMouseMotionListener(this);

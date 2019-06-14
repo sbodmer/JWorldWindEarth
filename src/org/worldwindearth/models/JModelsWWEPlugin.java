@@ -15,6 +15,7 @@ import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.render.BasicShapeAttributes;
 import gov.nasa.worldwind.render.Material;
 import gov.nasa.worldwind.render.ShapeAttributes;
+import gov.nasa.worldwind.util.BasicDragger;
 import gov.nasa.worldwind.view.orbit.BasicOrbitView;
 import java.awt.CardLayout;
 import java.awt.IllegalComponentStateException;
@@ -63,6 +64,8 @@ public class JModelsWWEPlugin extends javax.swing.JPanel implements WWEPlugin, C
     protected Model selected = null;
     protected DragSurfacePolygon cross = null;
 
+    protected BasicDragger dragger = null;
+    
     // protected ScreenAnnotation loading = null;
 
     /**
@@ -79,6 +82,7 @@ public class JModelsWWEPlugin extends javax.swing.JPanel implements WWEPlugin, C
         SP_Longitude.setEditor(new JSpinner.NumberEditor(SP_Longitude, "0.000000000"));
         SP_Scale.setEditor(new JSpinner.NumberEditor(SP_Scale, "0.0000"));
         
+        dragger = new BasicDragger(ww);
     }
 
     //**************************************************************************
@@ -178,7 +182,7 @@ public class JModelsWWEPlugin extends javax.swing.JPanel implements WWEPlugin, C
         SP_Roll.addChangeListener(this);
         SP_Scale.addChangeListener(this);
 
-        // ww.addSelectListener(new BasicDragger(ww));
+        // 
         // layer.setPickEnabled(true);
         /*
         AnnotationAttributes defaultAttributes = new AnnotationAttributes();
@@ -521,6 +525,7 @@ public class JModelsWWEPlugin extends javax.swing.JPanel implements WWEPlugin, C
     public void valueChanged(ListSelectionEvent e) {
         if (e.getValueIsAdjusting() == true) return;
 
+        ww.removeSelectListener(dragger);
         //--- Remove old surface quad
         CardLayout layout = (CardLayout) PN_Data.getLayout();
         int index = TB_Models.getSelectedRow();
@@ -535,6 +540,7 @@ public class JModelsWWEPlugin extends javax.swing.JPanel implements WWEPlugin, C
             SP_Roll.setValue(selected.getRoll());
             SP_Scale.setValue(selected.getScale());
 
+            ww.addSelectListener(dragger);
             cross.moveTo(Position.fromDegrees(selected.getLatitude(), selected.getLongitude()));
             cross.setVisible(true);
 

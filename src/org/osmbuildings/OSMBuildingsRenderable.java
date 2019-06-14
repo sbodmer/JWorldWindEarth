@@ -105,7 +105,7 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
     protected double defaultHeight = 10;
 
     protected boolean draggable = false;
-    
+
     /**
      * Some comment (like the x,y value of the tile), useful for debug
      */
@@ -174,7 +174,7 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
             prepare(obj);
 
         } else if (doc.getRootObject() instanceof Object[]) {
-            for (Object o : (Object[]) doc.getRootObject()) {
+            for (Object o:(Object[]) doc.getRootObject()) {
                 if (o instanceof GeoJSONObject) {
                     prepare((GeoJSONObject) o);
 
@@ -201,8 +201,8 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
 
     public void setDragEnabled(boolean draggable) {
         this.draggable = draggable;
-        
-        for (Renderable renderable : renderables) {
+
+        for (Renderable renderable:renderables) {
             if (renderable instanceof Polygon) {
                 Polygon polygon = (Polygon) renderable;
                 polygon.setDragEnabled(draggable);
@@ -210,7 +210,6 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
             } else if (renderable instanceof ExtrudedPolygon) {
                 ExtrudedPolygon polygon = (ExtrudedPolygon) renderable;
                 polygon.setDragEnabled(draggable);
-
 
             } else if (renderable instanceof Ellipsoid) {
                 Ellipsoid elli = (Ellipsoid) renderable;
@@ -221,10 +220,11 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
             }
         }
     }
-    
+
     public boolean isDragEnabled() {
         return draggable;
     }
+
     /**
      * Return the tile reference position (first processed extruded polygon)
      *
@@ -235,8 +235,9 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
     }
 
     /**
-     * Return the list of internale renderables primitives objects (original list)
-     * 
+     * Return the list of internale renderables primitives objects (original
+     * list)
+     *
      *
      * @return
      */
@@ -261,7 +262,7 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
     public void setOpacity(double opacity) {
         defaultAttrs.setInteriorOpacity(opacity);
 
-        for (Renderable renderable : renderables) {
+        for (Renderable renderable:renderables) {
             if (renderable instanceof Polygon) {
                 Polygon polygon = (Polygon) renderable;
                 polygon.getAttributes().setInteriorOpacity(opacity);
@@ -293,7 +294,7 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
     public void setDrawOutline(boolean draw) {
         defaultAttrs.setDrawOutline(draw);
 
-        for (Renderable renderable : renderables) {
+        for (Renderable renderable:renderables) {
             if (renderable instanceof Polygon) {
                 Polygon polygon = (Polygon) renderable;
                 polygon.getAttributes().setDrawOutline(draw);
@@ -323,7 +324,7 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
      * @param s
      */
     public void applyRoofTexture(BufferedImage tex, Sector sector) {
-        for (Renderable renderable : renderables) {
+        for (Renderable renderable:renderables) {
             if (renderable instanceof Polygon) {
                 Polygon polygon = (Polygon) renderable;
                 // polygon.getAttributes().setDrawOutline(draw);
@@ -351,7 +352,7 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
                         cnt++;
                     }
                     float tc[] = new float[texCoord.size()];
-                    for (int i = 0; i < tc.length; i++) tc[i] = texCoord.get(i);
+                    for (int i = 0;i < tc.length;i++) tc[i] = texCoord.get(i);
                     polygon.setCapImageSource(tex, tc, cnt);
                 }
 
@@ -374,7 +375,7 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
         Globe globe = dc.getGlobe();
 
         if (reference == null) {
-            for (Renderable r : renderables) {
+            for (Renderable r:renderables) {
                 //--- For extruded polygon, for the geometry to be correct, the reference
                 //--- position must be defined as the point which has the highest elevation
                 //--- Resolve the position only once
@@ -413,29 +414,34 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
         // Vec4 loc = dc.getGlobe().computePointFromPosition(pos);
         // System.out.println("REFERENCE:" + pos.latitude + "," + pos.longitude + "," + pos.elevation);
         // System.out.println("EX:"+tile.getExtent());
-        
-        //--- Draw only if in visible frustum
-        if (tile.getExtent() != null) {
-            if (dc.getView().getFrustumInModelCoordinates().intersects(tile.getExtent())) {
-                for (Renderable r : renderables) {
+        try {
+            //--- Draw only if in visible frustum
+            if (tile.getExtent() != null) {
+                if (dc.getView().getFrustumInModelCoordinates().intersects(tile.getExtent())) {
+                    for (Renderable r:renderables) {
+                        r.render(dc);
+                    }
+
+                }
+
+            } else {
+                //--- Draw it anyway
+                for (Renderable r:renderables) {
                     r.render(dc);
                 }
+
+            }
             
-            }
-
-        } else {
-            //--- Draw it anyway
-            for (Renderable r : renderables) {
-                r.render(dc);
-            }
-
+        } catch (NullPointerException ex) {
+            //--- Some time the extent can fire this exception (fly mode)
+            
         }
 
     }
 
     @Override
     public void preRender(DrawContext dc) {
-        for (Renderable r : renderables) {
+        for (Renderable r:renderables) {
             if (r instanceof PreRenderable)
                 ((PreRenderable) r).preRender(dc);
         }
@@ -447,7 +453,7 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
     // **************************************************************************
     @Override
     public void dispose() {
-        for (Renderable r : renderables) {
+        for (Renderable r:renderables) {
             if (r instanceof Disposable)
                 ((Disposable) r).dispose();
         }
@@ -485,7 +491,7 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
 
         } else if (object.isFeatureCollection()) {
             GeoJSONFeatureCollection c = object.asFeatureCollection();
-            for (GeoJSONFeature f : c.getFeatures()) {
+            for (GeoJSONFeature f:c.getFeatures()) {
                 String id = f.getValue("id").toString();
                 if (listener != null) {
                     boolean r = listener.osmBuildingsProduceRenderableForId(id);
@@ -500,7 +506,7 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
 
             }
         }
-        
+
         //--- Default not draggable
         setDragEnabled(draggable);
     }
@@ -521,7 +527,7 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
         } else if (geom.isMultiPoint()) {
             GeoJSONMultiPoint mp = geom.asMultiPoint();
             PointPlacemarkAttributes pa = new PointPlacemarkAttributes();
-            for (int i = 0; i < mp.getPointCount(); i++) {
+            for (int i = 0;i < mp.getPointCount();i++) {
                 fillRenderablePoint(f, mp.asPoint(), mp.getPosition(i), pa, properties);
             }
 
@@ -539,7 +545,7 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
             BasicShapeAttributes sa = new BasicShapeAttributes();
             sa.copy(defaultAttrs);
             fillShapeAttribute(sa, properties);
-            for (GeoJSONPositionArray coords : ms.getCoordinates()) {
+            for (GeoJSONPositionArray coords:ms.getCoordinates()) {
                 fillRenderablePolyline(f, geom, coords, sa, properties);
             }
 
@@ -556,14 +562,14 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
             BasicShapeAttributes sa = new BasicShapeAttributes();
             sa.copy(defaultAttrs);
             fillShapeAttribute(sa, properties);
-            for (int i = 0; i < mpoly.getPolygonCount(); i++) {
+            for (int i = 0;i < mpoly.getPolygonCount();i++) {
                 fillRenderablePolygon(f, mpoly.asPolygon(), mpoly.getExteriorRing(i), mpoly.getInteriorRings(i), sa, properties);
             }
 
         } else if (geom.isGeometryCollection()) {
             GeoJSONGeometryCollection c = geom.asGeometryCollection();
             GeoJSONGeometry geos[] = c.getGeometries();
-            for (int i = 0; i < geos.length; i++) {
+            for (int i = 0;i < geos.length;i++) {
                 fill(f, geos[i], properties);
             }
 
@@ -670,7 +676,7 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
             poly.setValue(AVKEY_OSMBUILDING_HAS_INNER_BOUNDS, false);
             poly.setAttributes(attrs);
             if (innerBoundaries != null) {
-                for (Iterable<? extends Position> iter : innerBoundaries) poly.addInnerBoundary(iter);
+                for (Iterable<? extends Position> iter:innerBoundaries) poly.addInnerBoundary(iter);
                 poly.setValue(AVKEY_OSMBUILDING_HAS_INNER_BOUNDS, true);
             }
 
@@ -771,7 +777,7 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
                 box.setBaseDepth(-minHeight); // --- negative value will push the base up instead of below
                 box.setOuterBoundary(outerBoundary);
                 if (innerBoundaries != null) {
-                    for (Iterable<? extends Position> iter : innerBoundaries) {
+                    for (Iterable<? extends Position> iter:innerBoundaries) {
                         box.addInnerBoundary(iter);
                     }
                     box.setValue(AVKEY_OSMBUILDING_HAS_INNER_BOUNDS, true);
@@ -831,7 +837,7 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
                 double centerLon = lons / corners.size();
                 Position center = Position.fromDegrees(centerLats, centerLon, roofHeight);
 
-                for (int i = 0; i < corners.size(); i++) {
+                for (int i = 0;i < corners.size();i++) {
                     if (i == corners.size() - 1) break;
 
                     Position p = corners.get(i);
@@ -1006,7 +1012,7 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
             //--- Display the foot print
             SurfacePolygon poly = new SurfacePolygon(attrs, outerBoundary);
             if (innerBoundaries != null) {
-                for (Iterable<? extends Position> iter : innerBoundaries) {
+                for (Iterable<? extends Position> iter:innerBoundaries) {
                     poly.addInnerBoundary(iter);
                 }
             }
@@ -1102,7 +1108,7 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
      * @return
      */
     protected static boolean hasNonzeroAltitude(Iterable<? extends Position> positions) {
-        for (Position pos : positions) {
+        for (Position pos:positions) {
             if (pos.getAltitude() != 0)
                 return true;
         }
@@ -1133,7 +1139,7 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
         //--- Use a default random gray scale
         int r = random.nextInt(16);
         String v = "#";
-        for (int i = 0; i < 6; i++) v += Integer.toHexString(r);
+        for (int i = 0;i < 6;i++) v += Integer.toHexString(r);
         if (properties != null) {
             v = properties.getStringValue("color");
             String mat = properties.getStringValue("material");
