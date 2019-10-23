@@ -1,13 +1,12 @@
 package gov.nasa.fog;
 
+import com.jogamp.opengl.GL2;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.layers.RenderableLayer;
 import gov.nasa.worldwind.render.DrawContext;
 import gov.nasa.worldwind.util.Logging;
 
 import java.awt.Color;
-
-import javax.media.opengl.GL2;
 
 /**
  * Sets fog range/density according to view altitude.

@@ -1,5 +1,7 @@
 package gov.nasa.atmosphere;
 
+import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.GLContext;
 import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.Matrix;
@@ -11,8 +13,6 @@ import gov.nasa.worldwind.util.Logging;
 
 import java.awt.Color;
 
-import javax.media.opengl.GL2;
-import javax.media.opengl.GLContext;
 
 /**
  * Renders an atmosphere around the globe and a sky dome at low altitude. Uses atmospheric scattering as color source.

@@ -47,9 +47,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import javax.media.opengl.GL2;
-
 import com.jogamp.common.nio.Buffers;
+import com.jogamp.opengl.GL2;
 import org.worldwindearth.WWE;
 
 /**

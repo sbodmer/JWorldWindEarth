@@ -1,0 +1,1 @@
+Tiny-Factory: org.defaultbuildings.JDefaultBuildingsWWEFactory

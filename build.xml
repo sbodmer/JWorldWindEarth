@@ -233,7 +233,7 @@
     <target name="copy_libs">
         <echo message="Copy libs to dist"/>
         <copy todir="${dist.dir}/lib">
-            <fileset file="lib/TinyRCP.jar"/>
+            <fileset file="lib/tinyrcp.jar"/>
             <fileset file="lib/worldwind/gdal.jar"/>
             <fileset file="lib/worldwind/gluegen-*.jar"/>
             <fileset file="lib/worldwind/jogl-*.jar"/>
@@ -283,11 +283,19 @@
     <target name="update_libs">
         <echo message="Update libs from TinyRCP project"/>
         <copy failonerror="false" todir="lib" overwrite="true">
-            <fileset file="../TinyRCP/dist/TinyRCP.jar"/>
+            <fileset file="../TinyRCP/dist/tinyrcp.jar"/>
         </copy>
-       <echo message="Update libs from WorldWindObj project"/>
+        <echo message="Update libs from WorldWindObj project"/>
         <copy failonerror="false" todir="lib" overwrite="true">
             <fileset file="../WorldWindObj/dist/WorldWindObj.jar"/>
+        </copy>
+        <echo message="Update libs from WorldWind project"/>
+        <copy failonerror="false" todir="lib/worldwind" overwrite="true">
+            <fileset file="../../Idea/WorldWindJava/build/jar/release/worldwind.jar"/>
+            <fileset file="../../Idea/WorldWindJava/build/jar/release/worldwindx.jar"/>
+            <fileset file="../../Idea/WorldWindJava/gdal.jar"/>
+            <fileset file="../../Idea/WorldWindJava/jogl*.jar"/>
+            <fileset file="../../Idea/WorldWindJava/gluegen-rt*.jar"/>
         </copy>
     </target>
     
@@ -298,6 +306,50 @@
     <target name="package_jworldwindearth" depends="-init-project" description="Build debian jworldwindearth package">
         <!-- Platform -->
         <echo message="[deb] Create jworldwindearth package for platform ${platform}"/>
+        <echo message="[deb] Cyop source code"/>
+        <delete dir="Packages/deb/jworldwindearth-${version}/src" />
+        <mkdir dir="Packages/deb/jworldwindearth-${version}/src" />
+        <copy todir="Packages/deb/jworldwindearth-${version}/src">
+            <fileset dir="src"/>
+        </copy>
+        <copy todir="Packages/deb/jworldwindearth-${version}">
+            <fileset file="build.xml"/>
+        </copy>
+        <tar basedir="Packages/deb/jworldwindearth-${version}" destfile="Packages/deb/jworldwindearth_${version}.orig.tar.gz" compression="gzip">
+            
+        </tar>
+        
+        <delete dir="Packages/deb/jworldwindearth-${version}/debian" />
+        <mkdir dir="Packages/deb/jworldwindearth-${version}/debian" />
+        <copy todir="Packages/deb/jworldwindearth-${version}/debian">
+            <fileset dir="Packages/deb/debian"/>
+        </copy>
+        <delete dir="Packages/deb/jworldwindearth-${version}/nbproject" />
+        <mkdir dir="Packages/deb/jworldwindearth-${version}/nbproject" />
+        <copy todir="Packages/deb/jworldwindearth-${version}/nbproject">
+            <fileset file="nbproject/build-impl.xml"/>
+            <fileset file="nbproject/project.properties"/>
+        </copy>
+        <delete dir="Packages/deb/jworldwindearth-${version}/lib" />
+        <mkdir dir="Packages/deb/jworldwindearth-${version}/lib" />
+        <copy todir="Packages/deb/jworldwindearth-${version}/lib">
+            <fileset dir="lib"/>
+        </copy>
+        <delete dir="Packages/deb/jworldwindearth-${version}/Manifests" />
+        <mkdir dir="Packages/deb/jworldwindearth-${version}/Manifests" />
+        <copy todir="Packages/deb/jworldwindearth-${version}/Manifests">
+            <fileset dir="Manifests"/>
+        </copy>
+               
+		<delete dir="Packages/deb/jworldwindearth-${version}/bin" />
+        <mkdir dir="Packages/deb/jworldwindearth-${version}/bin" />
+        <copy todir="Packages/deb/jworldwindearth-${version}/bin">
+            <fileset dir="bin/amd64"/>
+        </copy>
+		<copy todir="Packages/deb/jworldwindearth-${version}">
+            <fileset dir="Packages/deb/desktop"/>
+        </copy>
+        <!--
         <delete dir="${dist.dir}/Packages/jworldwindearth"/>
         <mkdir dir="${dist.dir}/Packages/jworldwindearth/DEBIAN"/>
         <copy todir="${dist.dir}/Packages/jworldwindearth/DEBIAN" overwrite="true" >
@@ -316,12 +368,15 @@
         <copy todir="${dist.dir}/Packages/jworldwindearth/usr/bin">
             <fileset file="bin/${platform}/jworldwindearth"/>
         </copy>
-        <exec executable="dpkg-deb" dir="${dist.dir}/Packages">
-            <arg value="--build"/>
-            <arg value="jworldwindearth"/>
+        -->
+        <exec executable="debuild" dir="Packages/deb/jworldwindearth-${version}/debian">
+            <arg value="-us"/>
+            <arg value="-uc"/>
         </exec>
+        <!--
         <mkdir dir="Releases/Packages"/>
         <move file="${dist.dir}/Packages/jworldwindearth.deb" tofile="Releases/Packages/jworldwindearth_all.deb"/>
+        -->
     </target>
     
 </project>

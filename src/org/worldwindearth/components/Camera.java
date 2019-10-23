@@ -5,6 +5,7 @@
  */
 package org.worldwindearth.components;
 
+import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.util.awt.AWTGLReadBufferUtil;
 import gov.nasa.worldwind.WorldWindow;
 import gov.nasa.worldwind.event.RenderingEvent;
@@ -13,7 +14,6 @@ import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.view.orbit.BasicOrbitView;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
-import javax.media.opengl.GLAutoDrawable;
 
 /**
  *

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- For automatic creation use this config a starting point -->
+<Layer className="org.worldwindearth.components.layers.buildings.BuildingsLayer">
+    <Property name="Name" value="Buildings 3D"/>
+    <Property name="MaxActiveAltitude" value="8000"/>
+    <Property name="MinActiveAltitude" value="1"/>
+    <Property name="NetworkRetrievalEnabled" value="true"/>
+    <Property name="ExpiryTime" value="2592000000"/> <!-- 30 days -->
+    <Property name="MaxTiles" value="30"/>
+    <Property name="Rows" value="3"/>
+    <Property name="Cols" value="3"/>
+    <Property name="MinLevel" value="15"/>
+    <Property name="MaxLevel" value="15"/>
+    <Property name="DrawProcessingBox" value="true"/>
+    <Property name="Provider" value="http://www.les-studios-inexistants.ch/buildings/tile/${Z}/${X}/${Y}/buildings.xml"/>
+</Layer>
