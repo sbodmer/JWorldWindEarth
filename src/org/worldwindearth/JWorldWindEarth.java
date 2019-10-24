@@ -615,8 +615,8 @@ public class JWorldWindEarth extends javax.swing.JFrame implements ActionListene
         System.gc();
 
         //--- Wait that the JVM dies
-        System.out.println("(I) No System.exit called, should stop automatically");
-        System.out.println("(I) Force exit for the moment");
+        // System.out.println("(I) No System.exit called, should stop automatically");
+        System.out.println("(I) Force exit");
         System.exit(0);
     }
 
