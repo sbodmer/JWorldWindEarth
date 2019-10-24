@@ -79,9 +79,9 @@ public class JViewControlsWWEPlugin extends JPanel implements WWEPlugin, ActionL
 
     @Override
     public void cleanup() {
-        System.out.println("(W) TODO: The wordlwind ViewControlsSelectListener has a timer set, but no way to stop it...");
         ww.removeSelectListener(clistener);
         layer.dispose();
+		clistener.setRepeatTimerDelay(0);
         
     }
 
