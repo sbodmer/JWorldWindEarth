@@ -37,6 +37,8 @@ The layers are recursively loaded from file system in the default folders
 Work in progress, but enough for a Preview...
 
 ## Building
+!!! Only 64bit architecture supported !!!
+
 The project is a Netbeans project, for manual compiling, use the ant build.xml
 
     cd {cwd}
