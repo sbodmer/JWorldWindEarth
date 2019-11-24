@@ -13,6 +13,9 @@
       </Properties>
     </Component>
     <Component class="javax.swing.JLabel" name="LB_Description">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="&lt;html&gt;Worldwind bing sat images layer&lt;/html&gt;"/>
+      </Properties>
     </Component>
   </NonVisualComponents>
   <AuxValues>

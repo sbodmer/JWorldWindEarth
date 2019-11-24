@@ -79,7 +79,7 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
     protected int minLevel = 15;
     protected int maxLevel = 15;
     protected int lastLevel = 15;
-
+    protected int timeout = 60000;  //--- Tile timeout is ms
     javax.swing.Timer timer = null;
 
     /**
@@ -728,14 +728,14 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
                     long diff = now - load;
                     // System.out.println("["+key+"]="+load+", diff="+diff+" renderable=false");
                     // System.out.println("DIFF:"+diff+" (load:"+load+" now:"+now+")");
-                    if (diff > 30000) {
+                    if (diff > timeout) {
                         //--- Loading too long, consider failed
                         tooLong.add(t);
                     }
                 }
 
             }
-            for (int i = 0; i < tooLong.size(); i++) osmBuildingsLoadingFailed(tooLong.get(i), "No failed message received after 30s, force to failed loading...");
+            for (int i = 0; i < tooLong.size(); i++) osmBuildingsLoadingFailed(tooLong.get(i), "No failed message received after "+(timeout/1000)+"s, force to failed loading...");
         }
     }
 

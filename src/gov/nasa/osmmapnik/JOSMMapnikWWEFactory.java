@@ -127,7 +127,7 @@ public class JOSMMapnikWWEFactory extends JPanel implements WWEFactory {
         LB_Name.setText(bundle.getString("factory_name")); // NOI18N
 
         LB_Description.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
-        LB_Description.setText("<html><body>\nOpenstreet map tiles\n</body></html>");
+        LB_Description.setText("<html><body>\nOpenstreet map tiles (mapnik renderer)\n</body></html>");
         LB_Description.setVerticalAlignment(javax.swing.SwingConstants.TOP);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);

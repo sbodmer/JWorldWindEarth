@@ -122,7 +122,7 @@ public class JOpenstreetmapWWEFactory extends JPanel implements WWEFactory {
         LB_Name.setText(bundle.getString("factory_name")); // NOI18N
 
         LB_Description.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
-        LB_Description.setText("<html><body>\nWorldwind stars layer\n</body></html>");
+        LB_Description.setText("<html><body>\nWorldwind Open Street map layer\n</body></html>");
         LB_Description.setVerticalAlignment(javax.swing.SwingConstants.TOP);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);

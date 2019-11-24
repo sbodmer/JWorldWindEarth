@@ -120,6 +120,8 @@ public class JBingWWEFactory extends JPanel implements WWEFactory {
         java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("gov/nasa/bing/Bing"); // NOI18N
         LB_Name.setText(bundle.getString("factory_name")); // NOI18N
 
+        LB_Description.setText("<html>Worldwind bing sat images layer</html>");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
