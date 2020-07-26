@@ -486,7 +486,7 @@ public class JOSMBuildingsWWEFactory extends javax.swing.JPanel implements WWEFa
         TB_Providers.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {"osmbuildings.org", "http://[abcd].data.osmbuildings.org/0.2/sx3pxpz6/tile/${Z}/${X}/${Y}.json",  new Integer(15),  new Integer(15)},
-                {"les-studios-inexistants.ch", "http://www.les-studios-inexistants.ch:8088/osmbuildings/${Z}/${X}/${Y}.json",  new Integer(15),  new Integer(15)}
+                {"les-studios-inexistants.ch", "http://kaitan.les-studios-inexistants.ch:8088/osmbuildings/${Z}/${X}/${Y}.json",  new Integer(15),  new Integer(15)}
             },
             new String [] {
                 "Title", "URL", "Min level", "Max level"

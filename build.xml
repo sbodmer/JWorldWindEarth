@@ -188,27 +188,25 @@
         <jar destfile="${dist.dir}/lib/ext/layers/OSMBuildings.jar" manifest="Manifests/layers/OSMBuildings.mf">
             <fileset dir="${build.dir}/classes" includes="org/osmbuildings/**"/>
         </jar>
-        <!--
         <echo message="[Layer] Buildings"/>
-        <jar destfile="${dist.dir}/lib/ext/layers/Buildings.jar" manifest="Manifests/layers/Buildings.mf">
+        <jar destfile="${dist.dir}/lib/ext/layers/DefaultBuildings.jar" manifest="Manifests/layers/DefaultBuildings.mf">
             <fileset dir="${build.dir}/classes" includes="org/buildings/**"/>
         </jar>
-        -->
+        
         <echo message="[Layer] Models"/>
         <jar destfile="${dist.dir}/lib/ext/layers/Models.jar" manifest="Manifests/layers/Models.mf">
             <fileset dir="${build.dir}/classes" includes="org/worldwindearth/models/**"/>
         </jar>
-        <!--
         <echo message="[Layer] PaysDeBrest"/>
         <jar destfile="${dist.dir}/lib/ext/layers/PaysDeBrest.jar" manifest="Manifests/layers/PaysDeBrest.mf">
             <fileset dir="${build.dir}/classes" includes="fr/paysdebrest/**"/>
         </jar>
-        -->
+        <!--
         <echo message="[Layer] Geocode"/>
         <jar destfile="${dist.dir}/lib/ext/layers/Geocode.jar" manifest="Manifests/layers/Geocode.mf">
             <fileset dir="${build.dir}/classes" includes="org/worldwindearth/geocode/**"/>
         </jar>
-        
+        -->
         <!-- Geocode -->
         <mkdir dir="${dist.dir}/lib/ext/geocode"/>
         <echo message="[Geocode] Nominatim"/>

@@ -379,10 +379,11 @@ public class BuildingsTile extends Thread {
                     URL m = new URL(b.getModelUrl());
                     String fileName = m.getFile().substring(m.getFile().lastIndexOf('/') + 1);
                     File t = new File(f.getParentFile(), fileName);
-                    System.out.println("DOWNLOADING FROM " + m + " TO " + t.getPath());
+                    // System.out.println("DOWNLOADING FROM " + m + " TO " + t.getPath());
                     URLConnection con = m.openConnection();
+                    progress = "Downloading...";
                     totalToLoad = con.getContentLength();
-                    System.out.println("DOWNLOADING LENGTH:" + totalToLoad);
+                    // System.out.println("DOWNLOADING LENGTH:" + totalToLoad);
                     currentLoaded = 0;
                     progress = "Downloading " + fileName;
                     FileOutputStream fout = new FileOutputStream(t);
@@ -404,6 +405,7 @@ public class BuildingsTile extends Thread {
                         ZipEntry zipEntry = zis.getNextEntry();
                         while (zipEntry != null) {
                             File newFile = new File(destDir, zipEntry.getName());
+                            progress = "Unzipping "+zipEntry.getName();
                             // System.out.println("NEWFILE:" + newFile);
                             if (zipEntry.isDirectory()) {
                                 newFile.mkdirs();
@@ -426,7 +428,7 @@ public class BuildingsTile extends Thread {
                     }
                 }
                 if (file.exists()) {
-                    System.out.println("BUILDING FOUND:" + b.getFile() + "("+b.getFile().exists()+") MODEL:" + b.getModelUrl());
+                    // System.out.println("BUILDING FOUND:" + b.getFile() + "("+b.getFile().exists()+") MODEL:" + b.getModelUrl());
                     
                 }
             }

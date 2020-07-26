@@ -9,21 +9,16 @@ import org.osmbuildings.*;
 import gov.nasa.worldwind.*;
 import gov.nasa.worldwind.event.*;
 import gov.nasa.worldwind.geom.Position;
-import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.layers.RenderableLayer;
 import gov.nasa.worldwind.render.*;
-import gov.nasa.worldwind.util.Logging;
 import gov.nasa.worldwind.view.firstperson.BasicFlyView;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.logging.Level;
-import osm.map.worldwind.gl.GLRenderable;
 import osm.map.worldwind.gl.obj.ObjRenderable;
 
 /**
@@ -97,7 +92,7 @@ public class BuildingsLayer extends RenderableLayer implements ActionListener, B
     }
     
     /**
-     * Warpper for the proctected method
+     * Warpper for the protected method
      * @param sc 
      */
     public void setScreenCreditImage(ScreenCredit sc) {

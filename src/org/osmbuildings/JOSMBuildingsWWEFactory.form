@@ -316,7 +316,7 @@
                         </Column>
                         <Column editable="false" title="URL" type="java.lang.Object">
                           <Data value="http://[abcd].data.osmbuildings.org/0.2/sx3pxpz6/tile/${Z}/${X}/${Y}.json"/>
-                          <Data value="http://www.les-studios-inexistants.ch:8088/osmbuildings/${Z}/${X}/${Y}.json"/>
+                          <Data value="http://kaitan.les-studios-inexistants.ch:8088/osmbuildings/${Z}/${X}/${Y}.json"/>
                         </Column>
                         <Column editable="false" title="Min level" type="java.lang.Integer">
                           <Data value="15"/>

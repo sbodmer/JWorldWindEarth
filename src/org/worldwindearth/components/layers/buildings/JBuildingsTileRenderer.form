@@ -19,13 +19,15 @@
           <Group type="102" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Component id="TF_Title" max="32767" attributes="0"/>
                   <Component id="TF_Comments" alignment="0" max="32767" attributes="0"/>
                   <Group type="102" alignment="0" attributes="0">
-                      <Component id="PB_Progress" pref="392" max="32767" attributes="0"/>
+                      <Component id="TF_Title" max="32767" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="LB_Ok" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="LB_Error" min="-2" max="-2" attributes="0"/>
                   </Group>
+                  <Component id="PB_Progress" alignment="0" pref="471" max="32767" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
           </Group>
@@ -35,14 +37,15 @@
       <Group type="103" groupAlignment="0" attributes="0">
           <Group type="102" alignment="0" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
-              <Component id="TF_Title" min="-2" max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Component id="TF_Title" min="-2" max="-2" attributes="0"/>
+                  <Component id="LB_Ok" min="-2" max="-2" attributes="0"/>
+                  <Component id="LB_Error" min="-2" max="-2" attributes="0"/>
+              </Group>
               <EmptySpace max="-2" attributes="0"/>
               <Component id="TF_Comments" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="0" attributes="0">
-                  <Component id="PB_Progress" min="-2" max="-2" attributes="0"/>
-                  <Component id="LB_Error" min="-2" max="-2" attributes="0"/>
-              </Group>
+              <Component id="PB_Progress" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="32767" attributes="0"/>
           </Group>
       </Group>
@@ -68,6 +71,13 @@
       <Properties>
         <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
           <Image iconType="3" name="/org/worldwindearth/components/layers/buildings/Resources/Icons/16x16/error.png"/>
+        </Property>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JLabel" name="LB_Ok">
+      <Properties>
+        <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+          <Image iconType="3" name="/org/worldwindearth/components/layers/buildings/Resources/Icons/16x16/ok.png"/>
         </Property>
       </Properties>
     </Component>

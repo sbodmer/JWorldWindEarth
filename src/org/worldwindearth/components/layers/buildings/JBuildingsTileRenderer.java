@@ -36,6 +36,7 @@ public class JBuildingsTileRenderer extends javax.swing.JPanel implements ListCe
         TF_Comments = new javax.swing.JLabel();
         PB_Progress = new javax.swing.JProgressBar();
         LB_Error = new javax.swing.JLabel();
+        LB_Ok = new javax.swing.JLabel();
 
         TF_Title.setText("...");
 
@@ -45,6 +46,8 @@ public class JBuildingsTileRenderer extends javax.swing.JPanel implements ListCe
 
         LB_Error.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/components/layers/buildings/Resources/Icons/16x16/error.png"))); // NOI18N
 
+        LB_Ok.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/components/layers/buildings/Resources/Icons/16x16/ok.png"))); // NOI18N
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -52,25 +55,28 @@ public class JBuildingsTileRenderer extends javax.swing.JPanel implements ListCe
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(TF_Title, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(TF_Comments, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(PB_Progress, javax.swing.GroupLayout.DEFAULT_SIZE, 392, Short.MAX_VALUE)
+                        .addComponent(TF_Title, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(LB_Error)))
+                        .addComponent(LB_Ok)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(LB_Error))
+                    .addComponent(PB_Progress, javax.swing.GroupLayout.DEFAULT_SIZE, 471, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(TF_Title)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(TF_Title)
+                    .addComponent(LB_Ok)
+                    .addComponent(LB_Error))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(TF_Comments)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(PB_Progress, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(LB_Error))
+                .addComponent(PB_Progress, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
@@ -80,7 +86,6 @@ public class JBuildingsTileRenderer extends javax.swing.JPanel implements ListCe
         BuildingsTile t = (BuildingsTile) value;
         TF_Title.setText(t.level+"x"+t.x+"x"+t.y);
         TF_Comments.setText(t.getURL().toString());
-        LB_Error.setVisible(t.hasError() != null);
         PB_Progress.setString(t.getProgress());
         if (t.isLoaded()) {
             PB_Progress.setVisible(false);
@@ -96,11 +101,12 @@ public class JBuildingsTileRenderer extends javax.swing.JPanel implements ListCe
             LB_Error.setVisible(true);
             LB_Error.setToolTipText(t.hasError());
             PB_Progress.setString(t.hasError());
+            LB_Ok.setVisible(false);
             
         } else {
             LB_Error.setVisible(false);
             LB_Error.setToolTipText(null);
-            
+            LB_Ok.setVisible(true);
         }
         
         if (isSelected) {
@@ -115,6 +121,7 @@ public class JBuildingsTileRenderer extends javax.swing.JPanel implements ListCe
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     protected javax.swing.JLabel LB_Error;
+    protected javax.swing.JLabel LB_Ok;
     protected javax.swing.JProgressBar PB_Progress;
     protected javax.swing.JLabel TF_Comments;
     protected javax.swing.JLabel TF_Title;

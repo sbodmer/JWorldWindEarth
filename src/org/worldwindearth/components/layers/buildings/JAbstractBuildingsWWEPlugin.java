@@ -441,6 +441,7 @@ public abstract class JAbstractBuildingsWWEPlugin extends javax.swing.JPanel imp
 
         jTabbedPane1.addTab("Tiles", jScrollPane3);
 
+        TA_Logs.setEditable(false);
         TA_Logs.setColumns(20);
         TA_Logs.setFont(new java.awt.Font("Monospaced", 0, 11)); // NOI18N
         TA_Logs.setRows(5);
