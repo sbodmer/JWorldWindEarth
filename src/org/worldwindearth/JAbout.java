@@ -104,7 +104,6 @@ public class JAbout extends javax.swing.JDialog implements HyperlinkListener {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        LB_Image = new javax.swing.JLabel();
         jTabbedPane1 = new javax.swing.JTabbedPane();
         jScrollPane2 = new javax.swing.JScrollPane();
         TP_WorldWind = new javax.swing.JTextPane();
@@ -118,14 +117,13 @@ public class JAbout extends javax.swing.JDialog implements HyperlinkListener {
         jTextArea1 = new javax.swing.JTextArea();
         jScrollPane5 = new javax.swing.JScrollPane();
         TP_ChangeLog = new javax.swing.JTextPane();
+        jPanel4 = new javax.swing.JPanel();
+        LB_Image = new javax.swing.JLabel();
         jPanel3 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setPreferredSize(new java.awt.Dimension(480, 480));
-
-        LB_Image.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Images/cards_wwe.jpg"))); // NOI18N
-        getContentPane().add(LB_Image, java.awt.BorderLayout.CENTER);
 
         jTabbedPane1.setPreferredSize(new java.awt.Dimension(145, 200));
 
@@ -174,7 +172,12 @@ public class JAbout extends javax.swing.JDialog implements HyperlinkListener {
 
         jTabbedPane1.addTab("ChangeLog", jScrollPane5);
 
-        getContentPane().add(jTabbedPane1, java.awt.BorderLayout.SOUTH);
+        getContentPane().add(jTabbedPane1, java.awt.BorderLayout.CENTER);
+
+        jPanel4.setLayout(new java.awt.BorderLayout());
+
+        LB_Image.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Images/cards_wwe.jpg"))); // NOI18N
+        jPanel4.add(LB_Image, java.awt.BorderLayout.CENTER);
 
         jPanel3.setBackground(new java.awt.Color(144, 202, 249));
 
@@ -182,9 +185,11 @@ public class JAbout extends javax.swing.JDialog implements HyperlinkListener {
         jLabel1.setText("<html>\n<b>JWorldWindEarth</b> Preview<br>\n</html>");
         jPanel3.add(jLabel1);
 
-        getContentPane().add(jPanel3, java.awt.BorderLayout.NORTH);
+        jPanel4.add(jPanel3, java.awt.BorderLayout.NORTH);
 
-        setBounds(0, 0, 650, 510);
+        getContentPane().add(jPanel4, java.awt.BorderLayout.NORTH);
+
+        setBounds(0, 0, 650, 582);
     }// </editor-fold>//GEN-END:initComponents
 
 
@@ -198,6 +203,7 @@ public class JAbout extends javax.swing.JDialog implements HyperlinkListener {
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
+    private javax.swing.JPanel jPanel4;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
