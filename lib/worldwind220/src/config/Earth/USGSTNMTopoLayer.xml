@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<!--
+  ~ Copyright 2006-2009, 2017, 2020 United States Government, as represented by the
+  ~ Administrator of the National Aeronautics and Space Administration.
+  ~ All rights reserved.
+  ~ 
+  ~ The NASA World Wind Java (WWJ) platform is licensed under the Apache License,
+  ~ Version 2.0 (the "License"); you may not use this file except in compliance
+  ~ with the License. You may obtain a copy of the License at
+  ~ http://www.apache.org/licenses/LICENSE-2.0
+  ~ 
+  ~ Unless required by applicable law or agreed to in writing, software distributed
+  ~ under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+  ~ CONDITIONS OF ANY KIND, either express or implied. See the License for the
+  ~ specific language governing permissions and limitations under the License.
+  ~ 
+  ~ NASA World Wind Java (WWJ) also contains the following 3rd party Open Source
+  ~ software:
+  ~ 
+  ~     Jackson Parser – Licensed under Apache 2.0
+  ~     GDAL – Licensed under MIT
+  ~     JOGL – Licensed under  Berkeley Software Distribution (BSD)
+  ~     Gluegen – Licensed under Berkeley Software Distribution (BSD)
+  ~ 
+  ~ A complete listing of 3rd Party software notices and licenses included in
+  ~ NASA World Wind Java (WWJ)  can be found in the WorldWindJava-v2.2 3rd-party
+  ~ notices and licenses PDF found in code directory.
+  -->
+
+<Layer layerType="TiledImageLayer" version="1">
+    <DisplayName>USGS Topo Base Map</DisplayName>
+    <DatasetName>0</DatasetName>
+    <DataCacheName>Earth\USGS Topo Base Map</DataCacheName>
+    <Service serviceName="OGC:WMS" version="1.3.0">
+        <LayerNames>0</LayerNames>
+        <StyleNames>default</StyleNames>
+        <GetMapURL>https://basemap.nationalmap.gov/arcgis/services/USGSTopo/MapServer/WmsServer?</GetMapURL>
+        <GetCapabilitiesURL>https://basemap.nationalmap.gov/arcgis/services/USGSTopo/MapServer/WmsServer?
+        </GetCapabilitiesURL>
+    </Service>
+    <FormatSuffix>.dds</FormatSuffix>
+    <NumLevels count="12" numEmpty="0"/>
+    <Sector>
+        <SouthWest>
+            <LatLon latitude="-89.0" longitude="-179.999996" units="degrees"/>
+        </SouthWest>
+        <NorthEast>
+            <LatLon latitude="89.0" longitude="179.999996" units="degrees"/>
+        </NorthEast>
+    </Sector>
+    <TileOrigin>
+        <LatLon latitude="-90.0" longitude="-180.0" units="degrees"/>
+    </TileOrigin>
+    <TileSize>
+        <Dimension height="512" width="512"/>
+    </TileSize>
+    <LevelZeroTileDelta>
+        <LatLon latitude="36.0" longitude="36.0" units="degrees"/>
+    </LevelZeroTileDelta>
+    <ImageFormat>image/jpeg</ImageFormat>
+    <UseTransparentTextures>true</UseTransparentTextures>
+    <RetrievalTimeouts>
+        <ReadTimeout>
+            <Time units="milliseconds" value="20000"/>
+        </ReadTimeout>
+    </RetrievalTimeouts>
+</Layer>
+

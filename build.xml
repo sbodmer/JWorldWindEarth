@@ -190,17 +190,19 @@
         </jar>
         <echo message="[Layer] Buildings"/>
         <jar destfile="${dist.dir}/lib/ext/layers/DefaultBuildings.jar" manifest="Manifests/layers/DefaultBuildings.mf">
-            <fileset dir="${build.dir}/classes" includes="org/buildings/**"/>
+            <fileset dir="${build.dir}/classes" includes="org/defaultbuildings/**"/>
         </jar>
         
         <echo message="[Layer] Models"/>
         <jar destfile="${dist.dir}/lib/ext/layers/Models.jar" manifest="Manifests/layers/Models.mf">
             <fileset dir="${build.dir}/classes" includes="org/worldwindearth/models/**"/>
         </jar>
+        <!--
         <echo message="[Layer] PaysDeBrest"/>
         <jar destfile="${dist.dir}/lib/ext/layers/PaysDeBrest.jar" manifest="Manifests/layers/PaysDeBrest.mf">
             <fileset dir="${build.dir}/classes" includes="fr/paysdebrest/**"/>
         </jar>
+        -->
         <!--
         <echo message="[Layer] Geocode"/>
         <jar destfile="${dist.dir}/lib/ext/layers/Geocode.jar" manifest="Manifests/layers/Geocode.mf">
@@ -306,43 +308,55 @@
         <echo message="[deb] Create jworldwindearth package for platform ${platform}"/>
         <delete dir="Releases/Packages/deb" />       
                         
-        <echo message="[deb] Copy source code to package src dir"/>
-        <delete dir="Releases/Packages/deb/jworldwindearth-${version}/src" />
-        <mkdir dir="Releases/Packages/deb/jworldwindearth-${version}/src" />
-        <copy todir="Releases/Packages/deb/jworldwindearth-${version}/src">
+        <echo message="[deb] Create source tarball"/>
+        <mkdir dir="Releases/Packages/deb/jworldwindearth-${version}-src" />
+        <copy todir="Releases/Packages/deb/jworldwindearth-${version}-src/src" overwrite="true" preservelastmodified="true">
             <fileset dir="src" />
         </copy>
-        <echo message="[deb] Copy ant build.xm to source packages for building"/>
-        <copy todir="Releases/Packages/deb/jworldwindearth-${version}">
-            <fileset file="build.xml"/>
+        <copy todir="Releases/Packages/deb/jworldwindearth-${version}-src" overwrite="true" preservelastmodified="true">
+            <fileset file="build.xml" />
         </copy>
-        <echo message="[deb] Archive source code"/>
-        <tar basedir="Releases/Packages/deb/jworldwindearth-${version}" destfile="Releases/Packages/deb/jworldwindearth_${version}.orig.tar.gz" compression="gzip" />   
-       
+        <copy todir="Releases/Packages/deb/jworldwindearth-${version}-src" overwrite="true" preservelastmodified="true">
+            <fileset file="build.xml" />
+        </copy>
+        <mkdir dir="Releases/Packages/deb/jworldwindearth-${version}-src/nbproject" />
+        <copy todir="Releases/Packages/deb/jworldwindearth-${version}-src/nbproject" overwrite="true" preservelastmodified="true">
+            <fileset file="nbproject/project.properties" />
+            <fileset file="nbproject/build-impl.xml" />
+        </copy>
+        <mkdir dir="Releases/Packages/deb/jworldwindearth-${version}-src/lib" />
+        <copy todir="Releases/Packages/deb/jworldwindearth-${version}-src/lib" overwrite="true" preservelastmodified="true">
+            <fileset dir="lib" />
+        </copy>
+        <mkdir dir="Releases/Packages/deb/jworldwindearth-${version}-src/Manifests" />
+        <copy todir="Releases/Packages/deb/jworldwindearth-${version}-src/Manifests" overwrite="true" preservelastmodified="true">
+            <fileset dir="Manifests" />
+        </copy>
+        <mkdir dir="Releases/Packages/deb/jworldwindearth-${version}" />
+        <tar basedir="Releases/Packages/deb/jworldwindearth-${version}-src" destfile="Releases/Packages/deb/jworldwindearth_${version}.orig.tar.gz" compression="gzip" />   
+        <delete dir="Releases/Packages/deb/jworldwindearth-${version}-src"/>
+    
         <echo message="[deb] Preparing package"/>
         <mkdir dir="Releases/Packages/deb/jworldwindearth-${version}/debian" />
-        <copy todir="Releases/Packages/deb/jworldwindearth-${version}/debian">
+        <copy todir="Releases/Packages/deb/jworldwindearth-${version}/debian" overwrite="true">
             <fileset dir="Packages/deb/debian"/>
         </copy>
-        <mkdir dir="Releases/Packages/deb/jworldwindearth-${version}/nbproject" />
-        <copy todir="Releases/Packages/deb/jworldwindearth-${version}/nbproject">
-            <fileset file="nbproject/build-impl.xml"/>
-            <fileset file="nbproject/project.properties"/>
-        </copy>
+        
+        
         <mkdir dir="Releases/Packages/deb/jworldwindearth-${version}/lib" />
-        <copy todir="Releases/Packages/deb/jworldwindearth-${version}/lib">
+        <copy todir="Releases/Packages/deb/jworldwindearth-${version}/lib" overwrite="true">
             <fileset dir="lib"/>
         </copy>
         <mkdir dir="Releases/Packages/deb/jworldwindearth-${version}/Manifests" />
-        <copy todir="Releases/Packages/deb/jworldwindearth-${version}/Manifests">
+        <copy todir="Releases/Packages/deb/jworldwindearth-${version}/Manifests" overwrite="true">
             <fileset dir="Manifests"/>
         </copy>
                
         <mkdir dir="Releases/Packages/deb/jworldwindearth-${version}/bin" />
-        <copy todir="Releases/Packages/deb/jworldwindearth-${version}/bin">
+        <copy todir="Releases/Packages/deb/jworldwindearth-${version}/bin" overwrite="true">
             <fileset dir="bin/amd64"/>
         </copy>
-        <copy todir="Releases/Packages/deb/jworldwindearth-${version}">
+        <copy todir="Releases/Packages/deb/jworldwindearth-${version}" overwrite="true">
             <fileset dir="Packages/deb/desktop"/>
         </copy>
         
