@@ -191,17 +191,16 @@ public class JWMSWWEPlugin extends JPanel implements WWEPlugin, ActionListener, 
             ex.printStackTrace();
 
         }
-        String sw = config!=null?config.getAttribute("wms"):"";
+        String sw = config != null ? config.getAttribute("wms") : "";
         for (int i = 0; i < CMB_Server.getItemCount(); i++) {
             wms = (WMSServer) CMB_Server.getItemAt(i);
             if (wms.getTitle().equals(sw)) {
                 LB_WMS.setText(wms.getTitle());
                 wms.fetch(this, selectedLayers);
                 break;
-                
+
             }
         }
-        
 
     }
 
@@ -484,6 +483,7 @@ public class JWMSWWEPlugin extends JPanel implements WWEPlugin, ActionListener, 
                 TA_Layer.setText("");
             }
 
+            
         }
     }
 
@@ -508,7 +508,6 @@ public class JWMSWWEPlugin extends JPanel implements WWEPlugin, ActionListener, 
         if (e.getSource() == SL_Opacity) {
             double alpha = SL_Opacity.getValue() / 100d;
             layer.setOpacity(alpha);
-
         }
         ww.redraw();
     }
