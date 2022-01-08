@@ -52,6 +52,12 @@ To run the application cd in the newly created dist dir
 To use only the World Wind Layer in other project, the folder dist contains the
 standalone WW layers libraries.
 
+For building a binary only debian pacakge use
+
+    cd {cwd}
+    ant package_jworldwindearth
+
+The .deb is then in the {cwd}/Releases/Packages
 
 ## Features
 TODO
