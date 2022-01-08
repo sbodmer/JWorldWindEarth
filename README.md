@@ -57,7 +57,7 @@ For building a binary only debian package use
     cd {cwd}
     ant package_jworldwindearth
 
-The .deb is then in the {cwd}/Releases/Packages
+The .deb is then in the {cwd}/Releases/Packages folder
 
 ## Features
 TODO
