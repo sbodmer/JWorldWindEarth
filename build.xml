@@ -234,14 +234,14 @@
         <echo message="Copy libs to dist"/>
         <copy todir="${dist.dir}/lib">
             <fileset file="lib/tinyrcp.jar"/>
-            <fileset file="lib/worldwind/gdal.jar"/>
-            <fileset file="lib/worldwind/gluegen-*.jar"/>
-            <fileset file="lib/worldwind/jogl-*.jar"/>
+            <fileset file="lib/worldwind220/gdal.jar"/>
+            <fileset file="lib/worldwind220/gluegen-*.jar"/>
+            <fileset file="lib/worldwind220/jogl-*.jar"/>
+            <fileset file="lib/worldwind220/vpf-symbols.jar"/>
         </copy>
         <mkdir dir="${dist.dir}/lib/ext"/>
         <copy todir="${dist.dir}/lib/ext">
-            <fileset file="lib/worldwind/worldwind.jar"/>
-            <fileset file="lib/worldwind/worldwindx.jar"/>
+            <fileset file="lib/worldwind220/WorldWindJava.jar"/>
         </copy>
         <copy todir="${dist.dir}/lib/ext">
             <fileset file="lib/WorldWindObj.jar"/>
@@ -289,6 +289,7 @@
         <copy failonerror="false" todir="lib" overwrite="true">
             <fileset file="../WorldWindObj/dist/WorldWindObj.jar"/>
         </copy>
+        <!-- 
         <echo message="Update libs from WorldWind project"/>
         <copy failonerror="false" todir="lib/worldwind" overwrite="true">
             <fileset file="../../Idea/WorldWindJava/build/jar/release/worldwind.jar"/>
@@ -297,6 +298,7 @@
             <fileset file="../../Idea/WorldWindJava/jogl*.jar"/>
             <fileset file="../../Idea/WorldWindJava/gluegen-rt*.jar"/>
         </copy>
+         -->
     </target>
     
     
