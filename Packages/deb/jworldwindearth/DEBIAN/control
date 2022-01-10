@@ -1,0 +1,8 @@
+Package: jworldwindearth
+Maintainer: Stephan Bodmer <sbodmer@les-studios-inexistants.ch>
+Section: misc
+Version: 0.9
+Architecture: all
+Depends: default-jre
+Description: Google Earth like Java application using the Nasa WorldWind SDK
+ Java demonstration application integration of Nasa Java WorldWind SDK

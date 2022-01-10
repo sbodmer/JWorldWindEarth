@@ -1,0 +1,10 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=JWorldWindEarth
+Comment=Google Earth like Java application using Nasa WorldWind SDK
+Exec=jworldwindearth
+Icon=jworldwindearth.png
+Terminal=false
+Type=Application
+Categories=GNOME;Application;Network
+StartupNotify=true
