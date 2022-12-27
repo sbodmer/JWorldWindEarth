@@ -245,6 +245,22 @@
         <copy todir="${dist.dir}/lib/ext">
             <fileset file="lib/WorldWindObj.jar"/>
         </copy>
+        <copy todir="${dist.dir}/lib/ext">
+            <fileset file="lib/osmapi/osmapi-3.1.jar"/>
+            <fileset file="lib/osmapi/signpost-core-1.2.1.2.jar"/>
+            <fileset file="lib/osmapi/xmlpull-xpp3-1.1.4c.jar"/>
+        </copy>
+        <copy todir="${dist.dir}/lib/ext">
+            <fileset file="lib/gson/gson-2.8.6-SNAPSHOT.jar"/>
+        </copy>
+        <copy todir="${dist.dir}/lib/ext">
+            <fileset file="lib/geogson/geogson-core-1.4-SNAPHOT.jar"/>
+            <fileset file="lib/geogson/geogson-jts-1.4-SNAPHOT.jar"/>
+        </copy>
+        <copy todir="${dist.dir}/lib/ext">
+            <fileset file="lib/Osmb.jar"/>
+        </copy>
+        
     </target>
     
     <target name="wwlayersonly">
@@ -278,8 +294,8 @@
         </jar>
     </target>
     
-    <!-- If the TinyRCP project is available use it to get the latest version -->
-    <target name="update_libs">
+    <!-- If the TinyRCP,SOMuildingsTileServer project is available use it to get the latest version -->
+    <target name="update_libs" description="Update depedencies libs">
         <echo message="Update libs from TinyRCP project"/>
         <copy failonerror="false" todir="lib" overwrite="true">
             <fileset file="../TinyRCP/dist/tinyrcp.jar"/>
@@ -288,6 +304,12 @@
         <copy failonerror="false" todir="lib" overwrite="true">
             <fileset file="../WorldWindObj/dist/WorldWindObj.jar"/>
         </copy>
+        <echo message="Update libs from OSMBuildingsTileServer project"/>
+        <copy failonerror="false" todir="lib" overwrite="true">
+            <fileset file="../OSMBuildingsTileServer/dist/Osmb.jar"/>
+        </copy>
+        
+        
         <!-- 
         <echo message="Update libs from WorldWind project"/>
         <copy failonerror="false" todir="lib/worldwind" overwrite="true">

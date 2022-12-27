@@ -13,12 +13,15 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.text.NumberFormat;
+import java.util.Properties;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.Icon;
 import javax.swing.JComponent;
 import javax.swing.JOptionPane;
 import javax.swing.ListSelectionModel;
 import javax.swing.table.DefaultTableModel;
+import org.osmbuildings.tileserver.OSMBuildingsTileServer;
 import org.tinyrcp.App;
 import org.tinyrcp.TinyPlugin;
 import org.w3c.dom.Element;
@@ -28,7 +31,7 @@ import org.worldwindearth.WWEFactory;
 
 /**
  * http://[abcd].data.osmbuildings.org/0.2/sx3pxpz6/tile/${Z}/${X}/${Y}.json
- * 
+ *
  * @author sbodmer
  */
 public class JOSMBuildingsWWEFactory extends javax.swing.JPanel implements WWEFactory, ActionListener {
@@ -37,6 +40,14 @@ public class JOSMBuildingsWWEFactory extends javax.swing.JPanel implements WWEFa
 
     DefaultComboBoxModel<OSMBuildingProvider> list = new DefaultComboBoxModel<>();
     App app = null;
+    NumberFormat nf = NumberFormat.getNumberInstance();
+    
+    javax.swing.Timer timer = null;
+
+    /**
+     * Local provider
+     */
+    OSMBuildingsTileServer server = null;
 
     /**
      * Creates new form OSMBuildingsWWELayerPluginFactory
@@ -67,6 +78,8 @@ public class JOSMBuildingsWWEFactory extends javax.swing.JPanel implements WWEFa
             TF_CachePath.setText(ex.getMessage());
             ex.printStackTrace();
         }
+
+        timer = new javax.swing.Timer(1000, this);
 
     }
 
@@ -126,9 +139,12 @@ public class JOSMBuildingsWWEFactory extends javax.swing.JPanel implements WWEFa
         BT_Up.addActionListener(this);
 
         TB_Providers.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        CB_LocalProvider.addActionListener(this);
 
         BT_Cache.addActionListener(this);
         BT_Clear.addActionListener(this);
+
+        timer.start();
     }
 
     @Override
@@ -155,6 +171,17 @@ public class JOSMBuildingsWWEFactory extends javax.swing.JPanel implements WWEFa
                 list.addElement(pr);
                 Object obj[] = {pr.getTitle(), pr.getUrl(), pr.getMinLevel(), pr.getMaxLevel()};
                 model.addRow(obj);
+
+            } else if (n.getNodeName().equals("Local")) {
+                Element e = (Element) n;
+                CB_LocalProvider.setSelected(e.getAttribute("localProviderEnabled").equals("true"));
+                try {
+                    SP_LocalProviderPort.setValue(Integer.parseInt(e.getAttribute("localProviderPort")));
+                    TF_LocalProviderAPI.setText(e.getFirstChild().getNodeValue());
+
+                } catch (Exception ex) {
+
+                }
             }
 
         }
@@ -163,6 +190,21 @@ public class JOSMBuildingsWWEFactory extends javax.swing.JPanel implements WWEFa
             list.addElement(pr);
             Object obj[] = {pr.getTitle(), pr.getUrl(), pr.getMinLevel(), pr.getMaxLevel()};
             model.addRow(obj);
+        }
+
+        TF_LocalProviderURL.setText("http://localhost:" + SP_LocalProviderPort.getValue() + "/osmbuildings/${Z}/${X}/${Y}.json");
+
+        //--- If local provider is enabled, start it here
+        if (CB_LocalProvider.isSelected()) {
+            Properties p = new Properties();
+            p.setProperty("CACHE_FOLDER", "");  //--- No cache, let layer handle the cache
+            p.setProperty("CACHE_KEEP_DELAY", "30");
+            p.setProperty("HOST", "localhost");
+            p.setProperty("PORT", "" + SP_LocalProviderPort.getValue());
+            p.setProperty("OSM_API", TF_LocalProviderAPI.getText());
+
+            server = new OSMBuildingsTileServer(p);
+            server.start();
         }
     }
 
@@ -177,9 +219,15 @@ public class JOSMBuildingsWWEFactory extends javax.swing.JPanel implements WWEFa
 
         config.setAttribute("expireDays", SP_ExpireDays.getValue().toString());
 
+        Element e = config.getOwnerDocument().createElement("Local");
+        e.setAttribute("localProviderEnabled", "" + CB_LocalProvider.isSelected());
+        e.setAttribute("localProviderPort", "" + SP_LocalProviderPort.getValue());
+        e.appendChild(config.getOwnerDocument().createTextNode(TF_LocalProviderAPI.getText()));
+        config.appendChild(e);
+
         DefaultTableModel model = (DefaultTableModel) TB_Providers.getModel();
         for (int i = 0; i < model.getRowCount(); i++) {
-            Element e = config.getOwnerDocument().createElement("Provider");
+            e = config.getOwnerDocument().createElement("Provider");
             e.appendChild(config.getOwnerDocument().createTextNode(model.getValueAt(i, 1).toString()));
             e.setAttribute("title", model.getValueAt(i, 0).toString().replace('&', ' '));
             e.setAttribute("minLevel", model.getValueAt(i, 2).toString());
@@ -191,6 +239,7 @@ public class JOSMBuildingsWWEFactory extends javax.swing.JPanel implements WWEFa
     @Override
     public void destroy() {
         //---
+        timer.stop();
     }
 
     @Override
@@ -209,7 +258,24 @@ public class JOSMBuildingsWWEFactory extends javax.swing.JPanel implements WWEFa
     //**************************************************************************
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (e.getActionCommand().equals("cache")) {
+        if (e.getSource() == timer) {
+            //--- Check local provider status
+            if (server == null) {
+                LB_LocalProviderStatus.setText("...");
+
+            } else if (server.isAlive()) {
+                LB_LocalProviderStatus.setText("<html><font color=\"green\">running</font></html>");
+                long loaded = server.getLoaded();
+                int kb = (int) (loaded/1024);
+                
+                LB_Loaded.setText(""+nf.format(kb)+"kb");
+                
+            } else {
+                LB_LocalProviderStatus.setText("<html><font color=\"red\">stopped</font></html>");
+
+            }
+
+        } else if (e.getActionCommand().equals("cache")) {
             //--- Check the cache size
             try {
                 FileStore fs = WorldWind.getDataFileStore();
@@ -292,6 +358,28 @@ public class JOSMBuildingsWWEFactory extends javax.swing.JPanel implements WWEFa
             //--- Select row again
             TB_Providers.getSelectionModel().addSelectionInterval(index - 1, index - 1);
 
+        } else if (e.getActionCommand().equals("localProviderEnabled")) {
+            if (CB_LocalProvider.isSelected()) {
+                SP_LocalProviderPort.setEnabled(false);
+                TF_LocalProviderAPI.setEnabled(false);
+                TF_LocalProviderURL.setText("http://localhost:" + SP_LocalProviderPort.getValue() + "/osmbuildings/${Z}/${X}/${Y}.json");
+
+                Properties p = new Properties();
+                p.setProperty("CACHE_FOLDER", "");  //--- No cache, let local layer handle the cache
+                p.setProperty("CACHE_KEEP_DELAY", "30");
+                p.setProperty("HOST", "localhost");
+                p.setProperty("PORT", "" + SP_LocalProviderPort.getValue());
+                p.setProperty("OSM_API", TF_LocalProviderAPI.getText());
+
+                server = new OSMBuildingsTileServer(p);
+                server.start();
+
+            } else {
+                SP_LocalProviderPort.setEnabled(true);
+                TF_LocalProviderAPI.setEnabled(true);
+
+                if (server != null) server.interrupt();
+            }
         }
     }
 
@@ -334,6 +422,17 @@ public class JOSMBuildingsWWEFactory extends javax.swing.JPanel implements WWEFa
         BT_Edit = new javax.swing.JButton();
         jSeparator9 = new javax.swing.JToolBar.Separator();
         BT_Delete = new javax.swing.JButton();
+        PN_LocalProvider = new javax.swing.JPanel();
+        jLabel7 = new javax.swing.JLabel();
+        jLabel8 = new javax.swing.JLabel();
+        CB_LocalProvider = new javax.swing.JCheckBox();
+        SP_LocalProviderPort = new javax.swing.JSpinner();
+        TF_LocalProviderURL = new javax.swing.JTextField();
+        jLabel9 = new javax.swing.JLabel();
+        TF_LocalProviderAPI = new javax.swing.JTextField();
+        jLabel10 = new javax.swing.JLabel();
+        LB_LocalProviderStatus = new javax.swing.JLabel();
+        LB_Loaded = new javax.swing.JLabel();
 
         LB_Name.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/osmbuildings/Resources/Icons/22x22/osmbuildings.png"))); // NOI18N
         java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("org/osmbuildings/OSMBuildings"); // NOI18N
@@ -456,7 +555,7 @@ public class JOSMBuildingsWWEFactory extends javax.swing.JPanel implements WWEFa
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(BT_Clear))
                             .addComponent(SP_ExpireDays, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                        .addGap(0, 266, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -485,6 +584,7 @@ public class JOSMBuildingsWWEFactory extends javax.swing.JPanel implements WWEFa
 
         TB_Providers.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
+                {"local", "http://localhost:8088/osmbuildings/${Z}/${X}/${Y}.json",  new Integer(15),  new Integer(15)},
                 {"osmbuildings.org", "http://[abcd].data.osmbuildings.org/0.2/sx3pxpz6/tile/${Z}/${X}/${Y}.json",  new Integer(15),  new Integer(15)},
                 {"les-studios-inexistants.ch", "http://kaitan.les-studios-inexistants.ch:8088/osmbuildings/${Z}/${X}/${Y}.json",  new Integer(15),  new Integer(15)}
             },
@@ -507,6 +607,7 @@ public class JOSMBuildingsWWEFactory extends javax.swing.JPanel implements WWEFa
                 return canEdit [columnIndex];
             }
         });
+        TB_Providers.setRowHeight(24);
         jScrollPane2.setViewportView(TB_Providers);
 
         PN_Providers.add(jScrollPane2, java.awt.BorderLayout.CENTER);
@@ -563,6 +664,91 @@ public class JOSMBuildingsWWEFactory extends javax.swing.JPanel implements WWEFa
 
         jTabbedPane1.addTab("Providers", PN_Providers);
 
+        jLabel7.setText("To use a client side embeded provider, enable it here and use the specified URL as provider.");
+
+        jLabel8.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        jLabel8.setText("Local Http port");
+
+        CB_LocalProvider.setSelected(true);
+        CB_LocalProvider.setText("Enabled");
+        CB_LocalProvider.setActionCommand("localProviderEnabled");
+
+        SP_LocalProviderPort.setModel(new javax.swing.SpinnerNumberModel(8088, 1024, 65535, 1));
+        SP_LocalProviderPort.setEnabled(false);
+
+        TF_LocalProviderURL.setEditable(false);
+        TF_LocalProviderURL.setText("http://localhost:8088/${Z}/${X}/${Y}.json");
+
+        jLabel9.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        jLabel9.setText("OSM Server API URL");
+
+        TF_LocalProviderAPI.setText("https://api.openstreetmap.org/api/0.6/");
+        TF_LocalProviderAPI.setEnabled(false);
+
+        jLabel10.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        jLabel10.setText("Enabled");
+
+        LB_LocalProviderStatus.setText("...");
+
+        LB_Loaded.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        LB_Loaded.setText("0");
+        LB_Loaded.setToolTipText("Loaded bytes");
+
+        javax.swing.GroupLayout PN_LocalProviderLayout = new javax.swing.GroupLayout(PN_LocalProvider);
+        PN_LocalProvider.setLayout(PN_LocalProviderLayout);
+        PN_LocalProviderLayout.setHorizontalGroup(
+            PN_LocalProviderLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(PN_LocalProviderLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(PN_LocalProviderLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel7, javax.swing.GroupLayout.DEFAULT_SIZE, 665, Short.MAX_VALUE)
+                    .addGroup(PN_LocalProviderLayout.createSequentialGroup()
+                        .addComponent(jLabel10, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(CB_LocalProvider)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(LB_LocalProviderStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 301, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(LB_Loaded, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(PN_LocalProviderLayout.createSequentialGroup()
+                        .addGroup(PN_LocalProviderLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jLabel8, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel9, javax.swing.GroupLayout.DEFAULT_SIZE, 140, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(PN_LocalProviderLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(PN_LocalProviderLayout.createSequentialGroup()
+                                .addComponent(SP_LocalProviderPort, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(TF_LocalProviderURL))
+                            .addComponent(TF_LocalProviderAPI))))
+                .addContainerGap())
+        );
+        PN_LocalProviderLayout.setVerticalGroup(
+            PN_LocalProviderLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(PN_LocalProviderLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(PN_LocalProviderLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(PN_LocalProviderLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(CB_LocalProvider)
+                        .addComponent(LB_LocalProviderStatus)
+                        .addComponent(LB_Loaded))
+                    .addComponent(jLabel10))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(PN_LocalProviderLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel8)
+                    .addComponent(SP_LocalProviderPort, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(TF_LocalProviderURL, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(PN_LocalProviderLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(TF_LocalProviderAPI, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel9))
+                .addContainerGap(315, Short.MAX_VALUE))
+        );
+
+        jTabbedPane1.addTab("Local Provider", PN_LocalProvider);
+
         add(jTabbedPane1, java.awt.BorderLayout.CENTER);
     }// </editor-fold>//GEN-END:initComponents
 
@@ -575,25 +761,36 @@ public class JOSMBuildingsWWEFactory extends javax.swing.JPanel implements WWEFa
     protected javax.swing.JButton BT_Down;
     protected javax.swing.JButton BT_Edit;
     protected javax.swing.JButton BT_Up;
+    protected javax.swing.JCheckBox CB_LocalProvider;
     protected javax.swing.JLabel LB_Description;
+    protected javax.swing.JLabel LB_Loaded;
+    protected javax.swing.JLabel LB_LocalProviderStatus;
     protected javax.swing.JLabel LB_Name;
+    protected javax.swing.JPanel PN_LocalProvider;
     protected javax.swing.JPanel PN_ProviderData;
     protected javax.swing.JPanel PN_Providers;
     protected javax.swing.JSpinner SP_ExpireDays;
+    protected javax.swing.JSpinner SP_LocalProviderPort;
     protected javax.swing.JSpinner SP_MaxLevel;
     protected javax.swing.JSpinner SP_MinLevel;
     protected javax.swing.JTable TB_Providers;
     protected javax.swing.JToolBar TB_Tools;
     protected javax.swing.JTextField TF_CachePath;
     protected javax.swing.JTextField TF_CacheSize;
+    protected javax.swing.JTextField TF_LocalProviderAPI;
+    protected javax.swing.JTextField TF_LocalProviderURL;
     protected javax.swing.JTextField TF_Title;
     protected javax.swing.JTextField TF_Url;
     protected javax.swing.JLabel jLabel1;
+    protected javax.swing.JLabel jLabel10;
     protected javax.swing.JLabel jLabel2;
     protected javax.swing.JLabel jLabel3;
     protected javax.swing.JLabel jLabel4;
     protected javax.swing.JLabel jLabel5;
     protected javax.swing.JLabel jLabel6;
+    protected javax.swing.JLabel jLabel7;
+    protected javax.swing.JLabel jLabel8;
+    protected javax.swing.JLabel jLabel9;
     protected javax.swing.JPanel jPanel1;
     protected javax.swing.JScrollPane jScrollPane2;
     protected javax.swing.JToolBar.Separator jSeparator9;
@@ -645,7 +842,7 @@ public class JOSMBuildingsWWEFactory extends javax.swing.JPanel implements WWEFa
             pr.setUrl(TF_Url.getText().trim());
             pr.setMinLevel((Integer) SP_MinLevel.getValue());
             pr.setMaxLevel((Integer) SP_MaxLevel.getValue());
-            model.setValueAt(pr.getTitle(), index,0);
+            model.setValueAt(pr.getTitle(), index, 0);
             model.setValueAt(pr.getUrl(), index, 1);
             model.setValueAt(pr.getMinLevel(), index, 2);
             model.setValueAt(pr.getMaxLevel(), index, 3);
@@ -668,7 +865,7 @@ public class JOSMBuildingsWWEFactory extends javax.swing.JPanel implements WWEFa
             model.insertRow(index, new Object[]{pr.getTitle(), pr.getUrl(), pr.getMinLevel(), pr.getMaxLevel()});
 
         }
-        
+
     }
 
 }

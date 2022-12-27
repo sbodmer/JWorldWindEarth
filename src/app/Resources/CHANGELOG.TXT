@@ -1,3 +1,6 @@
+[2022-12-27]
+  OSM Building layer can provide local server
+
 [2018-10-16]
   Added the grid, split panels
   Implemented the attached view concept (shared view)
