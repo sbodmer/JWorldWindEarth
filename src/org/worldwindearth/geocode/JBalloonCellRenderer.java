@@ -44,7 +44,7 @@ public class JBalloonCellRenderer extends javax.swing.JPanel implements ListCell
             setBackground(list.getSelectionBackground());
 
         } else {
-            setBackground(Color.white);
+            setBackground(list.getBackground());
         }
 
         return this;

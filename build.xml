@@ -260,7 +260,9 @@
         <copy todir="${dist.dir}/lib/ext">
             <fileset file="lib/Osmb.jar"/>
         </copy>
-        
+        <copy todir="${dist.dir}/lib/ext">
+            <fileset file="lib/flatlaf.jar"/>
+        </copy>
     </target>
     
     <target name="wwlayersonly">
@@ -308,18 +310,10 @@
         <copy failonerror="false" todir="lib" overwrite="true">
             <fileset file="../OSMBuildingsTileServer/dist/Osmb.jar"/>
         </copy>
-        
-        
-        <!-- 
         <echo message="Update libs from WorldWind project"/>
-        <copy failonerror="false" todir="lib/worldwind" overwrite="true">
-            <fileset file="../../Idea/WorldWindJava/build/jar/release/worldwind.jar"/>
-            <fileset file="../../Idea/WorldWindJava/build/jar/release/worldwindx.jar"/>
-            <fileset file="../../Idea/WorldWindJava/gdal.jar"/>
-            <fileset file="../../Idea/WorldWindJava/jogl*.jar"/>
-            <fileset file="../../Idea/WorldWindJava/gluegen-rt*.jar"/>
+        <copy failonerror="false" todir="lib/worldwind220" overwrite="true">
+            <fileset file="../WorldWindJava/dist/WorldWindJava.jar"/>
         </copy>
-         -->
     </target>
     
     

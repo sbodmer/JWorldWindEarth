@@ -91,7 +91,7 @@ public class JGroundCursorWWEPlugin extends JPanel implements WWEPlugin, ActionL
 
         config.setAttribute("zoom", "" + SP_Level.getValue());
         config.setAttribute("drawTileInfo", "" + CB_DrawTileInfo.isSelected());
-
+        
     }
 
     @Override

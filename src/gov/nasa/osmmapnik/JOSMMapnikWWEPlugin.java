@@ -127,6 +127,7 @@ public class JOSMMapnikWWEPlugin extends JPanel implements WWEPlugin, ActionList
             int opacity = Integer.parseInt(config.getAttribute("opacity"));
             SL_Opacity.setValue(opacity);
             layer.setOpacity((double) (opacity/100d));
+            layer.setUseTransparentTextures(layer.getOpacity()==1?false:true);
             
         } catch (NumberFormatException ex) {
             //---
@@ -165,9 +166,11 @@ public class JOSMMapnikWWEPlugin extends JPanel implements WWEPlugin, ActionList
     @Override
     public void stateChanged(ChangeEvent e) {
         if (e.getSource() == SL_Opacity) {
-            double alpha = SL_Opacity.getValue()/100d;
-            layer.setOpacity(alpha);
-            
+            double alpha = SL_Opacity.getValue();
+            layer.setOpacity(alpha/100d);
+            layer.setUseTransparentTextures(alpha==100?false:true);
+            ww.redraw();
+            // System.out.println("ALPHA:"+layer.getOpacity()+" tran:"+layer.isUseTransparentTextures());
         }
     }
     /**

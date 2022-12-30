@@ -46,7 +46,7 @@ public class JCameraSmallCellRenderer extends javax.swing.JPanel implements List
             setBackground(list.getSelectionBackground());
             
         } else {
-            setBackground(Color.WHITE);
+            setBackground(list.getBackground());
             
         }
         return this;

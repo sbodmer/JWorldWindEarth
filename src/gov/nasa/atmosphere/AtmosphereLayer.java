@@ -12,6 +12,8 @@ import gov.nasa.worldwind.render.DrawContext;
 import gov.nasa.worldwind.util.Logging;
 
 import java.awt.Color;
+import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
 
 
 /**
@@ -134,11 +136,8 @@ public class AtmosphereLayer extends AbstractLayer {
 			}
 
 			// GL set up
-
 			gl.glPushAttrib(GL2.GL_POLYGON_BIT); // Temporary hack around aliased sky.
-
 			gl.glPopAttrib();
-
 			gl.glPushAttrib(GL2.GL_COLOR_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT | GL2.GL_TRANSFORM_BIT | GL2.GL_POLYGON_BIT | GL2.GL_TEXTURE_BIT | GL2.GL_ENABLE_BIT | GL2.GL_CURRENT_BIT);
 
 			attribsPushed = true;
@@ -250,24 +249,20 @@ public class AtmosphereLayer extends AbstractLayer {
 
 		// Init atmospheric scattering computer
 
-		if (this.asc == null)
-			this.asc = new AtmosphericScatteringComputer(dc.getGlobe().getRadius(), this.thickness);
+        if (this.asc == null) this.asc = new AtmosphericScatteringComputer(dc.getGlobe().getRadius(), this.thickness);
 
 		// Get sky dome transform
+        Matrix skyTransform = computeSkyTransform(dc);
 
-		Matrix skyTransform = computeSkyTransform(dc);
-
-		// GL setup
-
+        // GL setup
 		GL2 gl = dc.getGL().getGL2(); // GL initialization checks for GL2 compatibility.
-
-		gl.glBlendFunc(GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA);
+        gl.glBlendFunc(GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA);
 		gl.glEnable(GL2.GL_BLEND);
 		gl.glDisable(GL2.GL_TEXTURE_2D);
-
-		// gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, GL2.GL_LINE); // wireframe
-
-		double latitude, longitude, latitudeTop = endLat;
+        // gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, GL2.GL_LINE); // wireframe
+        
+        
+        double latitude, longitude, latitudeTop = endLat;
 		double linear, linearTop, k, kTop;
 
 		Color color;
@@ -385,15 +380,13 @@ public class AtmosphereLayer extends AbstractLayer {
 
 		gl.glEnable(GL2.GL_TEXTURE_2D);
 		gl.glDisable(GL2.GL_BLEND);
+        
 	}
 
 	protected Matrix computeSkyTransform(DrawContext dc) {
 		Matrix transform = Matrix.IDENTITY;
-
 		transform = transform.multiply(dc.getGlobe().computeModelCoordinateOriginTransform(dc.getView().getEyePosition()));
-
 		transform = transform.multiply(Matrix.fromRotationX(Angle.POS90));
-
 		return transform;
 	}
 

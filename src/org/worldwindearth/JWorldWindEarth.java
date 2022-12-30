@@ -5,9 +5,13 @@
  */
 package org.worldwindearth;
 
+import com.formdev.flatlaf.FlatDarkLaf;
+import com.formdev.flatlaf.FlatLightLaf;
 import java.awt.BorderLayout;
+import java.awt.Font;
 import java.awt.Frame;
 import java.awt.Image;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -15,14 +19,21 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Properties;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.JRadioButtonMenuItem;
+import javax.swing.LookAndFeel;
+import javax.swing.SwingUtilities;
+import javax.swing.UIDefaults;
+import javax.swing.UIManager;
 import javax.swing.WindowConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -58,6 +69,7 @@ public class JWorldWindEarth extends javax.swing.JFrame implements ActionListene
      * Current loaded config
      */
     File file = null;
+    Properties properties = new Properties();
 
     TinyPlugin main = null;
 
@@ -75,8 +87,50 @@ public class JWorldWindEarth extends javax.swing.JFrame implements ActionListene
     public JWorldWindEarth(App app) {
         this.app = app;
 
+        //--- Install flat laf
+        try {
+            FlatLightLaf.installLafInfo();
+            FlatDarkLaf.installLafInfo();
+
+        } catch (Exception ex) {
+            //---
+
+        } catch (Error er) {
+
+        }
         //--- To avoid some exception width JDK8 new order implementation
         System.setProperty("java.util.Arrays.useLegacyMergeSort", "true");
+
+        //--- Load some app general properties
+        try {
+            file = new File(System.getProperty("user.home"), ".WorldWindEarth" + File.separator + "app.properties");
+            if (file.exists()) properties.load(new FileInputStream(file));
+
+            //--- Set the laf
+            String laf = properties.getProperty("lookAndFeelClass");
+            if (laf != null) {
+                Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
+                UIManager.setLookAndFeel(laf);
+
+                //--- Refresh all already created frames
+                Window frames[] = Window.getWindows();
+                for (int i = 0; i < frames.length; i++) {
+                    Thread.currentThread().setContextClassLoader(app.getLoader());
+                    SwingUtilities.updateComponentTreeUI(frames[i]);
+                    //--- Sent to all frames the closing event
+                    System.out.println("(I) Refresh laf for " + frames[i].getName() + " (" + frames[i].getClass().getName() + ")");
+
+                }
+
+                //--- Refresh alreay created factories
+                ArrayList<TinyFactory> facs = app.getFactories(null);
+                for (int i = 0; i < facs.size(); i++) if (facs.get(i).getFactoryConfigComponent() != null) SwingUtilities.updateComponentTreeUI(facs.get(i).getFactoryConfigComponent());
+
+            }
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
 
         initComponents();
 
@@ -103,6 +157,26 @@ public class JWorldWindEarth extends javax.swing.JFrame implements ActionListene
         app.addActionListener(this);
 
         setIconImage(((ImageIcon) LB_Title.getIcon()).getImage());
+
+        //------------------------------------------------------------------------
+        //--- Set LAF list
+        //------------------------------------------------------------------------
+        UIManager.LookAndFeelInfo lafs[] = UIManager.getInstalledLookAndFeels();
+        LookAndFeel claf = UIManager.getLookAndFeel();
+        for (int i = 0; i < lafs.length; i++) {
+            JRadioButtonMenuItem item = new JRadioButtonMenuItem(lafs[i].getName());
+            // item.setFont(new Font("Arial", 0, 11));
+            item.setActionCommand("laf");
+            item.putClientProperty("laf", lafs[i]);
+            if (lafs[i].getClassName().equals(UIManager.getSystemLookAndFeelClassName())) {
+                String txt = item.getText();
+                item.setText(txt + " (system)");
+            }
+            if (claf.getClass().getName().equals(lafs[i].getClassName())) item.setSelected(true);
+            item.addActionListener(this);
+            BTG_Laf.add(item);
+            MN_Laf.add(item);
+        }
     }
 
     //**************************************************************************
@@ -241,6 +315,46 @@ public class JWorldWindEarth extends javax.swing.JFrame implements ActionListene
             jb.setLocationRelativeTo(this);
             jb.setVisible(true);
 
+        } else if (e.getActionCommand().equals("laf")) {
+            JMenuItem item = (JMenuItem) e.getSource();
+            UIManager.LookAndFeelInfo laf = (UIManager.LookAndFeelInfo) item.getClientProperty("laf");
+            //--- Look and Feel change
+            try {
+                Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
+                UIManager.setLookAndFeel(laf.getClassName());
+
+            } catch (Exception ex) {
+                ex.printStackTrace();
+
+            }
+
+            //--- Refresh all frames
+            Window frames[] = Window.getWindows();
+            for (int i = 0; i < frames.length; i++) {
+                Thread.currentThread().setContextClassLoader(app.getLoader());
+                SwingUtilities.updateComponentTreeUI(frames[i]);
+                //--- Sent to all frames the closing event
+                System.out.println("(I) Refresh laf for " + frames[i].getName() + " (" + frames[i].getClass().getName() + ")");
+
+            }
+
+            //--- Refresh alreay created factories
+            ArrayList<TinyFactory> facs = app.getFactories(null);
+            for (int i = 0; i < facs.size(); i++) if (facs.get(i).getFactoryConfigComponent() != null) SwingUtilities.updateComponentTreeUI(facs.get(i).getFactoryConfigComponent());
+
+            //--- Store the choosen look and feel
+            try {
+                LookAndFeel la = UIManager.getLookAndFeel();
+                file = new File(System.getProperty("user.home"), ".WorldWindEarth" + File.separator + "app.properties");
+                file.getParentFile().mkdirs();
+                //--- Set the laf
+                properties.put("lookAndFeelClass", la.getClass().getName());
+                properties.store(new FileOutputStream(file), "Application propertites");
+
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+
         } else if (e.getActionCommand().equals("exit")) {
             close();
 
@@ -257,6 +371,7 @@ public class JWorldWindEarth extends javax.swing.JFrame implements ActionListene
     private void initComponents() {
 
         LB_Title = new javax.swing.JLabel();
+        BTG_Laf = new javax.swing.ButtonGroup();
         MB_Topbar = new javax.swing.JMenuBar();
         MN_File = new javax.swing.JMenu();
         MN_New = new javax.swing.JMenuItem();
@@ -270,6 +385,7 @@ public class JWorldWindEarth extends javax.swing.JFrame implements ActionListene
         MN_Tools = new javax.swing.JMenu();
         MN_Plugins = new javax.swing.JMenuItem();
         MN_Windows = new javax.swing.JMenu();
+        MN_Laf = new javax.swing.JMenu();
         MN_Help = new javax.swing.JMenu();
         MN_About = new javax.swing.JMenuItem();
 
@@ -325,6 +441,9 @@ public class JWorldWindEarth extends javax.swing.JFrame implements ActionListene
         MN_Windows.setText("Windows");
         MB_Topbar.add(MN_Windows);
 
+        MN_Laf.setText("Look and Feel");
+        MB_Topbar.add(MN_Laf);
+
         MN_Help.setText("Help");
 
         MN_About.setText("About");
@@ -346,12 +465,14 @@ public class JWorldWindEarth extends javax.swing.JFrame implements ActionListene
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    protected javax.swing.ButtonGroup BTG_Laf;
     protected javax.swing.JLabel LB_Title;
     protected javax.swing.JMenuBar MB_Topbar;
     protected javax.swing.JMenuItem MN_About;
     protected javax.swing.JMenuItem MN_Exit;
     protected javax.swing.JMenu MN_File;
     protected javax.swing.JMenu MN_Help;
+    protected javax.swing.JMenu MN_Laf;
     protected javax.swing.JMenuItem MN_Load;
     protected javax.swing.JMenuItem MN_New;
     protected javax.swing.JMenuItem MN_Plugins;

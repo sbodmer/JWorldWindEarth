@@ -63,7 +63,7 @@ public class WorldWindEarth {
                 japp.setVisible(true);
                 
                 //--- Start boot process
-                //--- When the boot has finished, teh splash screen should close itself
+                //--- When the boot has finished, the splash screen should close itself
                 AppLauncher.boot(japp, libs, args, "WorldWindEarth");
             }
         });

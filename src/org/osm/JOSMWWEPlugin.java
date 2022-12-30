@@ -123,6 +123,7 @@ public class JOSMWWEPlugin extends JPanel implements WWEPlugin, ActionListener, 
             int opacity = Integer.parseInt(config.getAttribute("opacity"));
             SL_Opacity.setValue(opacity);
             layer.setOpacity((double) (opacity/100d));
+            layer.setUseTransparentTextures(opacity==100?false:true);
             
         } catch (NumberFormatException ex) {
             //---
@@ -161,8 +162,10 @@ public class JOSMWWEPlugin extends JPanel implements WWEPlugin, ActionListener, 
     @Override
     public void stateChanged(ChangeEvent e) {
         if (e.getSource() == SL_Opacity) {
-            double alpha = SL_Opacity.getValue()/100d;
-            layer.setOpacity(alpha);
+            int opacity = SL_Opacity.getValue();
+            layer.setOpacity(opacity/100d);
+            layer.setUseTransparentTextures(opacity==100?false:true);
+            ww.redraw();
             
         }
     }

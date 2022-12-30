@@ -92,6 +92,7 @@ public class JBingWWEPlugin extends JPanel implements WWEPlugin, ActionListener,
             CB_DrawTileVolume.setSelected(config.getAttribute("drawTileVolume").equals("true"));
 
             layer.setOpacity(SP_Opacity.getValue() / 100d);
+            layer.setUseTransparentTextures(layer.getOpacity()==1?false:true);
             layer.setDrawTileIDs(CB_DrawTileIds.isSelected());
             layer.setDrawTileBoundaries(CB_DrawTileBoundaries.isSelected());
             layer.setDrawBoundingVolumes(CB_DrawTileVolume.isSelected());
@@ -187,6 +188,7 @@ public class JBingWWEPlugin extends JPanel implements WWEPlugin, ActionListener,
     public void stateChanged(ChangeEvent e) {
         if (e.getSource() == SP_Opacity) {
             layer.setOpacity(SP_Opacity.getValue() / 100d);
+            layer.setUseTransparentTextures(layer.getOpacity()==1?false:true);
             ww.redraw();
         }
     }
@@ -221,21 +223,21 @@ public class JBingWWEPlugin extends JPanel implements WWEPlugin, ActionListener,
 
         jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         jLabel1.setText("Draw tile ID");
-        jLabel1.setPreferredSize(new java.awt.Dimension(140, 26));
+        jLabel1.setPreferredSize(new java.awt.Dimension(200, 26));
 
         CB_DrawTileIds.setActionCommand("drawTileIds");
         CB_DrawTileIds.setPreferredSize(new java.awt.Dimension(26, 26));
 
         jLabel2.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         jLabel2.setText("Draw tile boundaries");
-        jLabel2.setPreferredSize(new java.awt.Dimension(140, 26));
+        jLabel2.setPreferredSize(new java.awt.Dimension(200, 26));
 
         CB_DrawTileBoundaries.setActionCommand("drawTileBoundaries");
         CB_DrawTileBoundaries.setPreferredSize(new java.awt.Dimension(26, 26));
 
         jLabel3.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         jLabel3.setText("Draw tile volume");
-        jLabel3.setPreferredSize(new java.awt.Dimension(140, 26));
+        jLabel3.setPreferredSize(new java.awt.Dimension(200, 26));
 
         CB_DrawTileVolume.setActionCommand("drawTileVolume");
         CB_DrawTileVolume.setPreferredSize(new java.awt.Dimension(26, 26));

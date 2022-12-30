@@ -515,7 +515,7 @@ public class OSMBuildingsTile {
                 }
 
             } catch (Exception ex) {
-                ex.printStackTrace();
+                // ex.printStackTrace();
                 //--- Failed
                 if (listener != null)
                     listener.osmBuildingsLoadingFailed(ti, ".json file could not be found : " + ex.getMessage());

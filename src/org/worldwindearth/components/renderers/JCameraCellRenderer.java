@@ -46,7 +46,7 @@ public class JCameraCellRenderer extends javax.swing.JPanel implements ListCellR
             setBackground(list.getSelectionBackground());
             
         } else {
-            setBackground(Color.WHITE);
+            setBackground(list.getBackground());
             
         }
         return this;

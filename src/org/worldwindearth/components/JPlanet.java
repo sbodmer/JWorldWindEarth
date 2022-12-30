@@ -1951,10 +1951,8 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
 
         PN_LayersCenter.add(PN_LayersData, java.awt.BorderLayout.CENTER);
 
-        jPanel8.setBackground(new java.awt.Color(144, 202, 249));
         jPanel8.setLayout(new java.awt.BorderLayout());
 
-        jPanel11.setBackground(new java.awt.Color(144, 202, 249));
         jPanel11.setMaximumSize(new java.awt.Dimension(32767, 24));
         jPanel11.setOpaque(false);
         jPanel11.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
@@ -1965,7 +1963,6 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         LB_LayerIcon.setPreferredSize(new java.awt.Dimension(32, 32));
         jPanel11.add(LB_LayerIcon);
 
-        LB_Layer.setForeground(new java.awt.Color(52, 73, 93));
         LB_Layer.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         LB_Layer.setText("...");
         jPanel11.add(LB_Layer);
@@ -2127,19 +2124,16 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         BT_Orbit.setSelected(true);
         BT_Orbit.setText("Orbit");
         BT_Orbit.setActionCommand("orbit");
-        BT_Orbit.setPreferredSize(new java.awt.Dimension(70, 32));
         PN_Tray.add(BT_Orbit);
 
         btgviews.add(BT_Fly);
         BT_Fly.setText("Fly");
         BT_Fly.setActionCommand("fly");
-        BT_Fly.setPreferredSize(new java.awt.Dimension(60, 32));
         PN_Tray.add(BT_Fly);
 
         btgviews.add(BT_Walk);
         BT_Walk.setText("Walk");
         BT_Walk.setActionCommand("walk");
-        BT_Walk.setPreferredSize(new java.awt.Dimension(60, 32));
         PN_Tray.add(BT_Walk);
 
         jSeparator2.setPreferredSize(new java.awt.Dimension(2, 32));
@@ -2185,7 +2179,6 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         PN_Status.add(jlabel1);
 
         TF_Altitude.setEditable(false);
-        TF_Altitude.setFont(new java.awt.Font("Monospaced", 0, 11)); // NOI18N
         TF_Altitude.setPreferredSize(new java.awt.Dimension(100, 26));
         PN_Status.add(TF_Altitude);
 
@@ -2198,13 +2191,11 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         PN_Status.add(jlabel2);
 
         TF_Latitude.setEditable(false);
-        TF_Latitude.setFont(new java.awt.Font("Monospaced", 0, 11)); // NOI18N
-        TF_Latitude.setPreferredSize(new java.awt.Dimension(100, 26));
+        TF_Latitude.setPreferredSize(new java.awt.Dimension(150, 26));
         PN_Status.add(TF_Latitude);
 
         TF_Longitude.setEditable(false);
-        TF_Longitude.setFont(new java.awt.Font("Monospaced", 0, 11)); // NOI18N
-        TF_Longitude.setPreferredSize(new java.awt.Dimension(100, 26));
+        TF_Longitude.setPreferredSize(new java.awt.Dimension(150, 26));
         PN_Status.add(TF_Longitude);
 
         LB_Licence.setText("...");

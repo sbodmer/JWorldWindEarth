@@ -117,7 +117,7 @@ public class JAtmosphereWWEPlugin extends JPanel implements WWEPlugin, ActionLis
         this.app = app;
 
         layer.setName("Atmosphere");
-
+        
         BT_Light.addActionListener(this);
         BT_Shade.addActionListener(this);
         CB_LensFlare.addActionListener(this);
@@ -128,6 +128,7 @@ public class JAtmosphereWWEPlugin extends JPanel implements WWEPlugin, ActionLis
         SL_Azimut.addChangeListener(this);
         SL_Elevation.addChangeListener(this);
 
+        //--- Preview
         pww = new WorldWindowGLJPanel();
         Model m = (Model) WorldWind.createConfigurationComponent(AVKey.MODEL_CLASS_NAME);
         m.setGlobe(new Earth());
@@ -347,8 +348,10 @@ public class JAtmosphereWWEPlugin extends JPanel implements WWEPlugin, ActionLis
         SL_Azimut.setValue(125);
 
         jLabel1.setText("Elevation");
+        jLabel1.setPreferredSize(new java.awt.Dimension(100, 26));
 
         jLabel2.setText("Azimut");
+        jLabel2.setPreferredSize(new java.awt.Dimension(100, 26));
 
         SL_Elevation.setFont(new java.awt.Font("Arial", 0, 9)); // NOI18N
         SL_Elevation.setMajorTickSpacing(20);
@@ -358,8 +361,10 @@ public class JAtmosphereWWEPlugin extends JPanel implements WWEPlugin, ActionLis
         SL_Elevation.setPaintTicks(true);
 
         jLabel3.setText("Shade");
+        jLabel3.setPreferredSize(new java.awt.Dimension(100, 26));
 
         jLabel4.setText("Light");
+        jLabel4.setPreferredSize(new java.awt.Dimension(100, 26));
 
         CB_LensFlare.setText("Lens Flare");
         CB_LensFlare.setActionCommand("lensFlare");
@@ -383,13 +388,13 @@ public class JAtmosphereWWEPlugin extends JPanel implements WWEPlugin, ActionLis
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, PN_ConfigLayout.createSequentialGroup()
                         .addGroup(PN_ConfigLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                             .addGroup(javax.swing.GroupLayout.Alignment.LEADING, PN_ConfigLayout.createSequentialGroup()
-                                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 69, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(SL_Elevation, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                             .addGroup(javax.swing.GroupLayout.Alignment.LEADING, PN_ConfigLayout.createSequentialGroup()
                                 .addGroup(PN_ConfigLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 69, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 69, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addGroup(PN_ConfigLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addGroup(PN_ConfigLayout.createSequentialGroup()
@@ -404,13 +409,15 @@ public class JAtmosphereWWEPlugin extends JPanel implements WWEPlugin, ActionLis
                                         .addComponent(CB_LensFlare)))
                                 .addGap(0, 0, Short.MAX_VALUE))
                             .addGroup(javax.swing.GroupLayout.Alignment.LEADING, PN_ConfigLayout.createSequentialGroup()
-                                .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 69, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(SL_Azimut, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(PN_ConfigLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(PN_Azimut, javax.swing.GroupLayout.PREFERRED_SIZE, 47, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(PN_Elevation, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 47, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                        .addGroup(PN_ConfigLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, PN_ConfigLayout.createSequentialGroup()
+                                .addComponent(PN_Azimut, javax.swing.GroupLayout.PREFERRED_SIZE, 47, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(0, 0, Short.MAX_VALUE))
+                            .addComponent(PN_Elevation, javax.swing.GroupLayout.PREFERRED_SIZE, 47, javax.swing.GroupLayout.PREFERRED_SIZE))))
                 .addContainerGap())
         );
         PN_ConfigLayout.setVerticalGroup(
@@ -418,12 +425,12 @@ public class JAtmosphereWWEPlugin extends JPanel implements WWEPlugin, ActionLis
             .addGroup(PN_ConfigLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(PN_ConfigLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(BT_Light, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(CB_LensFlare, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addGap(2, 2, 2)
                 .addGroup(PN_ConfigLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(BT_Shade, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(PN_ConfigLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -433,12 +440,12 @@ public class JAtmosphereWWEPlugin extends JPanel implements WWEPlugin, ActionLis
                 .addGroup(PN_ConfigLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(PN_ConfigLayout.createSequentialGroup()
                         .addGroup(PN_ConfigLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(SL_Azimut, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(SL_Azimut, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(PN_ConfigLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(SL_Elevation, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGroup(PN_ConfigLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(SL_Elevation, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                     .addGroup(PN_ConfigLayout.createSequentialGroup()
                         .addComponent(PN_Azimut, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -511,9 +518,10 @@ public class JAtmosphereWWEPlugin extends JPanel implements WWEPlugin, ActionLis
 
         light = sun.getNegative3();
         tessellator.setLightDirection(light);
-
+        
         layer.setSunDirection(sun);
         player.setSunDirection(sun);
+        
         // Redraw
         ww.redraw();
         pww.redraw();

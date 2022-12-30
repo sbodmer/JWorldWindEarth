@@ -123,6 +123,8 @@ public class JLandsatWWEPlugin extends JPanel implements WWEPlugin, ActionListen
         
         try {
             SL_Opacity.setValue(Integer.parseInt(config.getAttribute("opacity")));
+            layer.setOpacity(SL_Opacity.getValue()/100d);
+            layer.setUseTransparentTextures(layer.getOpacity()==1?false:true);
             
         } catch (NumberFormatException ex) {
            //--- 
@@ -162,6 +164,7 @@ public class JLandsatWWEPlugin extends JPanel implements WWEPlugin, ActionListen
     public void stateChanged(ChangeEvent e) {
         if (e.getSource() == SL_Opacity) {
             layer.setOpacity(SL_Opacity.getValue()/100d);
+            layer.setUseTransparentTextures(layer.getOpacity()==1?false:true);
             ww.redraw();
         }
     }

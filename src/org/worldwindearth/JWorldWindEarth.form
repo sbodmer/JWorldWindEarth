@@ -10,6 +10,8 @@
         <Property name="text" type="java.lang.String" value="jLabel1"/>
       </Properties>
     </Component>
+    <Component class="javax.swing.ButtonGroup" name="BTG_Laf">
+    </Component>
     <Menu class="javax.swing.JMenuBar" name="MB_Topbar">
       <SubComponents>
         <Menu class="javax.swing.JMenu" name="MN_File">
@@ -75,6 +77,11 @@
         <Menu class="javax.swing.JMenu" name="MN_Windows">
           <Properties>
             <Property name="text" type="java.lang.String" value="Windows"/>
+          </Properties>
+        </Menu>
+        <Menu class="javax.swing.JMenu" name="MN_Laf">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Look and Feel"/>
           </Properties>
         </Menu>
         <Menu class="javax.swing.JMenu" name="MN_Help">

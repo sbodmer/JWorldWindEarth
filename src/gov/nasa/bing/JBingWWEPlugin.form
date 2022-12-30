@@ -98,7 +98,7 @@
             <Property name="horizontalAlignment" type="int" value="4"/>
             <Property name="text" type="java.lang.String" value="Draw tile ID"/>
             <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
-              <Dimension value="[140, 26]"/>
+              <Dimension value="[200, 26]"/>
             </Property>
           </Properties>
         </Component>
@@ -115,7 +115,7 @@
             <Property name="horizontalAlignment" type="int" value="4"/>
             <Property name="text" type="java.lang.String" value="Draw tile boundaries"/>
             <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
-              <Dimension value="[140, 26]"/>
+              <Dimension value="[200, 26]"/>
             </Property>
           </Properties>
         </Component>
@@ -132,7 +132,7 @@
             <Property name="horizontalAlignment" type="int" value="4"/>
             <Property name="text" type="java.lang.String" value="Draw tile volume"/>
             <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
-              <Dimension value="[140, 26]"/>
+              <Dimension value="[200, 26]"/>
             </Property>
           </Properties>
         </Component>

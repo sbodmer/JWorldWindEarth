@@ -121,6 +121,7 @@ public class JVirtualearthWWEPlugin extends JPanel implements WWEPlugin, ActionL
             int alpha = Integer.parseInt(config.getAttribute("alpha"));
             SL_Alpha.setValue(alpha);
             layer.setOpacity((double) (alpha/100d));
+            layer.setUseTransparentTextures(alpha==100?false:true);
             
         } catch (NumberFormatException ex) {
             //---
@@ -159,9 +160,10 @@ public class JVirtualearthWWEPlugin extends JPanel implements WWEPlugin, ActionL
     @Override
     public void stateChanged(ChangeEvent e) {
         if (e.getSource() == SL_Alpha) {
-            double alpha = SL_Alpha.getValue()/100d;
-            layer.setOpacity(alpha);
-            
+            int opacity = SL_Alpha.getValue();
+            layer.setOpacity(opacity/100d);
+            layer.setUseTransparentTextures(opacity==100?false:true);
+            ww.redraw();
         }
     }
     

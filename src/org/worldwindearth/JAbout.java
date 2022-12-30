@@ -123,6 +123,7 @@ public class JAbout extends javax.swing.JDialog implements HyperlinkListener {
         jLabel1 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setTitle("About");
         setPreferredSize(new java.awt.Dimension(480, 480));
 
         jTabbedPane1.setPreferredSize(new java.awt.Dimension(145, 200));
@@ -176,10 +177,9 @@ public class JAbout extends javax.swing.JDialog implements HyperlinkListener {
 
         jPanel4.setLayout(new java.awt.BorderLayout());
 
+        LB_Image.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         LB_Image.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Images/cards_wwe.jpg"))); // NOI18N
         jPanel4.add(LB_Image, java.awt.BorderLayout.CENTER);
-
-        jPanel3.setBackground(new java.awt.Color(144, 202, 249));
 
         jLabel1.setFont(new java.awt.Font("Arial", 0, 24)); // NOI18N
         jLabel1.setText("<html>\n<b>JWorldWindEarth</b> Preview<br>\n</html>");
@@ -189,7 +189,7 @@ public class JAbout extends javax.swing.JDialog implements HyperlinkListener {
 
         getContentPane().add(jPanel4, java.awt.BorderLayout.NORTH);
 
-        setBounds(0, 0, 650, 582);
+        setBounds(0, 0, 741, 582);
     }// </editor-fold>//GEN-END:initComponents
 
 
