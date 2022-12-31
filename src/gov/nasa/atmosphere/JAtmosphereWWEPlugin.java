@@ -39,6 +39,8 @@ import org.worldwindearth.WWEPlugin;
 import gov.nasa.worldwind.terrain.Tessellator;
 import java.awt.BorderLayout;
 import java.io.InputStream;
+import javax.swing.JDesktopPane;
+import javax.swing.JLayeredPane;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import org.worldwindearth.WWEInputHandler;
@@ -50,12 +52,12 @@ import org.worldwindearth.components.layers.MergedLayer;
  * @author sbodmer
  */
 public class JAtmosphereWWEPlugin extends JPanel implements WWEPlugin, ActionListener, PositionListener, ChangeListener {
-
+    
     App app = null;
     WWEFactory factory = null;
     WorldWindow ww = null;
     Vec4 eyePoint = null;
-
+    
     SunPositionProvider sunPositionProvider = new BasicSunPositionProvider();
     RectangularNormalTessellator tessellator = new RectangularNormalTessellator();
     
@@ -67,6 +69,13 @@ public class JAtmosphereWWEPlugin extends JPanel implements WWEPlugin, ActionLis
     JCircle ele = null;
     WorldWindowGLJPanel pww = null;
     SunshadingLayer player = new SunshadingLayer(); //--- Preview
+    
+    /**
+     * Used desktop pane
+     */
+    JDesktopPane jd = null;
+    javax.swing.Timer timer = null; //--- Warning timer
+    
     /**
      *
      */
@@ -116,6 +125,15 @@ public class JAtmosphereWWEPlugin extends JPanel implements WWEPlugin, ActionLis
     public void setup(App app, Object arg) {
         this.app = app;
 
+        jd = (JDesktopPane) arg;
+        timer = new javax.swing.Timer(15000, this);
+        timer.setRepeats(false);
+        
+        //--- For infoirmation purpose, display the opacity warning
+        LB_Warning.setVisible(false);
+        LB_Warning.setSize(LB_Warning.getPreferredSize());
+        jd.add(LB_Warning, JLayeredPane.PALETTE_LAYER);
+        
         layer.setName("Atmosphere");
         
         BT_Light.addActionListener(this);
@@ -182,6 +200,7 @@ public class JAtmosphereWWEPlugin extends JPanel implements WWEPlugin, ActionLis
         player.dispose();
         
         layer.dispose();
+        timer.stop();
 
     }
 
@@ -215,10 +234,18 @@ public class JAtmosphereWWEPlugin extends JPanel implements WWEPlugin, ActionLis
             ww.addPositionListener(this);
             ww.getModel().getGlobe().setTessellator(tessellator);
             
+            //--- There is a bug in the atmospher renderfing, the alpha channel will
+            //--- be ignored
+            int width = jd.getWidth();
+            
+            LB_Warning.setLocation(jd.getWidth()/2-LB_Warning.getWidth()/2, 10);
+            LB_Warning.setVisible(true);
+            timer.restart();
             
         } else if (action.equals(DO_ACTION_LAYER_DISABLED)) {
             ww.removePositionListener(this);
             ww.getModel().getGlobe().setTessellator(null);
+            LB_Warning.setVisible(false);
             
         }
         return null;
@@ -247,7 +274,10 @@ public class JAtmosphereWWEPlugin extends JPanel implements WWEPlugin, ActionLis
     //**************************************************************************
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (e.getActionCommand().equals("light")
+        if (e.getSource() == timer) {
+            LB_Warning.setVisible(false);
+            
+        } else if (e.getActionCommand().equals("light")
                 || e.getActionCommand().equals("shade")) {
             Color c = JColorChooser.showDialog(PN_Config, "Choose a color...", ((JButton) e.getSource()).getBackground());
             if (c != null) {
@@ -319,6 +349,7 @@ public class JAtmosphereWWEPlugin extends JPanel implements WWEPlugin, ActionLis
         PN_Preview = new javax.swing.JPanel();
         PN_Elevation = new javax.swing.JPanel();
         PN_Azimut = new javax.swing.JPanel();
+        LB_Warning = new javax.swing.JLabel();
 
         BT_Light.setBackground(java.awt.Color.white);
         BT_Light.setActionCommand("light");
@@ -455,6 +486,9 @@ public class JAtmosphereWWEPlugin extends JPanel implements WWEPlugin, ActionLis
                 .addContainerGap())
         );
 
+        LB_Warning.setForeground(java.awt.Color.orange);
+        LB_Warning.setText("Atmosphere layer will cancel all other layer opacity... (bug ?)");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -475,6 +509,7 @@ public class JAtmosphereWWEPlugin extends JPanel implements WWEPlugin, ActionLis
     private javax.swing.JRadioButton BT_Relative;
     private javax.swing.JButton BT_Shade;
     private javax.swing.JCheckBox CB_LensFlare;
+    private javax.swing.JLabel LB_Warning;
     private javax.swing.JPanel PN_Azimut;
     private javax.swing.JPanel PN_Config;
     private javax.swing.JPanel PN_Elevation;

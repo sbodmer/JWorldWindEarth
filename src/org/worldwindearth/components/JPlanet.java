@@ -1897,7 +1897,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         BT_AddLayer.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/add.png"))); // NOI18N
         BT_AddLayer.setToolTipText("new layer");
         BT_AddLayer.setActionCommand("addLayer");
-        BT_AddLayer.setPreferredSize(new java.awt.Dimension(26, 26));
+        BT_AddLayer.setPreferredSize(new java.awt.Dimension(32, 32));
         TB_Tools.add(BT_AddLayer);
 
         BT_LayerUp.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
@@ -1905,7 +1905,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         BT_LayerUp.setToolTipText("move layer up");
         BT_LayerUp.setActionCommand("upLayer");
         BT_LayerUp.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        BT_LayerUp.setPreferredSize(new java.awt.Dimension(26, 26));
+        BT_LayerUp.setPreferredSize(new java.awt.Dimension(32, 32));
         TB_Tools.add(BT_LayerUp);
 
         BT_LayerDown.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
@@ -1913,14 +1913,14 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         BT_LayerDown.setToolTipText("move layer down");
         BT_LayerDown.setActionCommand("downLayer");
         BT_LayerDown.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        BT_LayerDown.setPreferredSize(new java.awt.Dimension(26, 26));
+        BT_LayerDown.setPreferredSize(new java.awt.Dimension(32, 32));
         TB_Tools.add(BT_LayerDown);
 
         BT_RenameLayer.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
         BT_RenameLayer.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/edit.png"))); // NOI18N
         BT_RenameLayer.setToolTipText("rename layer");
         BT_RenameLayer.setActionCommand("renameLayer");
-        BT_RenameLayer.setPreferredSize(new java.awt.Dimension(26, 26));
+        BT_RenameLayer.setPreferredSize(new java.awt.Dimension(32, 32));
         TB_Tools.add(BT_RenameLayer);
         TB_Tools.add(jSeparator9);
 
@@ -1928,7 +1928,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         BT_RemoveLayer.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/remove.png"))); // NOI18N
         BT_RemoveLayer.setToolTipText("delete layer");
         BT_RemoveLayer.setActionCommand("removeLayer");
-        BT_RemoveLayer.setPreferredSize(new java.awt.Dimension(26, 26));
+        BT_RemoveLayer.setPreferredSize(new java.awt.Dimension(32, 32));
         TB_Tools.add(BT_RemoveLayer);
 
         jPanel4.add(TB_Tools, java.awt.BorderLayout.PAGE_START);
@@ -2007,7 +2007,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         BT_NewCamera.setBorderPainted(false);
         BT_NewCamera.setFocusPainted(false);
         BT_NewCamera.setFocusable(false);
-        BT_NewCamera.setPreferredSize(new java.awt.Dimension(26, 26));
+        BT_NewCamera.setPreferredSize(new java.awt.Dimension(32, 32));
         TB_CameraTools.add(BT_NewCamera);
 
         BT_CameraUp.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
@@ -2018,7 +2018,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         BT_CameraUp.setFocusPainted(false);
         BT_CameraUp.setFocusable(false);
         BT_CameraUp.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        BT_CameraUp.setPreferredSize(new java.awt.Dimension(26, 26));
+        BT_CameraUp.setPreferredSize(new java.awt.Dimension(32, 32));
         TB_CameraTools.add(BT_CameraUp);
 
         BT_CameraDown.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
@@ -2029,7 +2029,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         BT_CameraDown.setFocusPainted(false);
         BT_CameraDown.setFocusable(false);
         BT_CameraDown.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        BT_CameraDown.setPreferredSize(new java.awt.Dimension(26, 26));
+        BT_CameraDown.setPreferredSize(new java.awt.Dimension(32, 32));
         TB_CameraTools.add(BT_CameraDown);
 
         BT_UpdateCamera.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
@@ -2039,14 +2039,14 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         BT_UpdateCamera.setBorderPainted(false);
         BT_UpdateCamera.setFocusPainted(false);
         BT_UpdateCamera.setFocusable(false);
-        BT_UpdateCamera.setPreferredSize(new java.awt.Dimension(26, 26));
+        BT_UpdateCamera.setPreferredSize(new java.awt.Dimension(32, 32));
         TB_CameraTools.add(BT_UpdateCamera);
 
         BT_SmallCamera.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/collapse.png"))); // NOI18N
         BT_SmallCamera.setActionCommand("smallCamera");
         BT_SmallCamera.setFocusable(false);
         BT_SmallCamera.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        BT_SmallCamera.setPreferredSize(new java.awt.Dimension(26, 26));
+        BT_SmallCamera.setPreferredSize(new java.awt.Dimension(32, 32));
         BT_SmallCamera.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         TB_CameraTools.add(BT_SmallCamera);
 
@@ -2060,7 +2060,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         BT_RemoveCamera.setBorderPainted(false);
         BT_RemoveCamera.setFocusPainted(false);
         BT_RemoveCamera.setFocusable(false);
-        BT_RemoveCamera.setPreferredSize(new java.awt.Dimension(26, 26));
+        BT_RemoveCamera.setPreferredSize(new java.awt.Dimension(32, 32));
         TB_CameraTools.add(BT_RemoveCamera);
 
         PN_Cameras.add(TB_CameraTools, java.awt.BorderLayout.PAGE_START);

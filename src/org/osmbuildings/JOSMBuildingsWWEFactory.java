@@ -42,7 +42,8 @@ public class JOSMBuildingsWWEFactory extends javax.swing.JPanel implements WWEFa
     DefaultComboBoxModel<OSMBuildingProvider> list = new DefaultComboBoxModel<>();
     App app = null;
     NumberFormat nf = NumberFormat.getNumberInstance();
-    
+
+    WorldWindow ww = null;
     javax.swing.Timer timer = null;
 
     /**
@@ -139,7 +140,7 @@ public class JOSMBuildingsWWEFactory extends javax.swing.JPanel implements WWEFa
         BT_Down.addActionListener(this);
         BT_Up.addActionListener(this);
         BT_ClearLogs.addActionListener(this);
-        
+
         TB_Providers.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         CB_LocalProvider.addActionListener(this);
 
@@ -205,13 +206,17 @@ public class JOSMBuildingsWWEFactory extends javax.swing.JPanel implements WWEFa
             p.setProperty("PORT", "" + SP_LocalProviderPort.getValue());
             p.setProperty("OSM_API", TF_LocalProviderAPI.getText());
 
-            server = new OSMBuildingsTileServer(p, this);
-            server.start();
+            if (server == null) {
+                server = new OSMBuildingsTileServer(p, this);
+                server.start();
+            }
         }
     }
 
     @Override
     public TinyPlugin newPlugin(Object o) {
+        this.ww = (WorldWindow) o;
+        
         return new JOSMBuildingsWWEPlugin(this, (WorldWindow) o, list);
     }
 
@@ -242,6 +247,7 @@ public class JOSMBuildingsWWEFactory extends javax.swing.JPanel implements WWEFa
     public void destroy() {
         //---
         timer.stop();
+        if (server != null) server.interrupt();
     }
 
     @Override
@@ -268,10 +274,10 @@ public class JOSMBuildingsWWEFactory extends javax.swing.JPanel implements WWEFa
             } else if (server.isAlive()) {
                 LB_LocalProviderStatus.setText("<html><font color=\"green\">running</font></html>");
                 long loaded = server.getLoaded();
-                int kb = (int) (loaded/1024);
-                
-                LB_Loaded.setText(""+nf.format(kb)+"kb");
-                
+                int kb = (int) (loaded / 1024);
+
+                LB_Loaded.setText("" + nf.format(kb) + "kb");
+
             } else {
                 LB_LocalProviderStatus.setText("<html><font color=\"red\">stopped</font></html>");
 
@@ -330,7 +336,7 @@ public class JOSMBuildingsWWEFactory extends javax.swing.JPanel implements WWEFa
 
         } else if (e.getActionCommand().equals("clearLogs")) {
             TA_Logs.setText("");
-            
+
         } else if (e.getActionCommand().equals("down")) {
             int index = TB_Providers.getSelectedRow();
             if (index >= list.getSize() - 1) return;
@@ -395,16 +401,16 @@ public class JOSMBuildingsWWEFactory extends javax.swing.JPanel implements WWEFa
     public void buildingsLogs(int state, String line) {
         if (TA_Logs.getText().length() > 65535) TA_Logs.setText("");
         if (state == 0) {
-            TA_Logs.append("(I) "+line+"\n");
+            TA_Logs.append("(I) " + line + "\n");
             LB_Log.setText(line);
-            
+
         } else if (state == 1) {
-            TA_Logs.append("(E) "+line+"\n");
-            LB_Log.setText("<html><font color=\"red\">"+line+"</font></html>");
-            
+            TA_Logs.append("(E) " + line + "\n");
+            LB_Log.setText("<html><font color=\"red\">" + line + "</font></html>");
+
         } else if (state == 2) {
-            TA_Logs.append("(W) "+line+"\n");
-            LB_Log.setText("<html><font color=\"red\">"+line+"</font></html>");
+            TA_Logs.append("(W) " + line + "\n");
+            LB_Log.setText("<html><font color=\"red\">" + line + "</font></html>");
             
         }
     }
@@ -651,7 +657,7 @@ public class JOSMBuildingsWWEFactory extends javax.swing.JPanel implements WWEFa
         BT_Add.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/add.png"))); // NOI18N
         BT_Add.setToolTipText("add");
         BT_Add.setActionCommand("add");
-        BT_Add.setPreferredSize(new java.awt.Dimension(26, 26));
+        BT_Add.setPreferredSize(new java.awt.Dimension(32, 32));
         TB_Tools.add(BT_Add);
 
         BT_Up.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
@@ -660,7 +666,7 @@ public class JOSMBuildingsWWEFactory extends javax.swing.JPanel implements WWEFa
         BT_Up.setActionCommand("up");
         BT_Up.setFocusable(false);
         BT_Up.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        BT_Up.setPreferredSize(new java.awt.Dimension(26, 26));
+        BT_Up.setPreferredSize(new java.awt.Dimension(32, 32));
         BT_Up.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         TB_Tools.add(BT_Up);
 
@@ -670,7 +676,7 @@ public class JOSMBuildingsWWEFactory extends javax.swing.JPanel implements WWEFa
         BT_Down.setActionCommand("down");
         BT_Down.setFocusable(false);
         BT_Down.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        BT_Down.setPreferredSize(new java.awt.Dimension(26, 26));
+        BT_Down.setPreferredSize(new java.awt.Dimension(32, 32));
         BT_Down.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         TB_Tools.add(BT_Down);
 
@@ -680,7 +686,7 @@ public class JOSMBuildingsWWEFactory extends javax.swing.JPanel implements WWEFa
         BT_Edit.setActionCommand("edit");
         BT_Edit.setFocusable(false);
         BT_Edit.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        BT_Edit.setPreferredSize(new java.awt.Dimension(26, 26));
+        BT_Edit.setPreferredSize(new java.awt.Dimension(32, 32));
         BT_Edit.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         TB_Tools.add(BT_Edit);
         TB_Tools.add(jSeparator9);
@@ -689,7 +695,7 @@ public class JOSMBuildingsWWEFactory extends javax.swing.JPanel implements WWEFa
         BT_Delete.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/remove.png"))); // NOI18N
         BT_Delete.setToolTipText("delete");
         BT_Delete.setActionCommand("delete");
-        BT_Delete.setPreferredSize(new java.awt.Dimension(26, 26));
+        BT_Delete.setPreferredSize(new java.awt.Dimension(32, 32));
         TB_Tools.add(BT_Delete);
 
         PN_Providers.add(TB_Tools, java.awt.BorderLayout.PAGE_START);
@@ -931,5 +937,4 @@ public class JOSMBuildingsWWEFactory extends javax.swing.JPanel implements WWEFa
 
     }
 
-    
 }

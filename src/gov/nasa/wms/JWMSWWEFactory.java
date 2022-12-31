@@ -336,7 +336,7 @@ public class JWMSWWEFactory extends JPanel implements WWEFactory, ActionListener
         BT_Add.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/add.png"))); // NOI18N
         BT_Add.setToolTipText("add");
         BT_Add.setActionCommand("add");
-        BT_Add.setPreferredSize(new java.awt.Dimension(26, 26));
+        BT_Add.setPreferredSize(new java.awt.Dimension(32, 32));
         TB_Tools.add(BT_Add);
 
         BT_Up.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
@@ -345,7 +345,7 @@ public class JWMSWWEFactory extends JPanel implements WWEFactory, ActionListener
         BT_Up.setActionCommand("up");
         BT_Up.setFocusable(false);
         BT_Up.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        BT_Up.setPreferredSize(new java.awt.Dimension(26, 26));
+        BT_Up.setPreferredSize(new java.awt.Dimension(32, 32));
         BT_Up.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         TB_Tools.add(BT_Up);
 
@@ -355,7 +355,7 @@ public class JWMSWWEFactory extends JPanel implements WWEFactory, ActionListener
         BT_Down.setActionCommand("down");
         BT_Down.setFocusable(false);
         BT_Down.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        BT_Down.setPreferredSize(new java.awt.Dimension(26, 26));
+        BT_Down.setPreferredSize(new java.awt.Dimension(32, 32));
         BT_Down.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         TB_Tools.add(BT_Down);
 
@@ -365,7 +365,7 @@ public class JWMSWWEFactory extends JPanel implements WWEFactory, ActionListener
         BT_Edit.setActionCommand("edit");
         BT_Edit.setFocusable(false);
         BT_Edit.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        BT_Edit.setPreferredSize(new java.awt.Dimension(26, 26));
+        BT_Edit.setPreferredSize(new java.awt.Dimension(32, 32));
         BT_Edit.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         TB_Tools.add(BT_Edit);
         TB_Tools.add(jSeparator9);
@@ -374,7 +374,7 @@ public class JWMSWWEFactory extends JPanel implements WWEFactory, ActionListener
         BT_Delete.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/remove.png"))); // NOI18N
         BT_Delete.setToolTipText("delete");
         BT_Delete.setActionCommand("delete");
-        BT_Delete.setPreferredSize(new java.awt.Dimension(26, 26));
+        BT_Delete.setPreferredSize(new java.awt.Dimension(32, 32));
         TB_Tools.add(BT_Delete);
 
         PN_Servers.add(TB_Tools, java.awt.BorderLayout.PAGE_START);
