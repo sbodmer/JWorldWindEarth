@@ -74,8 +74,8 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
      */
     protected OSMBuildingProvider provider = null;
 
-    protected Vec4 defaultSunDirection = null;
-    protected Material defaultSunMat = null;
+    // protected Vec4 defaultSunDirection = null;
+    // protected Material defaultSunMat = null;
 
     protected BasicDragger dragger = null;
             
@@ -465,12 +465,12 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
         LightingModel lm = dc.getStandardLightingModel();
         if (lm instanceof BasicLightingModel) {
             BasicLightingModel blm = (BasicLightingModel) lm;
-            if (defaultSunDirection == null) defaultSunDirection = blm.getLightDirection();
-            if (defaultSunMat == null) defaultSunMat = blm.getLightMaterial();
+            // if (defaultSunDirection == null) defaultSunDirection = blm.getLightDirection();
+            // if (defaultSunMat == null) defaultSunMat = blm.getLightMaterial();
 
             if (CB_FixedLighting.isSelected()) {
-                blm.setLightDirection(defaultSunDirection);
-                blm.setLightMaterial(defaultSunMat);
+                // blm.setLightDirection(defaultSunDirection);
+                // blm.setLightMaterial(defaultSunMat);
 
             } else {
                 // blm.setLightDirection(Vec4.INFINITY);;
@@ -478,16 +478,18 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
                 Tessellator tes = dc.getGlobe().getTessellator();
                 Vec4 sun = (Vec4) tes.getValue(WWE.TESSELATOR_KEY_SUN_DIRECTION);
                 if (sun != null) {
-                    Color color = (Color) tes.getValue(WWE.TESSELATOR_KEY_SUN_COLOR);
+                    //--- The sun is set (Atmosphere layer ?), use it
+                    // Color color = (Color) tes.getValue(WWE.TESSELATOR_KEY_SUN_COLOR);
                     blm.setLightDirection(sun);
-                    Color am = (Color) tes.getValue(WWE.TESSELATOR_KEY_SUN_AMBIENT_COLOR);
-                    Material m = new Material(Color.WHITE, color, am, Color.BLACK, 0);
-                    blm.setLightMaterial(m);
+                    // Color am = (Color) tes.getValue(WWE.TESSELATOR_KEY_SUN_AMBIENT_COLOR);
+                    // Material m = new Material(Color.WHITE, color, am, Color.BLACK, 0);
+                    // blm.setLightMaterial(m);
 
                 } else {
-                    blm.setLightDirection(defaultSunDirection);
-                    blm.setLightMaterial(defaultSunMat);
+                    // blm.setLightDirection(defaultSunDirection);
+                    // blm.setLightMaterial(defaultSunMat);
                 }
+                
             }
 
         }

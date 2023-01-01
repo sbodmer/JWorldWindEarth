@@ -8,7 +8,6 @@ package org.osmbuildings;
 import gov.nasa.worldwind.*;
 import gov.nasa.worldwind.event.*;
 import gov.nasa.worldwind.geom.Position;
-import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.layers.RenderableLayer;
 import gov.nasa.worldwind.render.*;
 import gov.nasa.worldwind.util.Logging;
@@ -16,7 +15,6 @@ import gov.nasa.worldwind.view.firstperson.BasicFlyView;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,19 +30,10 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
 
     public static final String CACHE_FOLDER = "Earth" + File.separatorChar + "OSMBuildings";
 
-    /**
-     * The api key
-     */
-    // public static String osmBuildingKey = "sx3pxpz6";
-    // public static final int ZOOM = 15;
-    // public static final double maxX = Math.pow(2, ZOOM);
-    // public static final double maxY = Math.pow(2, ZOOM);
-    // LatLon center = null;
-    // SurfacePolygon carpet = null;
     protected ExtrudedPolygon box = null;
 
     /**
-     * All the rendered ids (needed for dupilcate check)
+     * All the rendered ids (needed for duplicate check)
      */
     protected ArrayList<String> ids = new ArrayList<>();
 
@@ -744,7 +733,7 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
     //**************************************************************************
     private ShapeAttributes produceDefaultShapeAttribute() {
         BasicShapeAttributes defaultAttrs = new BasicShapeAttributes();
-        // Material m = new Material(Color.LIGHT_GRAY.brighter(), Color.LIGHT_GRAY, Color.LIGHT_GRAY.darker(), Color.LIGHT_GRAY.darker(), 0);
+        // Material m = new Material(Color.LIGHT_GRAY.brighter(), Color.LIGHT_GRAY, Color.BLACK, Color.BLACK, 0);
         // defaultAttrs.setInteriorMaterial(m);
         defaultAttrs.setInteriorMaterial(Material.LIGHT_GRAY);
         defaultAttrs.setInteriorOpacity(getOpacity());

@@ -532,7 +532,6 @@ public class JAtmosphereWWEPlugin extends JPanel implements WWEPlugin, ActionLis
         // Compute Sun direction
         Vec4 sun, light;
         if (BT_Relative.isSelected()) {
-            
             // Compute Sun position relative to the eye position
             Angle elevation = Angle.fromDegrees(SL_Elevation.getValue());
             Angle azimuth = Angle.fromDegrees(SL_Azimut.getValue());
