@@ -49,6 +49,12 @@ import org.worldwindearth.components.layers.MergedLayer;
 /**
  * Earth sun shading and lens flare layer
  *
+ * !!! I don't get what is going here, please help me understand how the
+ * sun shading works so that the rendered buildings are correct !!!
+ * 
+ * Also, it seems that the other layer opacity are disabled when this layer
+ * is active (bug ?)
+ * 
  * @author sbodmer
  */
 public class JAtmosphereWWEPlugin extends JPanel implements WWEPlugin, ActionListener, PositionListener, ChangeListener {
