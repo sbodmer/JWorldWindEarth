@@ -384,6 +384,24 @@
         </exec> 
     </target>
     -->
+    
+    <target name="exe_jworldwindearth" depends="-init-project" description="Build windows exe jworldwindearth archive">
+        <echo message="[exe] Create jworldwindearth windows executable with launch4j"/>
+        <exec executable="${launch4j}" dir=".">
+            <arg value="Packages/exe/jworldwindearth/jworldwindearth.xml"/>    
+        </exec>
+        <mkdir dir="Releases/Windows/JWorldWindEarth"/>
+        <move file="Packages/exe/jworldwindearth/JWorldWindEarth.exe" tofile="Releases/Windows/JWorldWindEarth/JWorldWindEarth.exe"/>
+        <mkdir dir="Releases/Windows/JWorldWindEarth/lib"/>
+        <copy todir="Releases/Windows/JWorldWindEarth/lib">
+            <fileset dir="dist/lib"/>  
+        </copy>
+        <copy todir="Releases/Windows/JWorldWindEarth">
+            <fileset file="dist/WWEarth.jar"/>
+        </copy>
+        <zip destfile="Releases/Windows/JWorldWindEarth_${version}.zip" basedir="Releases/Windows/JWorldWindEarth" update="true"/>
+    </target>
+    
     <target name="package_jworldwindearth" depends="-init-project" description="Build debian jworldwindearth package">
         <!-- Platform -->
         <echo message="[deb] Create jworldwindearth binary package for platform ${platform}"/>
