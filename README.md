@@ -7,9 +7,6 @@ Nasa WorldWind SDK to expose all the layers available.
 Each contributor could add a specific layer to the project (or add a reference
 to the layer code) to increase the number of exposed layers.
 
-A Java Web Start app is available to start the application without installation
-[WorldWindEarthJWS](http://tools.knop-tech.com)
-
 ![New York](https://user-images.githubusercontent.com/18146968/29412234-243faed8-8358-11e7-9e26-3675b769c608.jpg)
 
 [Other screen shots](https://github.com/sbodmer/JWorldWindEarth/issues/1)
