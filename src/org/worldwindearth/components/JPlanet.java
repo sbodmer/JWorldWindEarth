@@ -421,7 +421,9 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         MN_NewLayers.add(jmenu, 5);
         jmenu = app.createFactoryMenus("Search", WWEFactory.PLUGIN_CATEGORY_WORLDWIND_LAYER, WWEFactory.PLUGIN_FAMILY_WORLDWIND_LAYER_SEARCH, this);
         MN_NewLayers.add(jmenu, 6);
-
+        jmenu = app.createFactoryMenus("Measures", WWEFactory.PLUGIN_CATEGORY_WORLDWIND_LAYER, WWEFactory.PLUGIN_FAMILY_WORLDWIND_LAYER_MEASURES, this);
+        MN_NewLayers.add(jmenu, 7);
+        
         //--- Prepare table
         layers = new WorldWindLayersTableModel(m.getLayers());
         TB_Layers.setModel(layers);

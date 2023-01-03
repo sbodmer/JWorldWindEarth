@@ -207,6 +207,10 @@
         <jar destfile="${dist.dir}/lib/ext/layers/Geocode.jar" manifest="Manifests/layers/Geocode.mf">
             <fileset dir="${build.dir}/classes" includes="org/worldwindearth/geocode/**"/>
         </jar>
+        <echo message="[Layer] Trek"/>
+        <jar destfile="${dist.dir}/lib/ext/layers/Trek.jar" manifest="Manifests/layers/Trek.mf">
+            <fileset dir="${build.dir}/classes" includes="org/worldwindearth/trek/**"/>
+        </jar>
         
         <!-- Geocode -->
         <mkdir dir="${dist.dir}/lib/ext/geocode"/>
