@@ -123,6 +123,7 @@ public class JTrekWWEFactory extends javax.swing.JPanel implements WWEFactory {
         LB_Name = new javax.swing.JLabel();
         LB_Description = new javax.swing.JLabel();
 
+        LB_Name.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/trek/Resources/Icons/22x22/trek.png"))); // NOI18N
         java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("org/worldwindearth/trek/Trek"); // NOI18N
         LB_Name.setText(bundle.getString("factory_name")); // NOI18N
 
