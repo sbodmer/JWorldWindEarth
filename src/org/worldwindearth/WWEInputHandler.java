@@ -39,7 +39,7 @@ public class WWEInputHandler extends AWTInputHandler {
         // System.out.println("CLICKED:"+mouseEvent.getClickCount());
         // if (mouseEvent.getClickCount() == 1) return;
         // super.mouseClicked(mouseEvent);
-        callMouseClickedListeners(mouseEvent);
+        // callMouseClickedListeners(mouseEvent);
 
         //--- Check if an object was picked
         PickedObjectList pickedObjects = this.wwd.getObjectsAtCurrentPosition();

@@ -7,7 +7,6 @@ package org.osmbuildings;
 
 import gov.nasa.worldwind.*;
 import gov.nasa.worldwind.cache.FileStore;
-import gov.nasa.worldwind.drag.Draggable;
 import gov.nasa.worldwind.formats.geojson.GeoJSONDoc;
 import gov.nasa.worldwind.geom.*;
 import gov.nasa.worldwind.render.*;

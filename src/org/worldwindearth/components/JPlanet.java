@@ -196,7 +196,10 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         LI_Cameras.setModel(cameras);
 
         MN_ClearAttached.addActionListener(this);
-
+        MN_Rename.addActionListener(this);
+        MN_RemoveLayer.addActionListener(this);
+        MN_ShowCross.addActionListener(this);
+        
         //--- Set a custom desktop manager, which will block the layers internal frame if sticky
         TB_Layers.getSelectionModel().addListSelectionListener(this);
         TB_Layers.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -323,12 +326,11 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         wwd.setView(orbit);
         wwd.setInputHandler(wweih);
         wwd.addRenderingListener(this);
-
-        
         wweih.addMouseListener(this);
         wweih.addMouseMotionListener(this);
         wweih.addMouseWheelListener(this);
-
+        wweih.addKeyListener(this);
+        
         cameraCellRenderer = new JCameraCellRenderer(app);
         cameraSmallCellRenderer = new JCameraSmallCellRenderer(app);
         LI_Cameras.setCellRenderer(cameraCellRenderer);
@@ -377,11 +379,13 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         SP_VerticalExageration.addChangeListener(this);
         CB_Wireframe.addActionListener(this);
 
+        /*
         InputHandler ih = wwd.getInputHandler();
         ih.addKeyListener(this);
         ih.addMouseListener(this);
         ih.addMouseWheelListener(this);
-
+        */
+        
         //--- Register drag and drop action for camera (view) link
         cth = new JPlanetTransferHandler(this);
         BT_Attach.addMouseMotionListener(this);
@@ -502,13 +506,13 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
                         int loc = Integer.parseInt(e.getAttribute("mainDividerLocation"));
                         SP_Main.setDividerLocation(loc);
                         SP_Main.setLastDividerLocation(300);
-                        boolean hidden = e.getAttribute("hideLayers").equals("true");
-                        MN_HideLayers.setSelected(hidden);
-
+                        MN_HideLayers.setSelected(e.getAttribute("hideLayers").equals("true"));
+                        MN_ShowCross.setSelected(e.getAttribute("showCross").equals("true"));
+                        
                         loc = Integer.parseInt(e.getAttribute("dividerLocation"));
                         SP_Layers.setDividerLocation(loc);
                         SP_Layers.setLastDividerLocation(250);
-
+                        
                     } catch (NumberFormatException ex) {
                         // ex.printStackTrace();
 
@@ -624,6 +628,8 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
             SP_Main.setDividerSize(0);
 
         }
+        PN_Cross.setVisible(MN_ShowCross.isSelected());
+        
         SP_Main.revalidate();
 
         timer.start();
@@ -685,6 +691,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         e.setAttribute("mainDividerLocation", "" + SP_Main.getDividerLocation());
         e.setAttribute("dividerLocation", "" + SP_Layers.getDividerLocation());
         e.setAttribute("hideLayers", "" + MN_HideLayers.isSelected());
+        e.setAttribute("showCross", ""+MN_ShowCross.isSelected());
         config.appendChild(e);
 
         e = config.getOwnerDocument().createElement("Center");
@@ -1012,6 +1019,9 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
             }
             SP_Main.revalidate();
 
+        } else if (e.getActionCommand().equals("showCross")) {
+            PN_Cross.setVisible(true);
+            
         } else if (e.getActionCommand().equals("switch")) {
             JComponent left = (JComponent) SP_Main.getLeftComponent();
             JComponent right = (JComponent) SP_Main.getRightComponent();
@@ -1280,7 +1290,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
 
         } else if (e.getActionCommand().equals("orbit")) {
             fptimer.stop();
-            PN_Cross.setVisible(false);
+            PN_Cross.setVisible(MN_ShowCross.isSelected());
             LB_FPKeys.setVisible(false);
 
             Position eye = wwd.getView().getEyePosition();
@@ -1742,6 +1752,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         MN_HideTopBar = new javax.swing.JCheckBoxMenuItem();
         MN_HideStatusBar = new javax.swing.JCheckBoxMenuItem();
         MN_HideLayers = new javax.swing.JCheckBoxMenuItem();
+        MN_ShowCross = new javax.swing.JCheckBoxMenuItem();
         MN_SwitchSide = new javax.swing.JMenuItem();
         jSeparator11 = new javax.swing.JPopupMenu.Separator();
         MN_Screens = new javax.swing.JMenu();
@@ -1847,6 +1858,10 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         MN_HideLayers.setText("Hide layers panel");
         MN_HideLayers.setActionCommand("hideLayers");
         PU_More.add(MN_HideLayers);
+
+        MN_ShowCross.setText("Show cross");
+        MN_ShowCross.setActionCommand("showCross");
+        PU_More.add(MN_ShowCross);
 
         MN_SwitchSide.setText("Switch layer and world side");
         MN_SwitchSide.setActionCommand("switch");
@@ -2141,7 +2156,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         jSeparator2.setPreferredSize(new java.awt.Dimension(2, 32));
         PN_Tray.add(jSeparator2);
 
-        BT_Cameras.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/components/Resources/Icons/22x22/camera.png"))); // NOI18N
+        BT_Cameras.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/bookmark.png"))); // NOI18N
         BT_Cameras.setActionCommand("cameras");
         BT_Cameras.setPreferredSize(new java.awt.Dimension(32, 32));
         PN_Tray.add(BT_Cameras);
@@ -2149,13 +2164,13 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         PN_TopBar.add(PN_Tray, java.awt.BorderLayout.EAST);
 
         BT_More.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
-        BT_More.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/down.png"))); // NOI18N
+        BT_More.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/more.png"))); // NOI18N
         BT_More.setActionCommand("more");
         BT_More.setPreferredSize(new java.awt.Dimension(32, 32));
         jPanel7.add(BT_More);
 
         BT_Attach.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
-        BT_Attach.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/components/Resources/Icons/22x22/attached.png"))); // NOI18N
+        BT_Attach.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/attach.png"))); // NOI18N
         BT_Attach.setToolTipText("Drag and drop the button to another view to link the camera");
         BT_Attach.setActionCommand("link");
         BT_Attach.setPreferredSize(new java.awt.Dimension(32, 32));
@@ -2221,6 +2236,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
 
         add(SP_Main, java.awt.BorderLayout.CENTER);
     }// </editor-fold>//GEN-END:initComponents
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton BT_AddLayer;
     private javax.swing.JButton BT_Attach;
@@ -2260,6 +2276,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
     private javax.swing.JMenuItem MN_Rename;
     private javax.swing.JMenuItem MN_ScreenIdentifier;
     private javax.swing.JMenu MN_Screens;
+    private javax.swing.JCheckBoxMenuItem MN_ShowCross;
     private javax.swing.JMenuItem MN_SwitchSide;
     private javax.swing.JProgressBar PB_Downloading;
     private javax.swing.JPanel PN_Cameras;

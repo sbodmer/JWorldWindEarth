@@ -4,6 +4,7 @@
  */
 package org.worldwindearth.trek;
 
+import gov.nasa.worldwind.render.Path;
 import java.util.ArrayList;
 
 /**
@@ -15,7 +16,10 @@ public class TrkType {
     public ArrayList<TrkSeg> trkseg = new ArrayList<>();
     
     public TrkType() {
-        
+        //---
     }
     
+    public String toString() {
+        return name;
+    }
 }

@@ -5,7 +5,6 @@
  */
 package gov.nasa.atmosphere;
 
-import gov.nasa.atmosphere.AtmosphereLayer;
 import gov.nasa.worldwind.Model;
 import gov.nasa.worldwind.WorldWind;
 import gov.nasa.worldwind.WorldWindow;
@@ -36,15 +35,11 @@ import org.tinyrcp.App;
 import org.w3c.dom.Element;
 import org.worldwindearth.WWEFactory;
 import org.worldwindearth.WWEPlugin;
-import gov.nasa.worldwind.terrain.Tessellator;
 import java.awt.BorderLayout;
-import java.io.InputStream;
 import javax.swing.JDesktopPane;
 import javax.swing.JLayeredPane;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import org.worldwindearth.WWEInputHandler;
-import org.worldwindearth.components.layers.MergedLayer;
 
 /**
  * Earth sun shading and lens flare layer

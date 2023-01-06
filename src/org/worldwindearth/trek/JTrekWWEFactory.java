@@ -65,7 +65,7 @@ public class JTrekWWEFactory extends javax.swing.JPanel implements WWEFactory {
 
     @Override
     public JComponent getFactoryConfigComponent() {
-        return this;
+        return null;
     }
 
     @Override

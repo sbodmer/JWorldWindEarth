@@ -4,6 +4,7 @@
  */
 package org.worldwindearth.trek;
 
+import gov.nasa.worldwind.render.Path;
 import java.util.ArrayList;
 
 /**
@@ -14,7 +15,13 @@ public class RteType {
     public ArrayList<WptType> rtept = new ArrayList<>();
     public String name = "";
     
+    public Path path = null;
+    
     public RteType() {
         
+    }
+    
+    public String toString() {
+        return name;
     }
 }
