@@ -9,7 +9,8 @@ import gov.nasa.worldwind.view.orbit.OrbitViewInputHandler;
 import java.awt.event.MouseWheelEvent;
 
 /**
- *
+ * NOT YET USED
+ * 
  * @author sbodmer
  */
 public class WWEViewInputHandler extends OrbitViewInputHandler {

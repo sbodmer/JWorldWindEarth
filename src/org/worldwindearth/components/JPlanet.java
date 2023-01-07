@@ -320,7 +320,11 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
             }
         };
         fly = new BasicFlyView();
+        fly.setGlobe(wwd.getView().getGlobe());
         walk = new BasicWalkFlyView();
+        walk.setGlobe(wwd.getView().getGlobe());
+        orbit.setGlobe(wwd.getView().getGlobe());
+        
         // WWEViewInputHandler vhh = new WWEViewInputHandler();
         // view.setViewInputHandler(vhh);
         wwd.setView(orbit);

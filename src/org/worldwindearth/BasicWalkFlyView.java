@@ -5,6 +5,7 @@
  */
 package org.worldwindearth;
 
+import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.view.firstperson.BasicFlyView;
 
 /**
@@ -14,8 +15,15 @@ import gov.nasa.worldwind.view.firstperson.BasicFlyView;
 public class BasicWalkFlyView extends BasicFlyView {
     public BasicWalkFlyView() {
         super();
+        // this.viewLimits.setEyeElevationLimits(5, 5);
         
-        this.viewLimits.setEyeElevationLimits(5, 5);
-
+    }
+    @Override
+    public Position getCurrentEyePosition() {
+        //--- Limit the altitude to ground level
+        Position eye = super.getCurrentEyePosition();
+        double ele = getGlobe().getElevation(eye.latitude, eye.longitude);
+        this.viewLimits.setEyeElevationLimits(ele+5, ele+5);
+        return super.getCurrentEyePosition();
     }
 }

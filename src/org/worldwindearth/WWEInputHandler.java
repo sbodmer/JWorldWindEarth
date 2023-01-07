@@ -9,10 +9,7 @@ import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.awt.AWTInputHandler;
 import gov.nasa.worldwind.event.SelectEvent;
 import gov.nasa.worldwind.geom.Position;
-import gov.nasa.worldwind.geom.Vec4;
 import gov.nasa.worldwind.pick.PickedObjectList;
-import gov.nasa.worldwind.view.orbit.BasicOrbitView;
-import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 
