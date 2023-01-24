@@ -96,8 +96,8 @@ public class JWorldWindEarth extends javax.swing.JFrame implements ActionListene
 
         //--- Load some app general properties
         try {
-            file = new File(System.getProperty("user.home"), ".WorldWindEarth" + File.separator + "app.properties");
-            if (file.exists()) properties.load(new FileInputStream(file));
+            File tmp = new File(System.getProperty("user.home"), ".WorldWindEarth" + File.separator + "app.properties");
+            if (tmp.exists()) properties.load(new FileInputStream(tmp));
 
             //--- Set the laf
             String laf = properties.getProperty("lookAndFeelClass");

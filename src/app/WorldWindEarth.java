@@ -52,8 +52,8 @@ public class WorldWindEarth {
                 //--- Prepare the loader
                 String libs[] = {
                     "lib"+File.separator+"ext",
-                    System.getProperty("user.home")+File.separator+".WorldWindEarth"
-                        
+                    System.getProperty("user.home")+File.separator+".WorldWindEarth"+File.separatorChar+"lib",
+                    System.getProperty("user.home")+File.separator+".WorldWindEarth"+File.separatorChar+"plugins"
                 };
                 
                 //--- Prepare default boot splash frame
