@@ -189,9 +189,6 @@
             </Component>
             <Component class="javax.swing.JLabel" name="LB_WMS">
               <Properties>
-                <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-                  <Color blue="f9" green="ca" red="90" type="rgb"/>
-                </Property>
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                   <Font name="DejaVu Sans" size="12" style="1"/>
                 </Property>

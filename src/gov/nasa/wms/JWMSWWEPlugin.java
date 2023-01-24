@@ -594,7 +594,6 @@ public class JWMSWWEPlugin extends JPanel implements WWEPlugin, ActionListener, 
         BT_Load.setToolTipText("Reload the WMS Capabilities");
         BT_Load.setActionCommand("load");
 
-        LB_WMS.setBackground(new java.awt.Color(144, 202, 249));
         LB_WMS.setFont(new java.awt.Font("DejaVu Sans", 1, 12)); // NOI18N
         LB_WMS.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         LB_WMS.setText("...");
