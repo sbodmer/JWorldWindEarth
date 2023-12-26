@@ -186,6 +186,12 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
 
         initComponents();
 
+        BT_AddLayer.setIcon(SVGIcon.newIcon(22, "/org/worldwindearth/Resources/Icons/add.svg"));
+        BT_RenameLayer.setIcon(SVGIcon.newIcon(22, "/org/worldwindearth/Resources/Icons/edit.svg"));
+        BT_LayerUp.setIcon(SVGIcon.newIcon(22, "/org/worldwindearth/Resources/Icons/up.svg"));
+        BT_LayerDown.setIcon(SVGIcon.newIcon(22, "/org/worldwindearth/Resources/Icons/down.svg"));
+        BT_RemoveLayer.setIcon(SVGIcon.newIcon(22, "/org/worldwindearth/Resources/Icons/trash.svg"));
+         
         PN_Cross = new JCross();
         DP_Main.add(PN_Cross, JLayeredPane.POPUP_LAYER);
         PN_Cross.setVisible(false);
@@ -1902,7 +1908,6 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         PN_Left.setLayout(new java.awt.BorderLayout());
 
         SP_Layers.setDividerLocation(200);
-        SP_Layers.setDividerSize(5);
         SP_Layers.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
         SP_Layers.setOneTouchExpandable(true);
 
@@ -1912,7 +1917,6 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         jPanel4.setLayout(new java.awt.BorderLayout());
 
         TB_Tools.setBorder(null);
-        TB_Tools.setFloatable(false);
 
         BT_AddLayer.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
         BT_AddLayer.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/add.png"))); // NOI18N
@@ -2019,7 +2023,6 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         PN_Cameras.add(jScrollPane1, java.awt.BorderLayout.CENTER);
 
         TB_CameraTools.setBorder(null);
-        TB_CameraTools.setFloatable(false);
 
         BT_NewCamera.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
         BT_NewCamera.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/add.png"))); // NOI18N
@@ -2094,7 +2097,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         LB_FPKeys.setText("Use W,S,A,D (SHIFT) Key to move");
         LB_FPKeys.setOpaque(true);
         DP_Main.add(LB_FPKeys);
-        LB_FPKeys.setBounds(150, 10, 220, 15);
+        LB_FPKeys.setBounds(150, 10, 220, 23);
 
         PN_Right.add(DP_Main, java.awt.BorderLayout.CENTER);
 

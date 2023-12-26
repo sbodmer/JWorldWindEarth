@@ -5,30 +5,23 @@
  */
 package org.worldwindearth.trek;
 
+import com.formdev.flatlaf.extras.FlatSVGIcon;
 import gov.nasa.worldwind.View;
-import gov.nasa.worldwind.WorldWind;
-import org.osm.*;
 import gov.nasa.worldwind.WorldWindow;
 import gov.nasa.worldwind.event.SelectEvent;
 import gov.nasa.worldwind.event.SelectListener;
-import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.layers.Layer;
-import gov.nasa.worldwind.render.Balloon;
-import gov.nasa.worldwind.render.BasicShapeAttributes;
 import gov.nasa.worldwind.render.Cone;
 import gov.nasa.worldwind.render.Cylinder;
-import gov.nasa.worldwind.render.Material;
 import gov.nasa.worldwind.render.Path;
 import gov.nasa.worldwind.render.Path.PositionColors;
-import gov.nasa.worldwind.render.ShapeAttributes;
 import gov.nasa.worldwind.util.BasicDragger;
-import gov.nasa.worldwind.view.orbit.BasicOrbitView;
-import gov.nasa.worldwindx.applications.sar.PositionsContextMenu;
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Point;
-import java.awt.Rectangle;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.ClipboardOwner;
+import java.awt.datatransfer.Transferable;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -42,14 +35,11 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.TimeZone;
-import javax.swing.DefaultListModel;
 import javax.swing.JComponent;
 import javax.swing.JDesktopPane;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileFilter;
@@ -60,13 +50,14 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.worldwindearth.WWEPlugin;
+import org.worldwindearth.components.SVGIcon;
 
 /**
  * Stars dome
  *
  * @author sbodmer
  */
-public class JTrekWWEPlugin extends JPanel implements WWEPlugin, ActionListener, ListSelectionListener, ItemListener, SelectListener {
+public class JTrekWWEPlugin extends JPanel implements WWEPlugin, ActionListener, ListSelectionListener, ItemListener, SelectListener, ClipboardOwner {
 
     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
     NumberFormat nf = NumberFormat.getInstance();
@@ -85,6 +76,8 @@ public class JTrekWWEPlugin extends JPanel implements WWEPlugin, ActionListener,
 
     BasicDragger dragger = null;
     GPX selected = null;
+
+    Clipboard clip = new Clipboard("Trek");
 
     /**
      *
@@ -133,6 +126,26 @@ public class JTrekWWEPlugin extends JPanel implements WWEPlugin, ActionListener,
         this.app = app;
         this.jdesktop = (JDesktopPane) arg;
 
+        BT_New.setIcon(SVGIcon.newIcon(22, "/org/worldwindearth/Resources/Icons/add.svg"));
+        BT_Edit.setIcon(SVGIcon.newIcon(22, "/org/worldwindearth/Resources/Icons/edit.svg"));
+        BT_Delete.setIcon(SVGIcon.newIcon(22, "/org/worldwindearth/Resources/Icons/trash.svg"));
+        BT_Import.setIcon(SVGIcon.newIcon(22, "/org/worldwindearth/Resources/Icons/import.svg"));
+        BT_Export.setIcon(SVGIcon.newIcon(22, "/org/worldwindearth/Resources/Icons/save.svg"));
+        
+        BT_EditRoutePoint.setIcon(SVGIcon.newIcon(22, "/org/worldwindearth/Resources/Icons/edit.svg"));
+        BT_CopyRoutePoints.setIcon(SVGIcon.newIcon(22, "/org/worldwindearth/Resources/Icons/copy.svg"));
+        BT_PasteRoutePoints.setIcon(SVGIcon.newIcon(22, "/org/worldwindearth/Resources/Icons/paste.svg"));
+        BT_DeleteRoutePoint.setIcon(SVGIcon.newIcon(22, "/org/worldwindearth/Resources/Icons/trash.svg"));
+
+        BT_DeleteRoute.setIcon(SVGIcon.newIcon(22, "/org/worldwindearth/Resources/Icons/trash.svg"));
+        BT_EditRoute.setIcon(SVGIcon.newIcon(22, "/org/worldwindearth/Resources/Icons/edit.svg"));
+        BT_NewRoute.setIcon(SVGIcon.newIcon(22, "/org/worldwindearth/Resources/Icons/add.svg"));
+
+        BT_EditWaypoint.setIcon(SVGIcon.newIcon(22, "/org/worldwindearth/Resources/Icons/edit.svg"));
+        BT_DeleteWaypoint.setIcon(SVGIcon.newIcon(22, "/org/worldwindearth/Resources/Icons/trash.svg"));
+        
+        BT_EditTrack.setIcon(SVGIcon.newIcon(22, "/org/worldwindearth/Resources/Icons/edit.svg"));
+        
         BT_Import.addActionListener(this);
         BT_Export.addActionListener(this);
         BT_Delete.addActionListener(this);
@@ -147,6 +160,8 @@ public class JTrekWWEPlugin extends JPanel implements WWEPlugin, ActionListener,
         BT_DeleteRoute.addActionListener(this);
         BT_EditRoutePoint.addActionListener(this);
         BT_DeleteRoutePoint.addActionListener(this);
+        BT_CopyRoutePoints.addActionListener(this);
+        BT_PasteRoutePoints.addActionListener(this);
 
         BT_EditTrack.addActionListener(this);
 
@@ -490,10 +505,10 @@ public class JTrekWWEPlugin extends JPanel implements WWEPlugin, ActionListener,
         } else if (e.getActionCommand().equals("editRoutePoint")) {
             int row = TB_Routes.getSelectedRow();
             if (row == -1) return;
-            
+
             DefaultTableModel model = (DefaultTableModel) TB_Routes.getModel();
             WptType w = (WptType) model.getValueAt(row, 0);
-            
+
             String name = JOptionPane.showInputDialog(getTopLevelAncestor(), "Name", w.name);
             if (name != null) w.name = name;
             model.fireTableCellUpdated(row, 0);
@@ -501,23 +516,56 @@ public class JTrekWWEPlugin extends JPanel implements WWEPlugin, ActionListener,
         } else if (e.getActionCommand().equals("deleteRoutePoint")) {
             int row = TB_Routes.getSelectedRow();
             if (row == -1) return;
-            
+
             DefaultTableModel model = (DefaultTableModel) TB_Routes.getModel();
             WptType w = (WptType) model.getValueAt(row, 0);
             RteType r = (RteType) CMB_Route.getSelectedItem();
             r.rtept.remove(w);
-           
+
             layer.removeRenderable(w.cylinder);
             layer.clearRoutes();
             fillRoute(r);
-            
+
+        } else if (e.getActionCommand().equals("copyRoutePoints")) {
+            int rows[] = TB_Routes.getSelectedRows();
+            if (rows.length == 0) return;
+
+            WptTypeTransferable tr = new WptTypeTransferable();
+            for (int i = 0; i < rows.length; i++) tr.add((WptType) TB_Routes.getValueAt(rows[i], 0));
+            clip.setContents(tr, this);
+
+        } else if (e.getActionCommand().equals("pasteRoutePoints")) {
+            Transferable tr = clip.getContents(null);
+            if (tr != null) {
+                if (tr.isDataFlavorSupported(WptTypeTransferable.wptTypeDataFlavor)) {
+                    try {
+                        WptTypeTransferable wpt = (WptTypeTransferable) tr.getTransferData(WptTypeTransferable.wptTypeDataFlavor);
+                        DefaultTableModel model = (DefaultTableModel) TB_Routes.getModel();
+                        RteType r = (RteType) CMB_Route.getSelectedItem();
+                        for (int i=0;i<wpt.size();i++) {
+                            WptType w = wpt.get(i);
+                            Object objs[] = { w, w.lat, w.lon, w.ele };
+                            model.addRow(objs);
+                            r.rtept.add(w);
+                            
+                        }
+                        layer.clearRoutes();
+                        fillRoute(r);
+                        
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                }
+
+            }
+
         } else if (e.getActionCommand().equals("editTrack")) {
             TrkType t = (TrkType) CMB_Tracks.getSelectedItem();
-            
+
             String name = JOptionPane.showInputDialog(getTopLevelAncestor(), "Name", t.name);
             if (name != null) t.name = name;
             CMB_Tracks.repaint();
-            
+
         } else if (e.getActionCommand().equals("extrudeTrack")) {
             //--- Switch extrdue for all segements tracks of the selected gpx
             for (int i = 0; i < CMB_Tracks.getItemCount(); i++) {
@@ -568,7 +616,7 @@ public class JTrekWWEPlugin extends JPanel implements WWEPlugin, ActionListener,
                 LB_GPX.setToolTipText(selected.getReferenceFile().getPath());
                 PN_GPX.setVisible(true);
             }
-
+            
         } else if (e.getSource() == TB_Waypoints.getSelectionModel()) {
             int row = TB_Waypoints.getSelectedRow();
             if (row != -1) {
@@ -676,6 +724,14 @@ public class JTrekWWEPlugin extends JPanel implements WWEPlugin, ActionListener,
         }
     }
 
+    //*************************************************************************
+    //*** Clipboard owner Listener
+    //*************************************************************************
+    @Override
+    public void lostOwnership(Clipboard clipboard, Transferable contents) {
+        //---
+    }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -718,6 +774,8 @@ public class JTrekWWEPlugin extends JPanel implements WWEPlugin, ActionListener,
         TB_Routes = new javax.swing.JTable();
         jToolBar5 = new javax.swing.JToolBar();
         BT_EditRoutePoint = new javax.swing.JButton();
+        BT_CopyRoutePoints = new javax.swing.JButton();
+        BT_PasteRoutePoints = new javax.swing.JButton();
         BT_DeleteRoutePoint = new javax.swing.JButton();
         jPanel8 = new javax.swing.JPanel();
         jLabel2 = new javax.swing.JLabel();
@@ -742,7 +800,6 @@ public class JTrekWWEPlugin extends JPanel implements WWEPlugin, ActionListener,
         jPanel3.setPreferredSize(new java.awt.Dimension(456, 200));
         jPanel3.setLayout(new java.awt.BorderLayout());
 
-        jToolBar1.setFloatable(false);
         jToolBar1.setRollover(true);
 
         BT_New.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
@@ -861,7 +918,6 @@ public class JTrekWWEPlugin extends JPanel implements WWEPlugin, ActionListener,
 
         jPanel2.add(jScrollPane3, java.awt.BorderLayout.CENTER);
 
-        jToolBar4.setFloatable(false);
         jToolBar4.setRollover(true);
 
         BT_EditWaypoint.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
@@ -895,7 +951,6 @@ public class JTrekWWEPlugin extends JPanel implements WWEPlugin, ActionListener,
 
         jPanel5.setLayout(new java.awt.BorderLayout());
 
-        jToolBar2.setFloatable(false);
         jToolBar2.setRollover(true);
 
         jToolBar2.add(CMB_Route);
@@ -955,7 +1010,6 @@ public class JTrekWWEPlugin extends JPanel implements WWEPlugin, ActionListener,
 
         jPanel9.add(jScrollPane4, java.awt.BorderLayout.CENTER);
 
-        jToolBar5.setFloatable(false);
         jToolBar5.setRollover(true);
 
         BT_EditRoutePoint.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
@@ -967,6 +1021,26 @@ public class JTrekWWEPlugin extends JPanel implements WWEPlugin, ActionListener,
         BT_EditRoutePoint.setPreferredSize(new java.awt.Dimension(32, 32));
         BT_EditRoutePoint.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         jToolBar5.add(BT_EditRoutePoint);
+
+        BT_CopyRoutePoints.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
+        BT_CopyRoutePoints.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/remove.png"))); // NOI18N
+        BT_CopyRoutePoints.setToolTipText("Copy route points");
+        BT_CopyRoutePoints.setActionCommand("copyRoutePoints");
+        BT_CopyRoutePoints.setFocusable(false);
+        BT_CopyRoutePoints.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        BT_CopyRoutePoints.setPreferredSize(new java.awt.Dimension(32, 32));
+        BT_CopyRoutePoints.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        jToolBar5.add(BT_CopyRoutePoints);
+
+        BT_PasteRoutePoints.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
+        BT_PasteRoutePoints.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/remove.png"))); // NOI18N
+        BT_PasteRoutePoints.setToolTipText("Paste route points");
+        BT_PasteRoutePoints.setActionCommand("pasteRoutePoints");
+        BT_PasteRoutePoints.setFocusable(false);
+        BT_PasteRoutePoints.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        BT_PasteRoutePoints.setPreferredSize(new java.awt.Dimension(32, 32));
+        BT_PasteRoutePoints.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        jToolBar5.add(BT_PasteRoutePoints);
 
         BT_DeleteRoutePoint.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
         BT_DeleteRoutePoint.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/remove.png"))); // NOI18N
@@ -991,7 +1065,6 @@ public class JTrekWWEPlugin extends JPanel implements WWEPlugin, ActionListener,
 
         jPanel6.setLayout(new java.awt.BorderLayout());
 
-        jToolBar3.setFloatable(false);
         jToolBar3.setRollover(true);
 
         jToolBar3.add(CMB_Tracks);
@@ -1077,6 +1150,7 @@ public class JTrekWWEPlugin extends JPanel implements WWEPlugin, ActionListener,
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton BT_CopyRoutePoints;
     private javax.swing.JButton BT_Delete;
     private javax.swing.JButton BT_DeleteRoute;
     private javax.swing.JButton BT_DeleteRoutePoint;
@@ -1090,6 +1164,7 @@ public class JTrekWWEPlugin extends JPanel implements WWEPlugin, ActionListener,
     private javax.swing.JButton BT_Import;
     private javax.swing.JButton BT_New;
     private javax.swing.JButton BT_NewRoute;
+    private javax.swing.JButton BT_PasteRoutePoints;
     private javax.swing.JCheckBox CB_Extrude;
     private javax.swing.JComboBox<RteType> CMB_Route;
     private javax.swing.JComboBox<TrkType> CMB_Tracks;
@@ -1128,7 +1203,6 @@ public class JTrekWWEPlugin extends JPanel implements WWEPlugin, ActionListener,
     private javax.swing.JToolBar jToolBar5;
     // End of variables declaration//GEN-END:variables
 
-    
     /**
      * Fill waypoints, routes, track table
      *
@@ -1155,6 +1229,8 @@ public class JTrekWWEPlugin extends JPanel implements WWEPlugin, ActionListener,
         }
 
         //--- Routes
+        model = (DefaultTableModel) TB_Routes.getModel();
+        model.setRowCount(0);
         CMB_Route.removeItemListener(this);
         CMB_Route.removeAllItems();
         for (int i = 0; i < g.rte.size(); i++) {
@@ -1166,6 +1242,8 @@ public class JTrekWWEPlugin extends JPanel implements WWEPlugin, ActionListener,
         CMB_Route.addItemListener(this);
 
         //--- Tracks
+        model = (DefaultTableModel) TB_Track.getModel();
+        model.setRowCount(0);
         CMB_Tracks.removeItemListener(this);
         CMB_Tracks.removeAllItems();
         for (int i = 0; i < g.trk.size(); i++) {
@@ -1183,7 +1261,7 @@ public class JTrekWWEPlugin extends JPanel implements WWEPlugin, ActionListener,
         model.setRowCount(0);
 
         if (r.path != null) layer.removeRoute(r.path);
-                
+
         ArrayList<Position> positions = new ArrayList<>();
         for (int i = 0; i < r.rtept.size(); i++) {
             WptType w = r.rtept.get(i);
@@ -1200,7 +1278,6 @@ public class JTrekWWEPlugin extends JPanel implements WWEPlugin, ActionListener,
 
         }
 
-        
         //--- Prepare paths
         Path p = new Path();
         p.setFollowTerrain(true);
@@ -1269,4 +1346,5 @@ public class JTrekWWEPlugin extends JPanel implements WWEPlugin, ActionListener,
         //--- Elevations for all segment
         jele.setElevations(elevations);
     }
+
 }

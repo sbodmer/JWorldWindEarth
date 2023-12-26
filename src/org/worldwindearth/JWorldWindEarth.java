@@ -7,6 +7,7 @@ package org.worldwindearth;
 
 import com.formdev.flatlaf.FlatDarkLaf;
 import com.formdev.flatlaf.FlatLightLaf;
+import com.formdev.flatlaf.extras.FlatSVGIcon;
 import java.awt.BorderLayout;
 import java.awt.Frame;
 import java.awt.Window;
@@ -105,6 +106,8 @@ public class JWorldWindEarth extends javax.swing.JFrame implements ActionListene
                 Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
                 UIManager.setLookAndFeel(laf);
 
+                app.setDarkLaf(FlatSVGIcon.isDarkLaf());
+                
                 //--- Refresh all already created frames
                 Window frames[] = Window.getWindows();
                 for (int i = 0; i < frames.length; i++) {
@@ -320,7 +323,8 @@ public class JWorldWindEarth extends javax.swing.JFrame implements ActionListene
                 ex.printStackTrace();
 
             }
-
+            app.setDarkLaf(FlatSVGIcon.isDarkLaf());
+            
             //--- Refresh all frames
             Window frames[] = Window.getWindows();
             for (int i = 0; i < frames.length; i++) {

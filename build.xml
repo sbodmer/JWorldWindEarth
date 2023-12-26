@@ -266,6 +266,8 @@
         </copy>
         <copy todir="${dist.dir}/lib/ext">
             <fileset file="lib/flatlaf.jar"/>
+            <fileset file="lib/flatlaf-extras.jar"/>
+            <fileset file="lib/jsvg.jar"/>
         </copy>
     </target>
     
