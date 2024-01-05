@@ -22,6 +22,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.worldwindearth.WWEPlugin;
 import org.worldwindearth.WWEFactory;
+import org.worldwindearth.components.SVGIcon;
 
 /**
  *
@@ -64,6 +65,12 @@ public class JWMSWWEFactory extends JPanel implements WWEFactory, ActionListener
     public void initialize(App app) {
         this.app = app;
 
+        BT_Add.setIcon(SVGIcon.newIcon(22, "/org/worldwindearth/Resources/Icons/add.svg"));
+        BT_Up.setIcon(SVGIcon.newIcon(22, "/org/worldwindearth/Resources/Icons/up.svg"));
+        BT_Down.setIcon(SVGIcon.newIcon(22, "/org/worldwindearth/Resources/Icons/down.svg"));
+        BT_Edit.setIcon(SVGIcon.newIcon(22, "/org/worldwindearth/Resources/Icons/edit.svg"));
+        BT_Delete.setIcon(SVGIcon.newIcon(22, "/org/worldwindearth/Resources/Icons/trash.svg"));
+        
         BT_Add.addActionListener(this);
         BT_Delete.addActionListener(this);
         BT_Edit.addActionListener(this);

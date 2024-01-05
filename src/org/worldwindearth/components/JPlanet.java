@@ -186,12 +186,27 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
 
         initComponents();
 
+        BT_Configure.setIcon(SVGIcon.newIcon(22, "/org/worldwindearth/Resources/Icons/settings.svg"));
+        
         BT_AddLayer.setIcon(SVGIcon.newIcon(22, "/org/worldwindearth/Resources/Icons/add.svg"));
         BT_RenameLayer.setIcon(SVGIcon.newIcon(22, "/org/worldwindearth/Resources/Icons/edit.svg"));
         BT_LayerUp.setIcon(SVGIcon.newIcon(22, "/org/worldwindearth/Resources/Icons/up.svg"));
         BT_LayerDown.setIcon(SVGIcon.newIcon(22, "/org/worldwindearth/Resources/Icons/down.svg"));
         BT_RemoveLayer.setIcon(SVGIcon.newIcon(22, "/org/worldwindearth/Resources/Icons/trash.svg"));
          
+        BT_More.setIcon(SVGIcon.newIcon(22, "/org/worldwindearth/Resources/Icons/hamburger.svg"));
+        BT_Attach.setIcon(SVGIcon.newIcon(22, "/org/worldwindearth/Resources/Icons/attach.svg"));
+        BT_ScrollLeft.setIcon(SVGIcon.newIcon(22, "/org/worldwindearth/Resources/Icons/left.svg"));
+        BT_ScrollRight.setIcon(SVGIcon.newIcon(22, "/org/worldwindearth/Resources/Icons/right.svg"));
+        BT_Cameras.setIcon(SVGIcon.newIcon(22, "/org/worldwindearth/Resources/Icons/camera.svg"));
+        
+        BT_NewCamera.setIcon(SVGIcon.newIcon(22, "/org/worldwindearth/Resources/Icons/add.svg"));
+        BT_UpdateCamera.setIcon(SVGIcon.newIcon(22, "/org/worldwindearth/Resources/Icons/edit.svg"));
+        BT_RemoveCamera.setIcon(SVGIcon.newIcon(22, "/org/worldwindearth/Resources/Icons/trash.svg"));
+        BT_SmallCamera.setIcon(SVGIcon.newIcon(22, "/org/worldwindearth/Resources/Icons/collapse.svg"));
+        BT_CameraUp.setIcon(SVGIcon.newIcon(22, "/org/worldwindearth/Resources/Icons/up.svg"));
+        BT_CameraDown.setIcon(SVGIcon.newIcon(22, "/org/worldwindearth/Resources/Icons/down.svg"));
+        
         PN_Cross = new JCross();
         DP_Main.add(PN_Cross, JLayeredPane.POPUP_LAYER);
         PN_Cross.setVisible(false);
@@ -2123,9 +2138,6 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         BT_ScrollLeft.setBorderPainted(false);
         BT_ScrollLeft.setContentAreaFilled(false);
         BT_ScrollLeft.setMargin(new java.awt.Insets(2, 2, 2, 2));
-        BT_ScrollLeft.setMaximumSize(new java.awt.Dimension(22, 22));
-        BT_ScrollLeft.setMinimumSize(new java.awt.Dimension(22, 22));
-        BT_ScrollLeft.setPreferredSize(new java.awt.Dimension(22, 22));
         jPanel1.add(BT_ScrollLeft, java.awt.BorderLayout.WEST);
 
         BT_ScrollRight.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/next.png"))); // NOI18N
@@ -2134,9 +2146,7 @@ public class JPlanet extends JPanel implements KeyListener, ComponentListener, A
         BT_ScrollRight.setBorderPainted(false);
         BT_ScrollRight.setContentAreaFilled(false);
         BT_ScrollRight.setMargin(new java.awt.Insets(2, 2, 2, 2));
-        BT_ScrollRight.setMaximumSize(new java.awt.Dimension(22, 22));
         BT_ScrollRight.setMinimumSize(new java.awt.Dimension(22, 22));
-        BT_ScrollRight.setPreferredSize(new java.awt.Dimension(22, 22));
         jPanel1.add(BT_ScrollRight, java.awt.BorderLayout.EAST);
 
         PN_TopBar.add(jPanel1, java.awt.BorderLayout.CENTER);

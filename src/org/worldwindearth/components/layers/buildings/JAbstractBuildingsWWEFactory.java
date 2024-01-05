@@ -27,6 +27,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.worldwindearth.WWEFactory;
+import org.worldwindearth.components.SVGIcon;
 import static org.worldwindearth.components.layers.buildings.BuildingsTile.md;
 
 /**
@@ -100,6 +101,12 @@ public abstract class JAbstractBuildingsWWEFactory extends javax.swing.JPanel im
     public void initialize(App app) {
         this.app = app;
 
+        BT_Add.setIcon(SVGIcon.newIcon(22, "/org/worldwindearth/Resources/Icons/add.svg"));
+        BT_Up.setIcon(SVGIcon.newIcon(22, "/org/worldwindearth/Resources/Icons/up.svg"));
+        BT_Down.setIcon(SVGIcon.newIcon(22, "/org/worldwindearth/Resources/Icons/down.svg"));
+        BT_Edit.setIcon(SVGIcon.newIcon(22, "/org/worldwindearth/Resources/Icons/edit.svg"));
+        BT_Delete.setIcon(SVGIcon.newIcon(22, "/org/worldwindearth/Resources/Icons/trash.svg"));
+        
         BT_Add.addActionListener(this);
         BT_Delete.addActionListener(this);
         BT_Edit.addActionListener(this);
@@ -507,7 +514,6 @@ public abstract class JAbstractBuildingsWWEFactory extends javax.swing.JPanel im
         PN_Providers.add(jScrollPane2, java.awt.BorderLayout.CENTER);
 
         TB_Tools.setBorder(null);
-        TB_Tools.setFloatable(false);
 
         BT_Add.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
         BT_Add.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/add.png"))); // NOI18N

@@ -29,6 +29,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.worldwindearth.WWEFactory;
+import org.worldwindearth.components.SVGIcon;
 
 /**
  * http://[abcd].data.osmbuildings.org/0.2/sx3pxpz6/tile/${Z}/${X}/${Y}.json
@@ -134,6 +135,12 @@ public class JOSMBuildingsWWEFactory extends javax.swing.JPanel implements WWEFa
     public void initialize(App app) {
         this.app = app;
 
+        BT_Add.setIcon(SVGIcon.newIcon(22, "/org/worldwindearth/Resources/Icons/add.svg"));
+        BT_Up.setIcon(SVGIcon.newIcon(22, "/org/worldwindearth/Resources/Icons/up.svg"));
+        BT_Down.setIcon(SVGIcon.newIcon(22, "/org/worldwindearth/Resources/Icons/down.svg"));
+        BT_Edit.setIcon(SVGIcon.newIcon(22, "/org/worldwindearth/Resources/Icons/edit.svg"));
+        BT_Delete.setIcon(SVGIcon.newIcon(22, "/org/worldwindearth/Resources/Icons/trash.svg"));
+        
         BT_Add.addActionListener(this);
         BT_Delete.addActionListener(this);
         BT_Edit.addActionListener(this);
@@ -141,6 +148,7 @@ public class JOSMBuildingsWWEFactory extends javax.swing.JPanel implements WWEFa
         BT_Up.addActionListener(this);
         BT_ClearLogs.addActionListener(this);
 
+        
         TB_Providers.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         CB_LocalProvider.addActionListener(this);
 

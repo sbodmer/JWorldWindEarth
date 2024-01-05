@@ -120,7 +120,12 @@ public class JWorldWindEarth extends javax.swing.JFrame implements ActionListene
 
                 //--- Refresh alreay created factories
                 ArrayList<TinyFactory> facs = app.getFactories(null);
-                for (int i = 0; i < facs.size(); i++) if (facs.get(i).getFactoryConfigComponent() != null) SwingUtilities.updateComponentTreeUI(facs.get(i).getFactoryConfigComponent());
+                for (int i = 0; i < facs.size(); i++) {
+                    if (facs.get(i).getFactoryConfigComponent() != null) {
+                        SwingUtilities.updateComponentTreeUI(facs.get(i).getFactoryConfigComponent());
+                        System.out.println("(I) Refresh laf for factory " + facs.get(i).getFactoryName());
+                    }
+                }
 
             }
 
@@ -337,7 +342,12 @@ public class JWorldWindEarth extends javax.swing.JFrame implements ActionListene
 
             //--- Refresh alreay created factories
             ArrayList<TinyFactory> facs = app.getFactories(null);
-            for (int i = 0; i < facs.size(); i++) if (facs.get(i).getFactoryConfigComponent() != null) SwingUtilities.updateComponentTreeUI(facs.get(i).getFactoryConfigComponent());
+            for (int i = 0; i < facs.size(); i++) {
+                if (facs.get(i).getFactoryConfigComponent() != null) {
+                    SwingUtilities.updateComponentTreeUI(facs.get(i).getFactoryConfigComponent());
+                    System.out.println("(I) Refresh laf for factory " + facs.get(i).getFactoryName());
+                }
+            }
 
             //--- Store the choosen look and feel
             try {
