@@ -188,7 +188,8 @@ public class JOSMBuildingsWWEFactory extends javax.swing.JPanel implements WWEFa
                 CB_LocalProvider.setSelected(e.getAttribute("localProviderEnabled").equals("true"));
                 try {
                     SP_LocalProviderPort.setValue(Integer.parseInt(e.getAttribute("localProviderPort")));
-                    TF_LocalProviderAPI.setText(e.getFirstChild().getNodeValue());
+                    //--- Let the hard coded one be the source
+                    // TF_LocalProviderAPI.setText(e.getFirstChild().getNodeValue());
 
                 } catch (Exception ex) {
 
@@ -601,7 +602,7 @@ public class JOSMBuildingsWWEFactory extends javax.swing.JPanel implements WWEFa
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(BT_Clear))
                             .addComponent(SP_ExpireDays, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(0, 255, Short.MAX_VALUE)))
+                        .addGap(0, 332, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -659,7 +660,6 @@ public class JOSMBuildingsWWEFactory extends javax.swing.JPanel implements WWEFa
         PN_Providers.add(jScrollPane2, java.awt.BorderLayout.CENTER);
 
         TB_Tools.setBorder(null);
-        TB_Tools.setFloatable(false);
 
         BT_Add.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
         BT_Add.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/add.png"))); // NOI18N
@@ -731,7 +731,7 @@ public class JOSMBuildingsWWEFactory extends javax.swing.JPanel implements WWEFa
         jLabel9.setText("OSM Server API URL");
         jLabel9.setPreferredSize(new java.awt.Dimension(200, 26));
 
-        TF_LocalProviderAPI.setText("https://api.openstreetmap.org/api/0.6/");
+        TF_LocalProviderAPI.setText("https://www.overpass-api.de/api/xapi?");
         TF_LocalProviderAPI.setEnabled(false);
 
         jLabel10.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
@@ -764,7 +764,7 @@ public class JOSMBuildingsWWEFactory extends javax.swing.JPanel implements WWEFa
                 .addContainerGap()
                 .addGroup(PN_LocalProviderLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane1)
-                    .addComponent(jLabel7, javax.swing.GroupLayout.DEFAULT_SIZE, 689, Short.MAX_VALUE)
+                    .addComponent(jLabel7, javax.swing.GroupLayout.DEFAULT_SIZE, 780, Short.MAX_VALUE)
                     .addGroup(PN_LocalProviderLayout.createSequentialGroup()
                         .addComponent(jLabel10, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -812,7 +812,7 @@ public class JOSMBuildingsWWEFactory extends javax.swing.JPanel implements WWEFa
                     .addComponent(TF_LocalProviderAPI, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 266, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 259, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(PN_LocalProviderLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(BT_ClearLogs)

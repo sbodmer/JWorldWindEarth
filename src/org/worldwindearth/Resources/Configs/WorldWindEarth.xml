@@ -20,7 +20,7 @@
     <TinyFactory class="gov.nasa.openstreetmap.JOpenstreetmapWWEFactory"/>
     <TinyFactory class="gov.nasa.osmmapnik.JOSMMapnikWWEFactory"/>
     <TinyFactory class="org.osmbuildings.JOSMBuildingsWWEFactory" expireDays="240">
-        <Local localProviderEnabled="true" localProviderPort="8088">https://api.openstreetmap.org/api/0.6/</Local>
+        <Local localProviderEnabled="true" localProviderPort="8088">https://www.overpass-api.de/api/xapi?</Local>
         <Provider maxLevel="15" minLevel="15" title="local">http://localhost:8088/osmbuildings/${Z}/${X}/${Y}.json</Provider>
     </TinyFactory>
     <TinyFactory class="gov.nasa.countries.JCountriesWWEFactory"/>

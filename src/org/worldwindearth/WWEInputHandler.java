@@ -7,9 +7,11 @@ package org.worldwindearth;
 
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.awt.AWTInputHandler;
+import gov.nasa.worldwind.event.DragSelectEvent;
 import gov.nasa.worldwind.event.SelectEvent;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.pick.PickedObjectList;
+import java.awt.Point;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 
@@ -69,14 +71,13 @@ public class WWEInputHandler extends AWTInputHandler {
 
     @Override
     public void mousePressed(MouseEvent mouseEvent) {
-        // System.out.println("PRESSED:"+mouseEvent);
         super.mousePressed(mouseEvent);
     }
 
     public void mouseWheelMoved(MouseWheelEvent mouseWheelEvent) {
         Position pos = wwd.getCurrentPosition();
         callMouseMovedListeners(mouseWheelEvent);
-        
+
         Position eye = wwd.getView().getCurrentEyePosition();
         // System.out.println("POS:"+pos+" EYE:"+eye);
         // super.mouseWheelMoved(mouseWheelEvent);
@@ -84,11 +85,11 @@ public class WWEInputHandler extends AWTInputHandler {
         BasicOrbitView view = (BasicOrbitView) wwd.getView();
         Vec4 fw = view.getCurrentForwardVector();
         System.out.println("fw:"+fw);
-        */
-            // view.addPanToAnimator(pos, Angle.fromDegrees(pos.getHeading()), Angle.fromDegrees(c.getPitch()), c.getZoom());
-            // this.wwd.getView().getViewInputHandler().mouseWheelMoved(mouseWheelEvent);
+         */
+        // view.addPanToAnimator(pos, Angle.fromDegrees(pos.getHeading()), Angle.fromDegrees(c.getPitch()), c.getZoom());
+        // this.wwd.getView().getViewInputHandler().mouseWheelMoved(mouseWheelEvent);
         super.mouseWheelMoved(mouseWheelEvent);
-        
+
         /*
         if (this.wwd == null)
         {
@@ -104,6 +105,11 @@ public class WWEInputHandler extends AWTInputHandler {
 
         if (!mouseWheelEvent.isConsumed())
             this.wwd.getView().getViewInputHandler().mouseWheelMoved(mouseWheelEvent);
-        */
+         */
+    }
+
+    @Override
+    public void mouseDragged(MouseEvent mouseEvent) {
+        super.mouseDragged(mouseEvent);
     }
 }
