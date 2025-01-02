@@ -197,17 +197,17 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
      *
      * User 15 as the zoom (common for www.osmbuildings.org)
      *
-     * If the tile could be fetched/produced, null will be returned
-     * The method could be long to return (max 60s)
+     * If the tile could be fetched/produced, null will be returned The method
+     * could be long to return (max 60s)
+     *
      * @param lat
      * @param lon
      * @return
      */
     public ArrayList<Renderable> fetchTileAt(double lat, double lon, int zoom) {
-
         int x = lon2x(lon, zoom);
         int y = lat2y(lat, zoom);
-        String key = x + "x" + y  + "@" + zoom;
+        String key = x + "x" + y + "@" + zoom;
         OSMBuildingsTile t = buildings.get(key);
         if (t == null) {
             t = new OSMBuildingsTile(zoom,
@@ -235,12 +235,12 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
             }
             OSMBuildingsRenderable re = t.getRenderable();
             if (re != null) return re.getRenderables();
-            
+
         } catch (InterruptedException ex) {
             //---
-            
+
         }
-        
+
         return null;
 
     }
@@ -303,7 +303,7 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
             }
         }
     }
-    
+
     public void setApplyRoofTextures(boolean applyRoofTextures) {
         this.applyRoofTextures = applyRoofTextures;
 
@@ -623,8 +623,18 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
                         if (rend != null) removeRenderable(rend);
                         removeRenderable(oldest.getTileSurfaceRenderable());
                         //--- Remove the ids for removed tile
-                        ArrayList<String> removed = oldest.getIds();
-                        for (int k = 0; k < removed.size(); k++) ids.remove(removed.get(k));
+                            ArrayList<String> removed = oldest.getIds();
+                            for (int k = 0; k < removed.size(); k++) {
+                                try {
+                                    ids.remove(removed.get(k));
+                                    
+                                } catch (Exception ex) {
+                                    //--- xapi does not implements missing ids, so
+                                    //--- the reference array as none resolved data
+                                }
+                            }
+                            
+                        
                         buildings.remove(oldest.toString());
                     }
 
@@ -724,7 +734,7 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
                 }
 
             }
-            for (int i = 0; i < tooLong.size(); i++) osmBuildingsLoadingFailed(tooLong.get(i), "No failed message received after "+(timeout/1000)+"s, force to failed loading...");
+            for (int i = 0; i < tooLong.size(); i++) osmBuildingsLoadingFailed(tooLong.get(i), "No failed message received after " + (timeout / 1000) + "s, force to failed loading...");
         }
     }
 

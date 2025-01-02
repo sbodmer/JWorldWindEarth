@@ -785,19 +785,6 @@ public class JWorldWindEarth extends javax.swing.JFrame implements ActionListene
 
                 }
 
-                //--- Set the default font
-                /*
-                Font font = new Font("Arial", Font.PLAIN, 11);
-                UIDefaults defaults = UIManager.getDefaults();
-                // defaults.put("InternalFrame.titleFont",font);
-                Enumeration keys = defaults.keys();
-                while (keys.hasMoreElements()) {
-                    Object key = keys.nextElement();
-                    if ((key instanceof String) && (((String) key).endsWith(".font"))) {
-                        defaults.put(key, font);
-                    }
-                }
-                 */
                 //--- Set worldwind configuration path
                 try {
                     File config = new File(System.getProperty("user.home"), ".WorldWindEarth" + File.separatorChar + "worldwind.xml");

@@ -106,7 +106,7 @@ public abstract class JAbstractBuildingsWWEFactory extends javax.swing.JPanel im
         BT_Down.setIcon(SVGIcon.newIcon(22, "/org/worldwindearth/Resources/Icons/down.svg"));
         BT_Edit.setIcon(SVGIcon.newIcon(22, "/org/worldwindearth/Resources/Icons/edit.svg"));
         BT_Delete.setIcon(SVGIcon.newIcon(22, "/org/worldwindearth/Resources/Icons/trash.svg"));
-        
+
         BT_Add.addActionListener(this);
         BT_Delete.addActionListener(this);
         BT_Edit.addActionListener(this);
@@ -147,7 +147,7 @@ public abstract class JAbstractBuildingsWWEFactory extends javax.swing.JPanel im
             }
 
         }
-       
+
     }
 
     @Override
@@ -207,7 +207,7 @@ public abstract class JAbstractBuildingsWWEFactory extends javax.swing.JPanel im
                 long size = calculateSize(f);
                 TF_CacheSize.setText((size / (1024 * 1024)) + " MB");
             }
-            
+
         } else if (e.getActionCommand().equals("delete")) {
             DefaultTableModel model = (DefaultTableModel) TB_Providers.getModel();
             int index = TB_Providers.getSelectedRow();
@@ -326,15 +326,6 @@ public abstract class JAbstractBuildingsWWEFactory extends javax.swing.JPanel im
 
         LB_Name = new javax.swing.JLabel();
         LB_Description = new javax.swing.JLabel();
-        PN_ProviderData = new javax.swing.JPanel();
-        TF_Title = new javax.swing.JTextField();
-        jLabel1 = new javax.swing.JLabel();
-        jLabel4 = new javax.swing.JLabel();
-        TF_Url = new javax.swing.JTextField();
-        jLabel5 = new javax.swing.JLabel();
-        SP_MinLevel = new javax.swing.JSpinner();
-        jLabel6 = new javax.swing.JLabel();
-        SP_MaxLevel = new javax.swing.JSpinner();
         jPanel1 = new javax.swing.JPanel();
         BT_Cache = new javax.swing.JButton();
         TF_CacheSize = new javax.swing.JTextField();
@@ -345,7 +336,7 @@ public abstract class JAbstractBuildingsWWEFactory extends javax.swing.JPanel im
         PN_Providers = new javax.swing.JPanel();
         jScrollPane2 = new javax.swing.JScrollPane();
         TB_Providers = new javax.swing.JTable();
-        TB_Tools = new javax.swing.JToolBar();
+        jPanel3 = new javax.swing.JPanel();
         BT_Add = new javax.swing.JButton();
         BT_Up = new javax.swing.JButton();
         BT_Down = new javax.swing.JButton();
@@ -355,82 +346,6 @@ public abstract class JAbstractBuildingsWWEFactory extends javax.swing.JPanel im
         jPanel2 = new javax.swing.JPanel();
         jLabel2 = new javax.swing.JLabel();
         SP_ExpireDays = new javax.swing.JSpinner();
-
-        TF_Title.setText("Buildings servers");
-
-        jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        jLabel1.setText("Title");
-        jLabel1.setPreferredSize(new java.awt.Dimension(100, 26));
-
-        jLabel4.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        jLabel4.setText("URL");
-        jLabel4.setPreferredSize(new java.awt.Dimension(100, 26));
-
-        TF_Url.setFont(new java.awt.Font("Monospaced", 0, 12)); // NOI18N
-        TF_Url.setText("http://");
-        TF_Url.setToolTipText("<html>\nThe building xml file provider, the following sequence will be replaced\n<table>\n<tr><td>${Z}</td><td>The zoom level (ex. 15)</td></tr>\n<tr><td>${X}</td><td>The X tile column</td></tr>\n<tr><td>${Y}</td><td>The Y tile row</td></tr>\n</table>\nTo have random server use \"[ab...]\" notation, which will use a or b or ... in a random way.<br>\nEx: http://[abcd].les-studios-inexistants.ch/buildings/${Z}/${X}/${Y}/buildings.xml\n</html>");
-
-        jLabel5.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        jLabel5.setText("Min level");
-        jLabel5.setPreferredSize(new java.awt.Dimension(100, 26));
-
-        SP_MinLevel.setModel(new javax.swing.SpinnerNumberModel(15, 14, 18, 1));
-
-        jLabel6.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        jLabel6.setText("Max Level");
-        jLabel6.setPreferredSize(new java.awt.Dimension(100, 26));
-
-        SP_MaxLevel.setModel(new javax.swing.SpinnerNumberModel(15, 14, 20, 1));
-
-        javax.swing.GroupLayout PN_ProviderDataLayout = new javax.swing.GroupLayout(PN_ProviderData);
-        PN_ProviderData.setLayout(PN_ProviderDataLayout);
-        PN_ProviderDataLayout.setHorizontalGroup(
-            PN_ProviderDataLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(PN_ProviderDataLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(PN_ProviderDataLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, PN_ProviderDataLayout.createSequentialGroup()
-                        .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(TF_Title))
-                    .addGroup(PN_ProviderDataLayout.createSequentialGroup()
-                        .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(TF_Url, javax.swing.GroupLayout.DEFAULT_SIZE, 482, Short.MAX_VALUE))
-                    .addGroup(PN_ProviderDataLayout.createSequentialGroup()
-                        .addGroup(PN_ProviderDataLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(PN_ProviderDataLayout.createSequentialGroup()
-                                .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(SP_MinLevel, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(PN_ProviderDataLayout.createSequentialGroup()
-                                .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(SP_MaxLevel, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addGap(0, 0, Short.MAX_VALUE)))
-                .addContainerGap())
-        );
-        PN_ProviderDataLayout.setVerticalGroup(
-            PN_ProviderDataLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(PN_ProviderDataLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(PN_ProviderDataLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(TF_Title, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(PN_ProviderDataLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(TF_Url, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(PN_ProviderDataLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(SP_MinLevel, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(PN_ProviderDataLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(SP_MaxLevel, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
 
         setLayout(new java.awt.BorderLayout());
 
@@ -513,54 +428,51 @@ public abstract class JAbstractBuildingsWWEFactory extends javax.swing.JPanel im
 
         PN_Providers.add(jScrollPane2, java.awt.BorderLayout.CENTER);
 
-        TB_Tools.setBorder(null);
+        jPanel3.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
 
         BT_Add.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
         BT_Add.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/add.png"))); // NOI18N
         BT_Add.setToolTipText("add");
         BT_Add.setActionCommand("add");
-        BT_Add.setPreferredSize(new java.awt.Dimension(26, 26));
-        TB_Tools.add(BT_Add);
+        BT_Add.setPreferredSize(new java.awt.Dimension(32, 32));
+        jPanel3.add(BT_Add);
 
         BT_Up.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
         BT_Up.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/up.png"))); // NOI18N
         BT_Up.setToolTipText("move up");
         BT_Up.setActionCommand("up");
-        BT_Up.setFocusable(false);
         BT_Up.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        BT_Up.setPreferredSize(new java.awt.Dimension(26, 26));
+        BT_Up.setPreferredSize(new java.awt.Dimension(32, 32));
         BT_Up.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        TB_Tools.add(BT_Up);
+        jPanel3.add(BT_Up);
 
         BT_Down.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
         BT_Down.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/down.png"))); // NOI18N
         BT_Down.setToolTipText("move down");
         BT_Down.setActionCommand("down");
-        BT_Down.setFocusable(false);
         BT_Down.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        BT_Down.setPreferredSize(new java.awt.Dimension(26, 26));
+        BT_Down.setPreferredSize(new java.awt.Dimension(32, 32));
         BT_Down.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        TB_Tools.add(BT_Down);
+        jPanel3.add(BT_Down);
 
         BT_Edit.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
         BT_Edit.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/edit.png"))); // NOI18N
         BT_Edit.setToolTipText("edit");
         BT_Edit.setActionCommand("edit");
-        BT_Edit.setFocusable(false);
         BT_Edit.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        BT_Edit.setPreferredSize(new java.awt.Dimension(26, 26));
+        BT_Edit.setPreferredSize(new java.awt.Dimension(32, 32));
         BT_Edit.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        TB_Tools.add(BT_Edit);
-        TB_Tools.add(jSeparator9);
+        jPanel3.add(BT_Edit);
+        jPanel3.add(jSeparator9);
 
         BT_Delete.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
         BT_Delete.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/remove.png"))); // NOI18N
         BT_Delete.setToolTipText("delete");
         BT_Delete.setActionCommand("delete");
-        BT_Delete.setPreferredSize(new java.awt.Dimension(26, 26));
-        TB_Tools.add(BT_Delete);
+        BT_Delete.setPreferredSize(new java.awt.Dimension(32, 32));
+        jPanel3.add(BT_Delete);
 
-        PN_Providers.add(TB_Tools, java.awt.BorderLayout.PAGE_START);
+        PN_Providers.add(jPanel3, java.awt.BorderLayout.NORTH);
 
         jTabbedPane1.addTab("Providers", PN_Providers);
 
@@ -606,25 +518,16 @@ public abstract class JAbstractBuildingsWWEFactory extends javax.swing.JPanel im
     protected javax.swing.JButton BT_Up;
     protected javax.swing.JLabel LB_Description;
     protected javax.swing.JLabel LB_Name;
-    protected javax.swing.JPanel PN_ProviderData;
     protected javax.swing.JPanel PN_Providers;
     protected javax.swing.JSpinner SP_ExpireDays;
-    protected javax.swing.JSpinner SP_MaxLevel;
-    protected javax.swing.JSpinner SP_MinLevel;
     protected javax.swing.JTable TB_Providers;
-    protected javax.swing.JToolBar TB_Tools;
     protected javax.swing.JTextField TF_CachePath;
     protected javax.swing.JTextField TF_CacheSize;
-    protected javax.swing.JTextField TF_Title;
-    protected javax.swing.JTextField TF_Url;
-    protected javax.swing.JLabel jLabel1;
     protected javax.swing.JLabel jLabel2;
     protected javax.swing.JLabel jLabel3;
-    protected javax.swing.JLabel jLabel4;
-    protected javax.swing.JLabel jLabel5;
-    protected javax.swing.JLabel jLabel6;
     protected javax.swing.JPanel jPanel1;
     protected javax.swing.JPanel jPanel2;
+    protected javax.swing.JPanel jPanel3;
     protected javax.swing.JScrollPane jScrollPane2;
     protected javax.swing.JToolBar.Separator jSeparator9;
     protected javax.swing.JTabbedPane jTabbedPane1;
@@ -658,23 +561,16 @@ public abstract class JAbstractBuildingsWWEFactory extends javax.swing.JPanel im
     }
 
     /**
-     * Open input dialog to ask for wms server modification
+     * Open input dialog to ask for server modification
      */
     private void edit(int index) {
         BuildingsProvider pr = list.getElementAt(index);
 
-        TF_Title.setText(pr.getTitle());
-        TF_Url.setText(pr.getUrl());
-        SP_MinLevel.setValue(pr.getMinLevel());
-        SP_MaxLevel.setValue(pr.getMaxLevel());
-
-        int rep = JOptionPane.showConfirmDialog(this, PN_ProviderData, "Provider", JOptionPane.OK_CANCEL_OPTION);
-        if (rep == JOptionPane.OK_OPTION) {
+        JBuildingsProviderDlg jdlg = JBuildingsProviderDlg.newDialog(getTopLevelAncestor(), pr);
+        jdlg.setLocationRelativeTo(this);
+        jdlg.setVisible(true);
+        if (jdlg.getProvider() != null) {
             DefaultTableModel model = (DefaultTableModel) TB_Providers.getModel();
-            pr.setTitle(TF_Title.getText().trim());
-            pr.setUrl(TF_Url.getText().trim());
-            pr.setMinLevel((Integer) SP_MinLevel.getValue());
-            pr.setMaxLevel((Integer) SP_MaxLevel.getValue());
             model.setValueAt(pr.getTitle(), index, 0);
             model.setValueAt(pr.getUrl(), index, 1);
             model.setValueAt(pr.getMinLevel(), index, 2);
@@ -684,14 +580,16 @@ public abstract class JAbstractBuildingsWWEFactory extends javax.swing.JPanel im
     }
 
     private void add(int index) {
-        TF_Title.setText("");
-        TF_Url.setText("file:///usr/share/worldwindearth/buildings/${Z}/${X}/${Y}/buildings.xml");
-        SP_MinLevel.setValue(15);
-        SP_MaxLevel.setValue(15);
+        BuildingsProvider pr = new BuildingsProvider();
+        pr.setTitle("new provider");
+        pr.setUrl("file:///usr/share/worldwindearth/buildings/${Z}/${X}/${Y}/buildings.xml");
+        pr.setMinLevel(15);
+        pr.setMaxLevel(15);
 
-        int rep = JOptionPane.showConfirmDialog(this, PN_ProviderData, "Provider", JOptionPane.OK_CANCEL_OPTION);
-        if (rep == JOptionPane.OK_OPTION) {
-            BuildingsProvider pr = new BuildingsProvider(TF_Title.getText().trim(), TF_Url.getText().trim(), (Integer) SP_MinLevel.getValue(), (Integer) SP_MaxLevel.getValue());
+        JBuildingsProviderDlg jdlg = JBuildingsProviderDlg.newDialog(getTopLevelAncestor(), pr);
+        jdlg.setLocationRelativeTo(this);
+        jdlg.setVisible(true);
+        if (jdlg.getProvider() != null) {
             list.insertElementAt(pr, index);
             DefaultTableModel model = (DefaultTableModel) TB_Providers.getModel();
 

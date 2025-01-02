@@ -27,11 +27,14 @@ import javax.imageio.ImageIO;
  * @author sbodmer
  */
 public class OSMBuildingsTile {
-
+    public static final int STATE_LOADING = 1;
+    public static final int STATE_LOADED = 2;
+    public static final int STATE_JSON_NOT_FOUND = 10;
+    public static final int STATE_WRONG_HTTP_CODE = 11;
+    
     /**
-     * Special key for ww osm
+     * For the roof textures
      */
-    // static final String OSMBUILDINGS_URL = "http://[abcd].data.osmbuildings.org/0.2/sx3pxpz6/tile";
     static final String NASA_BINGMAPS_URL = "https://worldwind27.arc.nasa.gov/wms/virtualearth";
 
     /**
@@ -54,6 +57,7 @@ public class OSMBuildingsTile {
     boolean draggable = false;
     ShapeAttributes defaultAttrs = null;
     String provider = "";   //--- Base URL provider
+    
     /**
      * The fetching URL
      */
@@ -75,6 +79,9 @@ public class OSMBuildingsTile {
      */
     long fetchTs = 0;
 
+    /**
+     * Process feedbacks
+     */
     OSMBuildingsTileListener listener = null;
 
     /**
@@ -82,6 +89,7 @@ public class OSMBuildingsTile {
      */
     OSMBuildingsRenderable renderable = null;
     boolean loaded = false;
+    
     /**
      * The tile bounding box
      */
@@ -92,6 +100,11 @@ public class OSMBuildingsTile {
     LatLon tr = null;   //--- Top right
     LatLon br = null;   //--- Bottom right
 
+    /**
+     * States
+     */
+    int state = STATE_LOADING;
+    
     static {
         try {
             md = java.security.MessageDigest.getInstance("MD5");
@@ -194,6 +207,10 @@ public class OSMBuildingsTile {
     //**************************************************************************
     //*** API
     //**************************************************************************
+    public int getState() {
+        return state;
+    }
+    
     /**
      * Returns the fetched url or null if not yet fetched
      *
@@ -232,8 +249,8 @@ public class OSMBuildingsTile {
         fetchTs = System.currentTimeMillis();
         LocalBuildingsLoader lbl = new LocalBuildingsLoader(cachePath, this);
         try {
-            if (listener != null)
-                listener.osmBuildingsLoading(this);
+            state = STATE_LOADING;
+            if (listener != null) listener.osmBuildingsLoading(this);
 
             //------------------------------------------------------------------
             //--- Check in local file store first
@@ -247,6 +264,7 @@ public class OSMBuildingsTile {
 
                 } else {
                     // System.out.println("FOUND LOCAL json:"+f);
+                    url = data;
                     WorldWind.getTaskService().addTask(lbl);
                     return;
                 }
@@ -264,14 +282,13 @@ public class OSMBuildingsTile {
 
         } catch (MalformedURLException ex) {
             //--- Failed
-            if (listener != null)
-                listener.osmBuildingsLoadingFailed(this, ".json file could not be found : " + ex.getMessage());
+            state = STATE_JSON_NOT_FOUND;
+            if (listener != null) listener.osmBuildingsLoadingFailed(this, ".json file could not be found : " + ex.getMessage());
 
         } catch (URISyntaxException ex) {
-            //---
             //--- Failed
-            if (listener != null)
-                listener.osmBuildingsLoadingFailed(this, ".json file could not be found : " + ex.getMessage());
+            state = STATE_JSON_NOT_FOUND;
+            if (listener != null) listener.osmBuildingsLoadingFailed(this, ".json file could not be found : " + ex.getMessage());
 
         }
     }
@@ -432,7 +449,6 @@ public class OSMBuildingsTile {
      *
      */
     private class LocalBuildingsLoader implements Runnable, RetrievalPostProcessor {
-
         String path = null;
         OSMBuildingsTile ti = null;
 
@@ -454,6 +470,7 @@ public class OSMBuildingsTile {
                 doc.parse();
 
                 renderable = new OSMBuildingsRenderable(doc, defaultHeight, draggable, defaultAttrs, data.toString(), listener, tile );
+                state = STATE_LOADED;
                 if (listener != null) listener.osmBuildingsLoaded(ti);
 
                 if (applyRoofTextures) fetchRoofTextures();
@@ -462,14 +479,17 @@ public class OSMBuildingsTile {
                 
             } catch (NullPointerException ex) {
                 //--- File is no more in local storage ?
+                state = STATE_JSON_NOT_FOUND;
                 if (listener != null) listener.osmBuildingsLoadingFailed(ti, "Local .json file could not be found : " + cachePath);
 
             } catch (IOException ex) {
                 //--- Failed
+                state = STATE_JSON_NOT_FOUND;
                 if (listener != null) listener.osmBuildingsLoadingFailed(ti, "Local .json file could not be found : " + cachePath);
 
             } catch (Exception ex) {
                 //--- Other problems
+                state = STATE_JSON_NOT_FOUND;
                 if (listener != null) listener.osmBuildingsLoadingFailed(ti, "Local .json file could not be loaded : " + ex.getMessage());
 
             }
@@ -501,6 +521,7 @@ public class OSMBuildingsTile {
                     doc.parse();
 
                     renderable = new OSMBuildingsRenderable(doc, defaultHeight, draggable, defaultAttrs, f.toString(), listener, tile);
+                    state = STATE_LOADED;
                     if (listener != null) listener.osmBuildingsLoaded(ti);
 
                     if (applyRoofTextures) fetchRoofTextures();
@@ -508,16 +529,15 @@ public class OSMBuildingsTile {
                     loaded = true;
                     
                 } else {
+                    state = STATE_WRONG_HTTP_CODE;
                     //--- Wrong http response
-                    if (listener != null)
-                        listener.osmBuildingsLoadingFailed(ti, ".json file could not be found, wrong http response : " + hr.getResponseCode() + " " + hr.getResponseMessage());
+                    if (listener != null) listener.osmBuildingsLoadingFailed(ti, ".json file could not be found, wrong http response : " + hr.getResponseCode() + " " + hr.getResponseMessage());
                 }
 
             } catch (Exception ex) {
-                // ex.printStackTrace();
                 //--- Failed
-                if (listener != null)
-                    listener.osmBuildingsLoadingFailed(ti, ".json file could not be found : " + ex.getMessage());
+                state = STATE_JSON_NOT_FOUND;
+                if (listener != null) listener.osmBuildingsLoadingFailed(ti, ".json file could not be found : " + ex.getMessage());
             }
             fetchTs = 0;
             return hr.getBuffer();

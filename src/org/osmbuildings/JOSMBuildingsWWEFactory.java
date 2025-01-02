@@ -456,7 +456,7 @@ public class JOSMBuildingsWWEFactory extends javax.swing.JPanel implements WWEFa
         PN_Providers = new javax.swing.JPanel();
         jScrollPane2 = new javax.swing.JScrollPane();
         TB_Providers = new javax.swing.JTable();
-        TB_Tools = new javax.swing.JToolBar();
+        jPanel2 = new javax.swing.JPanel();
         BT_Add = new javax.swing.JButton();
         BT_Up = new javax.swing.JButton();
         BT_Down = new javax.swing.JButton();
@@ -659,54 +659,51 @@ public class JOSMBuildingsWWEFactory extends javax.swing.JPanel implements WWEFa
 
         PN_Providers.add(jScrollPane2, java.awt.BorderLayout.CENTER);
 
-        TB_Tools.setBorder(null);
+        jPanel2.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
 
         BT_Add.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
         BT_Add.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/add.png"))); // NOI18N
         BT_Add.setToolTipText("add");
         BT_Add.setActionCommand("add");
         BT_Add.setPreferredSize(new java.awt.Dimension(32, 32));
-        TB_Tools.add(BT_Add);
+        jPanel2.add(BT_Add);
 
         BT_Up.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
         BT_Up.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/up.png"))); // NOI18N
         BT_Up.setToolTipText("move up");
         BT_Up.setActionCommand("up");
-        BT_Up.setFocusable(false);
         BT_Up.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         BT_Up.setPreferredSize(new java.awt.Dimension(32, 32));
         BT_Up.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        TB_Tools.add(BT_Up);
+        jPanel2.add(BT_Up);
 
         BT_Down.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
         BT_Down.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/down.png"))); // NOI18N
         BT_Down.setToolTipText("move down");
         BT_Down.setActionCommand("down");
-        BT_Down.setFocusable(false);
         BT_Down.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         BT_Down.setPreferredSize(new java.awt.Dimension(32, 32));
         BT_Down.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        TB_Tools.add(BT_Down);
+        jPanel2.add(BT_Down);
 
         BT_Edit.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
         BT_Edit.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/edit.png"))); // NOI18N
         BT_Edit.setToolTipText("edit");
         BT_Edit.setActionCommand("edit");
-        BT_Edit.setFocusable(false);
         BT_Edit.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         BT_Edit.setPreferredSize(new java.awt.Dimension(32, 32));
         BT_Edit.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        TB_Tools.add(BT_Edit);
-        TB_Tools.add(jSeparator9);
+        jPanel2.add(BT_Edit);
+        jPanel2.add(jSeparator9);
 
         BT_Delete.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
         BT_Delete.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/remove.png"))); // NOI18N
         BT_Delete.setToolTipText("delete");
         BT_Delete.setActionCommand("delete");
         BT_Delete.setPreferredSize(new java.awt.Dimension(32, 32));
-        TB_Tools.add(BT_Delete);
+        jPanel2.add(BT_Delete);
 
-        PN_Providers.add(TB_Tools, java.awt.BorderLayout.PAGE_START);
+        PN_Providers.add(jPanel2, java.awt.BorderLayout.NORTH);
 
         jTabbedPane1.addTab("Providers", PN_Providers);
 
@@ -850,7 +847,6 @@ public class JOSMBuildingsWWEFactory extends javax.swing.JPanel implements WWEFa
     protected javax.swing.JSpinner SP_MinLevel;
     protected javax.swing.JTextArea TA_Logs;
     protected javax.swing.JTable TB_Providers;
-    protected javax.swing.JToolBar TB_Tools;
     protected javax.swing.JTextField TF_CachePath;
     protected javax.swing.JTextField TF_CacheSize;
     protected javax.swing.JTextField TF_LocalProviderAPI;
@@ -868,6 +864,7 @@ public class JOSMBuildingsWWEFactory extends javax.swing.JPanel implements WWEFa
     protected javax.swing.JLabel jLabel8;
     protected javax.swing.JLabel jLabel9;
     protected javax.swing.JPanel jPanel1;
+    protected javax.swing.JPanel jPanel2;
     protected javax.swing.JScrollPane jScrollPane1;
     protected javax.swing.JScrollPane jScrollPane2;
     protected javax.swing.JToolBar.Separator jSeparator9;

@@ -501,7 +501,7 @@ public abstract class JAbstractBuildingsWWEPlugin extends javax.swing.JPanel imp
                     .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(SP_Rows, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jTabbedPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 344, Short.MAX_VALUE)
+                .addComponent(jTabbedPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 394, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -526,6 +526,7 @@ public abstract class JAbstractBuildingsWWEPlugin extends javax.swing.JPanel imp
 
         LB_Provider.setBackground(new java.awt.Color(144, 202, 249));
         LB_Provider.setFont(new java.awt.Font("DejaVu Sans", 1, 12)); // NOI18N
+        LB_Provider.setForeground(java.awt.Color.black);
         LB_Provider.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         LB_Provider.setText("...");
         LB_Provider.setOpaque(true);

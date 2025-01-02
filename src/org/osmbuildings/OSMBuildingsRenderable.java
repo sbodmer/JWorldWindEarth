@@ -461,7 +461,6 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
      * @param object
      */
     public void prepare(GeoJSONObject object) {
-
         if (object.isGeometry()) {
             fill(null, object.asGeometry(), null);
 
@@ -806,7 +805,8 @@ public class OSMBuildingsRenderable implements Renderable, PreRenderable, Dispos
                 box.setValue(AVKEY_OSMBUILDING_FEATURE_ID, parent != null ? parent.getValue("id") : "");
             }
             //--- Handle roof
-            if (roofShape.equals("pyramid") || roofShape.equals("pyramidal")) {
+            if (roofShape.equals("pyramid") 
+                    || roofShape.equals("pyramidal")) {
                 // System.out.println("ROOF is " + roofShape + " HEIGHT:" + height + " MIN:" + minHeight);
                 roofHeight = roofHeight == 0 ? 2 : roofHeight;
 

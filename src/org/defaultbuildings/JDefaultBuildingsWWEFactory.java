@@ -27,7 +27,7 @@ public class JDefaultBuildingsWWEFactory extends JAbstractBuildingsWWEFactory {
 
         BuildingsProvider pr = new BuildingsProvider();
         pr.setTitle("www.les-studios-inexistants.ch");
-        pr.setUrl("http://www.les-studios-inexistants.ch/buildings/tile/${Z}/${X}/${Y}/buildings.xml");
+        pr.setUrl("file:///usr/share/worldwindearth/buildings/tile/${Z}/${X}/${Y}/buildings.xml");
         pr.setMaxLevel(15);
         pr.setMinLevel(15);
         list.addElement(pr);

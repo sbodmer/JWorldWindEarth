@@ -62,7 +62,19 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
     WorldWindow ww = null;
     File lastDir = new File(System.getProperty("user.home"), "Sources/netbeans/JWorldWindEarth/Resources/GeoJSON");
 
-    DefaultListModel model = new DefaultListModel();
+    /**
+     * Custom model
+     */
+    DefaultListModel<GeoJSONEntry> model = new DefaultListModel();
+
+    /**
+     * The actually rendered tiles
+     */
+    DefaultListModel<OSMBuildingsTile> tiles = new DefaultListModel<>();
+
+    /**
+     * WW main layer
+     */
     protected OSMBuildingsLayer layer = null;
 
     /**
@@ -73,9 +85,8 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
 
     // protected Vec4 defaultSunDirection = null;
     // protected Material defaultSunMat = null;
-
     protected BasicDragger dragger = null;
-            
+
     /**
      * Creates new form OSMBuildingsWWELayerPlugin
      */
@@ -86,6 +97,7 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
         initComponents();
 
         LI_Entries.setModel(model);
+        LI_Tiles.setModel(tiles);
 
         CMB_Providers.setModel(list);
 
@@ -150,6 +162,16 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
             //--- Simulate the stop event, so the layer will refresh the buildings
             Message msg = new Message(View.VIEW_STOPPED, ww);
             layer.onMessage(msg);
+
+        } else if (message.equals(DO_ACTION_LAYER_SELECTED)) {
+            //--- To be sure only once
+            // ww.removeSelectListener(this);
+            // ww.addSelectListener(this);
+            // layer.setPickEnabled(true);
+
+        } else if (message.equals(DO_ACTION_LAYER_UNSELECTED)) {
+            // ww.removeSelectListener(this);
+            // layer.setPickEnabled(false);
         }
         return null;
     }
@@ -167,13 +189,13 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
         // System.out.println("PICK:"+layer.isPickEnabled());
         // layer.setPickEnabled(true);
         provider = (OSMBuildingProvider) CMB_Providers.getSelectedItem();
-        if (provider == null) provider = new OSMBuildingProvider("www.osmbuildings.org","https://[abcd].data.osmbuildings.org/0.2/sx3pxpz6/tile/${Z}/${X}/${Y}.json", 15, 15);
+        if (provider == null) provider = new OSMBuildingProvider("www.osmbuildings.org", "https://[abcd].data.osmbuildings.org/0.2/sx3pxpz6/tile/${Z}/${X}/${Y}.json", 15, 15);
         layer.setMinLevel(provider.getMinLevel());
         layer.setMaxLevel(provider.getMaxLevel());
         layer.setProvider(provider.getUrl());
         layer.addPreBuildingsRenderer(this);
         layer.addTileListener(this);
-        ww.addSelectListener(this);
+        layer.setPickEnabled(false);    //--- Avoid blocking mouse events
 
         LB_Provider.setText(provider.getTitle());
 
@@ -184,7 +206,7 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
         SP_Rows.addChangeListener(this);
         CB_FixedLighting.addActionListener(this);
         CB_Draggable.addActionListener(this);
-        
+
         CB_DrawOutline.addActionListener(this);
         CB_ApplyRoofTextures.addActionListener(this);
 
@@ -199,6 +221,9 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
         BT_Apply.addActionListener(this);
 
         LI_Entries.addMouseListener(this);
+
+        LI_Tiles.setCellRenderer(new JOSMBuildingsTileRenderer());
+        LI_Tiles.addMouseListener(this);
     }
 
     @Override
@@ -222,11 +247,16 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
             layer.setDraggable(CB_Draggable.isSelected());
             if (CB_Draggable.isSelected()) {
                 ww.addSelectListener(dragger);
-                
+                ww.addSelectListener(this);
+                layer.setPickEnabled(true);
+
             } else {
+                ww.removeSelectListener(this);
                 ww.removeSelectListener(dragger);
+                layer.setPickEnabled(false);
+
             }
-            
+
             String prov = config.getAttribute("provider");
             if (!prov.equals("")) {
                 //--- Find  the provider
@@ -324,12 +354,17 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
             layer.setDraggable(CB_Draggable.isSelected());
             if (CB_Draggable.isSelected()) {
                 ww.addSelectListener(dragger);
-                
+                ww.addSelectListener(this);
+                layer.setPickEnabled(true);
+
             } else {
                 ww.removeSelectListener(dragger);
+                ww.addSelectListener(this);
+                layer.setPickEnabled(false);
             }
-            
+
         } else if (e.getActionCommand().equals("clear")) {
+            tiles.clear();
             layer.clearTiles();
 
         } else if (e.getActionCommand().equals("clearLogs")) {
@@ -486,7 +521,7 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
                     // blm.setLightDirection(defaultSunDirection);
                     // blm.setLightMaterial(defaultSunMat);
                 }
-                
+
             }
 
         }
@@ -500,12 +535,16 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
     //**************************************************************************
     @Override
     public void osmBuildingsLoaded(OSMBuildingsTile btile) {
-        //---
+        LI_Tiles.repaint();
     }
 
     @Override
     public void osmBuildingsLoading(OSMBuildingsTile btile) {
-        //---
+        tiles.add(0, btile);
+        if (tiles.size() > 100) {
+            //--- Remove the last one to avoid to much data
+            tiles.remove(99);
+        }
     }
 
     @Override
@@ -554,11 +593,34 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
                         } else {
                             v.goTo(ref, 1000);
                         }
-                        
+
                     } catch (Exception ex) {
 
                     }
                 }
+            }
+
+        } else if (e.getSource() == LI_Tiles) {
+            OSMBuildingsTile tile = LI_Tiles.getSelectedValue();
+            if (tile == null) return;
+            if (e.getClickCount() >= 2) {
+                try {
+                    //--- Could be another renderable...
+                    OSMBuildingsRenderable renderable = tile.getRenderable();
+                    Position ref = renderable.getReferencePosition();
+                    View v = ww.getView();
+                    if (v instanceof BasicOrbitView) {
+                        BasicOrbitView view = (BasicOrbitView) v;
+                        view.addPanToAnimator(ref, view.getHeading(), view.getPitch(), view.getZoom());
+
+                    } else {
+                        v.goTo(ref, 1000);
+                    }
+
+                } catch (Exception ex) {
+                    //--- Not yet loaded
+                }
+
             }
         }
     }
@@ -597,37 +659,40 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
         PU_Logs = new javax.swing.JPopupMenu();
         MN_ClearLogs = new javax.swing.JMenuItem();
         jPanel1 = new javax.swing.JPanel();
-        jLabel1 = new javax.swing.JLabel();
-        SP_DefaultHeight = new javax.swing.JSpinner();
-        CB_DrawProcessingBox = new javax.swing.JCheckBox();
-        jLabel2 = new javax.swing.JLabel();
-        jLabel3 = new javax.swing.JLabel();
-        SP_MaxTiles = new javax.swing.JSpinner();
-        jLabel5 = new javax.swing.JLabel();
-        CB_DrawOutline = new javax.swing.JCheckBox();
-        jLabel6 = new javax.swing.JLabel();
-        CB_ApplyRoofTextures = new javax.swing.JCheckBox();
         BT_Clear = new javax.swing.JButton();
         jLabel7 = new javax.swing.JLabel();
-        SP_Rows = new javax.swing.JSpinner();
-        jLabel4 = new javax.swing.JLabel();
-        jLabel8 = new javax.swing.JLabel();
-        CB_FixedLighting = new javax.swing.JCheckBox();
         jTabbedPane1 = new javax.swing.JTabbedPane();
+        jScrollPane3 = new javax.swing.JScrollPane();
+        LI_Tiles = new javax.swing.JList<>();
         jScrollPane1 = new javax.swing.JScrollPane();
         TA_Object = new javax.swing.JTextArea();
         jScrollPane2 = new javax.swing.JScrollPane();
         TA_Logs = new javax.swing.JTextArea();
         jPanel3 = new javax.swing.JPanel();
-        TB_Tools = new javax.swing.JToolBar();
+        jScrollPane4 = new javax.swing.JScrollPane();
+        LI_Entries = new javax.swing.JList<>();
+        jPanel4 = new javax.swing.JPanel();
         BT_Add = new javax.swing.JButton();
         BT_Edit = new javax.swing.JButton();
         jSeparator9 = new javax.swing.JToolBar.Separator();
         BT_Delete = new javax.swing.JButton();
-        jScrollPane4 = new javax.swing.JScrollPane();
-        LI_Entries = new javax.swing.JList<>();
+        jPanel5 = new javax.swing.JPanel();
+        jLabel1 = new javax.swing.JLabel();
+        SP_DefaultHeight = new javax.swing.JSpinner();
+        jLabel2 = new javax.swing.JLabel();
+        CB_DrawProcessingBox = new javax.swing.JCheckBox();
         jLabel9 = new javax.swing.JLabel();
         CB_Draggable = new javax.swing.JCheckBox();
+        jLabel3 = new javax.swing.JLabel();
+        SP_MaxTiles = new javax.swing.JSpinner();
+        jLabel4 = new javax.swing.JLabel();
+        SP_Rows = new javax.swing.JSpinner();
+        jLabel5 = new javax.swing.JLabel();
+        CB_DrawOutline = new javax.swing.JCheckBox();
+        jLabel6 = new javax.swing.JLabel();
+        CB_ApplyRoofTextures = new javax.swing.JCheckBox();
+        jLabel8 = new javax.swing.JLabel();
+        CB_FixedLighting = new javax.swing.JCheckBox();
         jPanel2 = new javax.swing.JPanel();
         SP_Opacity = new javax.swing.JSlider();
         CMB_Providers = new javax.swing.JComboBox<>();
@@ -640,41 +705,6 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
 
         setLayout(new java.awt.BorderLayout());
 
-        jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        jLabel1.setText("Default height");
-        jLabel1.setPreferredSize(new java.awt.Dimension(200, 26));
-
-        SP_DefaultHeight.setModel(new javax.swing.SpinnerNumberModel(10, 0, 1000, 1));
-        SP_DefaultHeight.setPreferredSize(new java.awt.Dimension(70, 26));
-
-        CB_DrawProcessingBox.setActionCommand("drawProcessingBox");
-        CB_DrawProcessingBox.setPreferredSize(new java.awt.Dimension(26, 26));
-
-        jLabel2.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        jLabel2.setText("Draw processing box");
-        jLabel2.setPreferredSize(new java.awt.Dimension(150, 26));
-
-        jLabel3.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        jLabel3.setText("Maximum tiles");
-        jLabel3.setPreferredSize(new java.awt.Dimension(200, 26));
-
-        SP_MaxTiles.setModel(new javax.swing.SpinnerNumberModel(30, 1, 256, 1));
-        SP_MaxTiles.setPreferredSize(new java.awt.Dimension(70, 26));
-
-        jLabel5.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        jLabel5.setText("Draw outline");
-        jLabel5.setPreferredSize(new java.awt.Dimension(200, 26));
-
-        CB_DrawOutline.setActionCommand("drawOutline");
-        CB_DrawOutline.setPreferredSize(new java.awt.Dimension(26, 26));
-
-        jLabel6.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        jLabel6.setText("Apply roof textures");
-        jLabel6.setPreferredSize(new java.awt.Dimension(200, 26));
-
-        CB_ApplyRoofTextures.setActionCommand("applyRoofTextures");
-        CB_ApplyRoofTextures.setPreferredSize(new java.awt.Dimension(26, 26));
-
         BT_Clear.setText("Clear");
         BT_Clear.setActionCommand("clear");
 
@@ -682,21 +712,10 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
         jLabel7.setText("Double Click on a polygon to see details");
         jLabel7.setPreferredSize(new java.awt.Dimension(150, 26));
 
-        SP_Rows.setModel(new javax.swing.SpinnerNumberModel(3, 1, 256, 1));
-        SP_Rows.setToolTipText("The grid resolution (rows x cols) of the center screen to get buildings data");
-        SP_Rows.setPreferredSize(new java.awt.Dimension(70, 26));
+        LI_Tiles.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        jScrollPane3.setViewportView(LI_Tiles);
 
-        jLabel4.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        jLabel4.setText("Resolution rows");
-        jLabel4.setPreferredSize(new java.awt.Dimension(200, 26));
-
-        jLabel8.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        jLabel8.setText("Fixed lighting");
-        jLabel8.setPreferredSize(new java.awt.Dimension(200, 26));
-
-        CB_FixedLighting.setSelected(true);
-        CB_FixedLighting.setActionCommand("fixedLighting");
-        CB_FixedLighting.setPreferredSize(new java.awt.Dimension(26, 26));
+        jTabbedPane1.addTab("Tiles", jScrollPane3);
 
         TA_Object.setColumns(20);
         TA_Object.setFont(new java.awt.Font("Monospaced", 0, 11)); // NOI18N
@@ -715,41 +734,54 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
 
         jPanel3.setLayout(new java.awt.BorderLayout());
 
-        TB_Tools.setBorder(null);
+        LI_Entries.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        jScrollPane4.setViewportView(LI_Entries);
+
+        jPanel3.add(jScrollPane4, java.awt.BorderLayout.CENTER);
+
+        jPanel4.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
 
         BT_Add.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
         BT_Add.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/add.png"))); // NOI18N
         BT_Add.setToolTipText("add");
         BT_Add.setActionCommand("add");
         BT_Add.setPreferredSize(new java.awt.Dimension(26, 26));
-        TB_Tools.add(BT_Add);
+        jPanel4.add(BT_Add);
 
         BT_Edit.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
         BT_Edit.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/edit.png"))); // NOI18N
         BT_Edit.setToolTipText("edit");
         BT_Edit.setActionCommand("edit");
-        BT_Edit.setFocusable(false);
         BT_Edit.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         BT_Edit.setPreferredSize(new java.awt.Dimension(26, 26));
         BT_Edit.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        TB_Tools.add(BT_Edit);
-        TB_Tools.add(jSeparator9);
+        jPanel4.add(BT_Edit);
+        jPanel4.add(jSeparator9);
 
         BT_Delete.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
         BT_Delete.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/remove.png"))); // NOI18N
         BT_Delete.setToolTipText("delete");
         BT_Delete.setActionCommand("delete");
         BT_Delete.setPreferredSize(new java.awt.Dimension(26, 26));
-        TB_Tools.add(BT_Delete);
+        jPanel4.add(BT_Delete);
 
-        jPanel3.add(TB_Tools, java.awt.BorderLayout.PAGE_START);
-
-        LI_Entries.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
-        jScrollPane4.setViewportView(LI_Entries);
-
-        jPanel3.add(jScrollPane4, java.awt.BorderLayout.CENTER);
+        jPanel3.add(jPanel4, java.awt.BorderLayout.NORTH);
 
         jTabbedPane1.addTab("Custom GeoJson", jPanel3);
+
+        jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        jLabel1.setText("Default height");
+        jLabel1.setPreferredSize(new java.awt.Dimension(200, 26));
+
+        SP_DefaultHeight.setModel(new javax.swing.SpinnerNumberModel(10, 0, 1000, 1));
+        SP_DefaultHeight.setPreferredSize(new java.awt.Dimension(70, 26));
+
+        jLabel2.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        jLabel2.setText("Draw processing box");
+        jLabel2.setPreferredSize(new java.awt.Dimension(150, 26));
+
+        CB_DrawProcessingBox.setActionCommand("drawProcessingBox");
+        CB_DrawProcessingBox.setPreferredSize(new java.awt.Dimension(26, 26));
 
         jLabel9.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         jLabel9.setText("Draggable");
@@ -758,6 +790,124 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
         CB_Draggable.setActionCommand("draggable");
         CB_Draggable.setPreferredSize(new java.awt.Dimension(26, 26));
 
+        jLabel3.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        jLabel3.setText("Maximum tiles");
+        jLabel3.setPreferredSize(new java.awt.Dimension(200, 26));
+
+        SP_MaxTiles.setModel(new javax.swing.SpinnerNumberModel(30, 1, 256, 1));
+        SP_MaxTiles.setPreferredSize(new java.awt.Dimension(70, 26));
+
+        jLabel4.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        jLabel4.setText("Resolution rows");
+        jLabel4.setPreferredSize(new java.awt.Dimension(200, 26));
+
+        SP_Rows.setModel(new javax.swing.SpinnerNumberModel(3, 1, 256, 1));
+        SP_Rows.setToolTipText("The grid resolution (rows x cols) of the center screen to get buildings data");
+        SP_Rows.setPreferredSize(new java.awt.Dimension(70, 26));
+
+        jLabel5.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        jLabel5.setText("Draw outline");
+        jLabel5.setPreferredSize(new java.awt.Dimension(200, 26));
+
+        CB_DrawOutline.setActionCommand("drawOutline");
+        CB_DrawOutline.setPreferredSize(new java.awt.Dimension(26, 26));
+
+        jLabel6.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        jLabel6.setText("Apply roof textures");
+        jLabel6.setPreferredSize(new java.awt.Dimension(200, 26));
+
+        CB_ApplyRoofTextures.setActionCommand("applyRoofTextures");
+        CB_ApplyRoofTextures.setPreferredSize(new java.awt.Dimension(26, 26));
+
+        jLabel8.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        jLabel8.setText("Fixed lighting");
+        jLabel8.setPreferredSize(new java.awt.Dimension(200, 26));
+
+        CB_FixedLighting.setSelected(true);
+        CB_FixedLighting.setActionCommand("fixedLighting");
+        CB_FixedLighting.setPreferredSize(new java.awt.Dimension(26, 26));
+
+        javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
+        jPanel5.setLayout(jPanel5Layout);
+        jPanel5Layout.setHorizontalGroup(
+            jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel5Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel5Layout.createSequentialGroup()
+                        .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(18, 18, 18)
+                        .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(SP_DefaultHeight, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(CB_DrawProcessingBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addGroup(jPanel5Layout.createSequentialGroup()
+                        .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(CB_DrawOutline, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel5Layout.createSequentialGroup()
+                        .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(CB_ApplyRoofTextures, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel5Layout.createSequentialGroup()
+                        .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(CB_FixedLighting, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel5Layout.createSequentialGroup()
+                        .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(SP_Rows, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel5Layout.createSequentialGroup()
+                        .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(SP_MaxTiles, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel5Layout.createSequentialGroup()
+                        .addComponent(jLabel9, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(CB_Draggable, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(253, Short.MAX_VALUE))
+        );
+        jPanel5Layout.setVerticalGroup(
+            jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel5Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(SP_DefaultHeight, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(CB_DrawProcessingBox, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(CB_Draggable, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(SP_MaxTiles, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(SP_Rows, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(CB_DrawOutline, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(CB_ApplyRoofTextures, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(CB_FixedLighting, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(232, Short.MAX_VALUE))
+        );
+
+        jTabbedPane1.addTab("Settings", jPanel5);
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -765,88 +915,16 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(BT_Clear, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jTabbedPane1)
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addGroup(jPanel1Layout.createSequentialGroup()
-                                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                            .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                            .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                                        .addGap(18, 18, 18)
-                                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                            .addComponent(SP_DefaultHeight, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                            .addComponent(CB_DrawProcessingBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                                    .addGroup(jPanel1Layout.createSequentialGroup()
-                                        .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addGap(18, 18, 18)
-                                        .addComponent(CB_DrawOutline, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                    .addGroup(jPanel1Layout.createSequentialGroup()
-                                        .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addGap(18, 18, 18)
-                                        .addComponent(CB_ApplyRoofTextures, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                    .addGroup(jPanel1Layout.createSequentialGroup()
-                                        .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addGap(18, 18, 18)
-                                        .addComponent(CB_FixedLighting, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                    .addGroup(jPanel1Layout.createSequentialGroup()
-                                        .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addGap(18, 18, 18)
-                                        .addComponent(SP_Rows, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                                .addGap(0, 0, Short.MAX_VALUE)))
-                        .addContainerGap())
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(18, 18, 18)
-                                .addComponent(SP_MaxTiles, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addComponent(jLabel9, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(18, 18, 18)
-                                .addComponent(CB_Draggable, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addGap(19, 265, Short.MAX_VALUE))))
+                    .addComponent(BT_Clear, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jTabbedPane1))
+                .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(SP_DefaultHeight, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(CB_DrawProcessingBox, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(CB_Draggable, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(SP_MaxTiles, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(SP_Rows, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(CB_DrawOutline, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(CB_ApplyRoofTextures, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(CB_FixedLighting, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jTabbedPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 165, Short.MAX_VALUE)
+                .addComponent(jTabbedPane1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -871,6 +949,7 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
 
         LB_Provider.setBackground(new java.awt.Color(144, 202, 249));
         LB_Provider.setFont(new java.awt.Font("DejaVu Sans", 1, 12)); // NOI18N
+        LB_Provider.setForeground(java.awt.Color.black);
         LB_Provider.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         LB_Provider.setText("...");
         LB_Provider.setOpaque(true);
@@ -923,6 +1002,7 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
     protected javax.swing.JComboBox<OSMBuildingProvider> CMB_Providers;
     protected javax.swing.JLabel LB_Provider;
     protected javax.swing.JList<GeoJSONEntry> LI_Entries;
+    protected javax.swing.JList<OSMBuildingsTile> LI_Tiles;
     protected javax.swing.JMenuItem MN_ClearLogs;
     protected javax.swing.JPopupMenu PU_Logs;
     protected javax.swing.JSpinner SP_DefaultHeight;
@@ -931,7 +1011,6 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
     protected javax.swing.JSpinner SP_Rows;
     protected javax.swing.JTextArea TA_Logs;
     protected javax.swing.JTextArea TA_Object;
-    protected javax.swing.JToolBar TB_Tools;
     protected javax.swing.JLabel jLabel1;
     protected javax.swing.JLabel jLabel2;
     protected javax.swing.JLabel jLabel3;
@@ -944,8 +1023,11 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
     protected javax.swing.JPanel jPanel1;
     protected javax.swing.JPanel jPanel2;
     protected javax.swing.JPanel jPanel3;
+    protected javax.swing.JPanel jPanel4;
+    protected javax.swing.JPanel jPanel5;
     protected javax.swing.JScrollPane jScrollPane1;
     protected javax.swing.JScrollPane jScrollPane2;
+    protected javax.swing.JScrollPane jScrollPane3;
     protected javax.swing.JScrollPane jScrollPane4;
     protected javax.swing.JToolBar.Separator jSeparator9;
     protected javax.swing.JTabbedPane jTabbedPane1;
