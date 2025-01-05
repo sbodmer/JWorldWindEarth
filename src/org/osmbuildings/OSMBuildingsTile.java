@@ -335,57 +335,7 @@ public class OSMBuildingsTile {
         return ts;
     }
 
-    //******************************************************************************************************************
-    //*** RetrievalPostProcessor
-    //******************************************************************************************************************
-    /**
-     * Dump the data to local file store, create the renderable and call the
-     * layer for rendering
-     *
-     * @param retriever
-     *
-     * @return
-     */
-    /*
-    @Override
-    public ByteBuffer run(Retriever retriever) {
-        HTTPRetriever hr = (HTTPRetriever) retriever;
-
-        try {
-            if (hr.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                byte b[] = hr.getBuffer().array();
-                if (b.length == 0) return null;
-
-                //--- Store to cache file
-                File f = store.newFile(cachePath);
-                FileOutputStream fout = new FileOutputStream(f);
-                //--- The buffer contains trailling 0000, so convert to string to remove it
-                //--- Why is that, no idea ???
-                String tmp = new String(b, "UTF-8").trim();
-                fout.write(tmp.getBytes("UTF-8"));
-                fout.close();
-
-                //--- Load the data
-                GeoJSONDoc doc = new GeoJSONDoc(f.toURI().toURL());
-                doc.parse();
-
-                renderable = new OSMBuildingsRenderable(doc, defaultHeight, defaultAttrs);
-                if (listener != null) listener.osmBuildingsLoaded(this);
-
-            } else {
-                //--- Wrong http response
-                if (listener != null)
-                    listener.osmBuildingsLoadingFailed(this, ".json file could not be found, wrong http response : " + hr.getResponseCode() + " " + hr.getResponseMessage());
-            }
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            //--- Failed
-            if (listener != null)
-                listener.osmBuildingsLoadingFailed(this, ".json file could not be found : " + ex.getMessage());
-        }
-        return null;
-    }
-     */
+    
     //**************************************************************************
     //*** Private
     //**************************************************************************
@@ -417,33 +367,7 @@ public class OSMBuildingsTile {
     }
 
     /**
-     * Load local cached file
-     */
-    /*
-    @Override
-    public void run() {
-        try {
-            URL data = store.findFile(cachePath, false);
-
-            //--- Load the data
-            GeoJSONDoc doc = new GeoJSONDoc(data);
-            doc.parse();
-
-            renderable = new OSMBuildingsRenderable(doc, defaultHeight, defaultAttrs);
-            if (listener != null) listener.osmBuildingsLoaded(this);
-
-        } catch (NullPointerException ex) {
-            //--- File is no more in local storage ?
-            if (listener != null) listener.osmBuildingsLoadingFailed(this, ".json file could not be found");
-
-        } catch (IOException ex) {
-            //--- Failed
-            if (listener != null) listener.osmBuildingsLoadingFailed(this, ".json file could not be found");
-        }
-    }
-     */
-    /**
-     * Local and remove listener for buildings json data loading process<p>
+     * Local and remote listener for buildings json data loading process<p>
      *
      * When the json has arrived, fetch the textures
      *

@@ -585,14 +585,14 @@ public class JModelsWWEPlugin extends javax.swing.JPanel implements WWEPlugin, C
         jLabel10 = new javax.swing.JLabel();
         jTabbedPane1 = new javax.swing.JTabbedPane();
         jPanel3 = new javax.swing.JPanel();
-        TB_Tools = new javax.swing.JToolBar();
+        jScrollPane3 = new javax.swing.JScrollPane();
+        TB_Models = new javax.swing.JTable();
+        jPanel1 = new javax.swing.JPanel();
         BT_Add = new javax.swing.JButton();
         BT_Edit = new javax.swing.JButton();
         jSeparator9 = new javax.swing.JToolBar.Separator();
         BT_Delete = new javax.swing.JButton();
         BT_Clear = new javax.swing.JButton();
-        jScrollPane3 = new javax.swing.JScrollPane();
-        TB_Models = new javax.swing.JTable();
         jScrollPane2 = new javax.swing.JScrollPane();
         TA_Logs = new javax.swing.JTextArea();
         PN_Data = new javax.swing.JPanel();
@@ -651,43 +651,6 @@ public class JModelsWWEPlugin extends javax.swing.JPanel implements WWEPlugin, C
 
         jPanel3.setLayout(new java.awt.BorderLayout());
 
-        TB_Tools.setBorder(null);
-        TB_Tools.setFloatable(false);
-
-        BT_Add.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
-        BT_Add.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/add.png"))); // NOI18N
-        BT_Add.setToolTipText("add");
-        BT_Add.setActionCommand("add");
-        BT_Add.setPreferredSize(new java.awt.Dimension(26, 26));
-        TB_Tools.add(BT_Add);
-
-        BT_Edit.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
-        BT_Edit.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/edit.png"))); // NOI18N
-        BT_Edit.setToolTipText("edit");
-        BT_Edit.setActionCommand("edit");
-        BT_Edit.setFocusable(false);
-        BT_Edit.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        BT_Edit.setPreferredSize(new java.awt.Dimension(26, 26));
-        BT_Edit.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        TB_Tools.add(BT_Edit);
-        TB_Tools.add(jSeparator9);
-
-        BT_Delete.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
-        BT_Delete.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/remove.png"))); // NOI18N
-        BT_Delete.setToolTipText("delete");
-        BT_Delete.setActionCommand("delete");
-        BT_Delete.setPreferredSize(new java.awt.Dimension(26, 26));
-        TB_Tools.add(BT_Delete);
-
-        BT_Clear.setText("Clear");
-        BT_Clear.setActionCommand("clear");
-        BT_Clear.setFocusable(false);
-        BT_Clear.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        BT_Clear.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        TB_Tools.add(BT_Clear);
-
-        jPanel3.add(TB_Tools, java.awt.BorderLayout.PAGE_START);
-
         TB_Models.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
 
@@ -715,6 +678,40 @@ public class JModelsWWEPlugin extends javax.swing.JPanel implements WWEPlugin, C
         jScrollPane3.setViewportView(TB_Models);
 
         jPanel3.add(jScrollPane3, java.awt.BorderLayout.CENTER);
+
+        jPanel1.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
+
+        BT_Add.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
+        BT_Add.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/add.png"))); // NOI18N
+        BT_Add.setToolTipText("add");
+        BT_Add.setActionCommand("add");
+        BT_Add.setPreferredSize(new java.awt.Dimension(26, 26));
+        jPanel1.add(BT_Add);
+
+        BT_Edit.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
+        BT_Edit.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/edit.png"))); // NOI18N
+        BT_Edit.setToolTipText("edit");
+        BT_Edit.setActionCommand("edit");
+        BT_Edit.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        BT_Edit.setPreferredSize(new java.awt.Dimension(26, 26));
+        BT_Edit.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        jPanel1.add(BT_Edit);
+        jPanel1.add(jSeparator9);
+
+        BT_Delete.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
+        BT_Delete.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/remove.png"))); // NOI18N
+        BT_Delete.setToolTipText("delete");
+        BT_Delete.setActionCommand("delete");
+        BT_Delete.setPreferredSize(new java.awt.Dimension(26, 26));
+        jPanel1.add(BT_Delete);
+
+        BT_Clear.setText("Clear");
+        BT_Clear.setActionCommand("clear");
+        BT_Clear.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        BT_Clear.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        jPanel1.add(BT_Clear);
+
+        jPanel3.add(jPanel1, java.awt.BorderLayout.NORTH);
 
         jTabbedPane1.addTab("3D Models", jPanel3);
 
@@ -893,7 +890,6 @@ public class JModelsWWEPlugin extends javax.swing.JPanel implements WWEPlugin, C
     protected javax.swing.JSpinner SP_Scale;
     protected javax.swing.JTextArea TA_Logs;
     protected javax.swing.JTable TB_Models;
-    protected javax.swing.JToolBar TB_Tools;
     protected javax.swing.JLabel jLabel1;
     protected javax.swing.JLabel jLabel10;
     protected javax.swing.JLabel jLabel2;
@@ -904,6 +900,7 @@ public class JModelsWWEPlugin extends javax.swing.JPanel implements WWEPlugin, C
     protected javax.swing.JLabel jLabel7;
     protected javax.swing.JLabel jLabel8;
     protected javax.swing.JLabel jLabel9;
+    protected javax.swing.JPanel jPanel1;
     protected javax.swing.JPanel jPanel2;
     protected javax.swing.JPanel jPanel3;
     protected javax.swing.JScrollPane jScrollPane2;

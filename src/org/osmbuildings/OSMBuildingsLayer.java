@@ -264,6 +264,22 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
         }
     }
 
+    public void removeTile(OSMBuildingsTile tile) {
+        Iterator<OSMBuildingsTile> it = buildings.values().iterator();
+        while (it.hasNext()) {
+            OSMBuildingsTile t = it.next();
+            if (t == tile) {
+                it.remove();
+                removeRenderable(t.getRenderable());
+                removeRenderable(t.getTileSurfaceRenderable());
+                ArrayList<String> removed = t.getIds();
+                for (int k = 0; k < removed.size(); k++) ids.remove(removed.get(k));
+                return;
+
+            }
+        }
+    }
+
     public void setProvider(String provider) {
         this.provider = provider;
     }
@@ -623,18 +639,8 @@ public class OSMBuildingsLayer extends RenderableLayer implements OSMBuildingsTi
                         if (rend != null) removeRenderable(rend);
                         removeRenderable(oldest.getTileSurfaceRenderable());
                         //--- Remove the ids for removed tile
-                            ArrayList<String> removed = oldest.getIds();
-                            for (int k = 0; k < removed.size(); k++) {
-                                try {
-                                    ids.remove(removed.get(k));
-                                    
-                                } catch (Exception ex) {
-                                    //--- xapi does not implements missing ids, so
-                                    //--- the reference array as none resolved data
-                                }
-                            }
-                            
-                        
+                        ArrayList<String> removed = oldest.getIds();
+                        for (int k = 0; k < removed.size(); k++) ids.remove(removed.get(k));
                         buildings.remove(oldest.toString());
                     }
 

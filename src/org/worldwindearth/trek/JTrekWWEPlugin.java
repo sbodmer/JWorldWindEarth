@@ -743,53 +743,53 @@ public class JTrekWWEPlugin extends JPanel implements WWEPlugin, ActionListener,
 
         jPanel1 = new javax.swing.JPanel();
         jPanel3 = new javax.swing.JPanel();
-        jToolBar1 = new javax.swing.JToolBar();
+        jScrollPane5 = new javax.swing.JScrollPane();
+        TB_GPX = new javax.swing.JTable();
+        jPanel10 = new javax.swing.JPanel();
         BT_New = new javax.swing.JButton();
         BT_Edit = new javax.swing.JButton();
         BT_Import = new javax.swing.JButton();
         BT_Export = new javax.swing.JButton();
         jSeparator9 = new javax.swing.JToolBar.Separator();
         BT_Delete = new javax.swing.JButton();
-        jScrollPane5 = new javax.swing.JScrollPane();
-        TB_GPX = new javax.swing.JTable();
         PN_GPX = new javax.swing.JPanel();
         TAB_Item = new javax.swing.JTabbedPane();
         jPanel2 = new javax.swing.JPanel();
         jScrollPane3 = new javax.swing.JScrollPane();
         TB_Waypoints = new javax.swing.JTable();
-        jToolBar4 = new javax.swing.JToolBar();
-        BT_EditWaypoint = new javax.swing.JButton();
-        BT_DeleteWaypoint = new javax.swing.JButton();
         jPanel7 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
+        jPanel12 = new javax.swing.JPanel();
+        BT_EditWaypoint = new javax.swing.JButton();
+        BT_DeleteWaypoint = new javax.swing.JButton();
         jPanel5 = new javax.swing.JPanel();
-        jToolBar2 = new javax.swing.JToolBar();
-        CMB_Route = new javax.swing.JComboBox<>();
-        BT_NewRoute = new javax.swing.JButton();
-        BT_EditRoute = new javax.swing.JButton();
-        jSeparator10 = new javax.swing.JToolBar.Separator();
-        BT_DeleteRoute = new javax.swing.JButton();
         jPanel9 = new javax.swing.JPanel();
         jScrollPane4 = new javax.swing.JScrollPane();
         TB_Routes = new javax.swing.JTable();
-        jToolBar5 = new javax.swing.JToolBar();
+        jPanel13 = new javax.swing.JPanel();
         BT_EditRoutePoint = new javax.swing.JButton();
         BT_CopyRoutePoints = new javax.swing.JButton();
         BT_PasteRoutePoints = new javax.swing.JButton();
         BT_DeleteRoutePoint = new javax.swing.JButton();
         jPanel8 = new javax.swing.JPanel();
         jLabel2 = new javax.swing.JLabel();
+        jPanel14 = new javax.swing.JPanel();
+        CMB_Route = new javax.swing.JComboBox<>();
+        BT_NewRoute = new javax.swing.JButton();
+        BT_EditRoute = new javax.swing.JButton();
+        jSeparator10 = new javax.swing.JToolBar.Separator();
+        BT_DeleteRoute = new javax.swing.JButton();
         jPanel6 = new javax.swing.JPanel();
-        jToolBar3 = new javax.swing.JToolBar();
-        CMB_Tracks = new javax.swing.JComboBox<>();
-        BT_EditTrack = new javax.swing.JButton();
-        CB_Extrude = new javax.swing.JCheckBox();
         jScrollPane2 = new javax.swing.JScrollPane();
         TB_Track = new javax.swing.JTable();
         PN_TrackDetails = new javax.swing.JPanel();
         jPanel4 = new javax.swing.JPanel();
         LB_TrackPoints = new javax.swing.JLabel();
         PN_Elevations = new javax.swing.JPanel();
+        jPanel15 = new javax.swing.JPanel();
+        CMB_Tracks = new javax.swing.JComboBox<>();
+        BT_EditTrack = new javax.swing.JButton();
+        CB_Extrude = new javax.swing.JCheckBox();
         jPanel11 = new javax.swing.JPanel();
         LB_GPX = new javax.swing.JLabel();
 
@@ -799,61 +799,6 @@ public class JTrekWWEPlugin extends JPanel implements WWEPlugin, ActionListener,
 
         jPanel3.setPreferredSize(new java.awt.Dimension(456, 200));
         jPanel3.setLayout(new java.awt.BorderLayout());
-
-        jToolBar1.setRollover(true);
-
-        BT_New.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
-        BT_New.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/add.png"))); // NOI18N
-        BT_New.setToolTipText("New gpx");
-        BT_New.setActionCommand("new");
-        BT_New.setFocusable(false);
-        BT_New.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        BT_New.setPreferredSize(new java.awt.Dimension(32, 32));
-        BT_New.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        jToolBar1.add(BT_New);
-
-        BT_Edit.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
-        BT_Edit.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/edit.png"))); // NOI18N
-        BT_Edit.setToolTipText("rename gpx");
-        BT_Edit.setActionCommand("edit");
-        BT_Edit.setFocusable(false);
-        BT_Edit.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        BT_Edit.setPreferredSize(new java.awt.Dimension(32, 32));
-        BT_Edit.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        jToolBar1.add(BT_Edit);
-
-        BT_Import.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
-        BT_Import.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/load.png"))); // NOI18N
-        BT_Import.setToolTipText("import");
-        BT_Import.setActionCommand("import");
-        BT_Import.setFocusable(false);
-        BT_Import.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        BT_Import.setPreferredSize(new java.awt.Dimension(32, 32));
-        BT_Import.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        jToolBar1.add(BT_Import);
-
-        BT_Export.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
-        BT_Export.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/save.png"))); // NOI18N
-        BT_Export.setToolTipText("Export");
-        BT_Export.setActionCommand("export");
-        BT_Export.setFocusable(false);
-        BT_Export.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        BT_Export.setPreferredSize(new java.awt.Dimension(32, 32));
-        BT_Export.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        jToolBar1.add(BT_Export);
-        jToolBar1.add(jSeparator9);
-
-        BT_Delete.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
-        BT_Delete.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/remove.png"))); // NOI18N
-        BT_Delete.setToolTipText("delete layer");
-        BT_Delete.setActionCommand("delete");
-        BT_Delete.setFocusable(false);
-        BT_Delete.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        BT_Delete.setPreferredSize(new java.awt.Dimension(32, 32));
-        BT_Delete.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        jToolBar1.add(BT_Delete);
-
-        jPanel3.add(jToolBar1, java.awt.BorderLayout.NORTH);
 
         TB_GPX.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -881,6 +826,56 @@ public class JTrekWWEPlugin extends JPanel implements WWEPlugin, ActionListener,
         jScrollPane5.setViewportView(TB_GPX);
 
         jPanel3.add(jScrollPane5, java.awt.BorderLayout.CENTER);
+
+        jPanel10.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
+
+        BT_New.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
+        BT_New.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/add.png"))); // NOI18N
+        BT_New.setToolTipText("New gpx");
+        BT_New.setActionCommand("new");
+        BT_New.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        BT_New.setPreferredSize(new java.awt.Dimension(32, 32));
+        BT_New.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        jPanel10.add(BT_New);
+
+        BT_Edit.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
+        BT_Edit.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/edit.png"))); // NOI18N
+        BT_Edit.setToolTipText("rename gpx");
+        BT_Edit.setActionCommand("edit");
+        BT_Edit.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        BT_Edit.setPreferredSize(new java.awt.Dimension(32, 32));
+        BT_Edit.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        jPanel10.add(BT_Edit);
+
+        BT_Import.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
+        BT_Import.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/load.png"))); // NOI18N
+        BT_Import.setToolTipText("import");
+        BT_Import.setActionCommand("import");
+        BT_Import.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        BT_Import.setPreferredSize(new java.awt.Dimension(32, 32));
+        BT_Import.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        jPanel10.add(BT_Import);
+
+        BT_Export.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
+        BT_Export.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/save.png"))); // NOI18N
+        BT_Export.setToolTipText("Export");
+        BT_Export.setActionCommand("export");
+        BT_Export.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        BT_Export.setPreferredSize(new java.awt.Dimension(32, 32));
+        BT_Export.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        jPanel10.add(BT_Export);
+        jPanel10.add(jSeparator9);
+
+        BT_Delete.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
+        BT_Delete.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/remove.png"))); // NOI18N
+        BT_Delete.setToolTipText("delete layer");
+        BT_Delete.setActionCommand("delete");
+        BT_Delete.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        BT_Delete.setPreferredSize(new java.awt.Dimension(32, 32));
+        BT_Delete.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        jPanel10.add(BT_Delete);
+
+        jPanel3.add(jPanel10, java.awt.BorderLayout.NORTH);
 
         jPanel1.add(jPanel3, java.awt.BorderLayout.NORTH);
 
@@ -918,75 +913,36 @@ public class JTrekWWEPlugin extends JPanel implements WWEPlugin, ActionListener,
 
         jPanel2.add(jScrollPane3, java.awt.BorderLayout.CENTER);
 
-        jToolBar4.setRollover(true);
-
-        BT_EditWaypoint.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
-        BT_EditWaypoint.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/edit.png"))); // NOI18N
-        BT_EditWaypoint.setToolTipText("rename gpx");
-        BT_EditWaypoint.setActionCommand("editWaypoint");
-        BT_EditWaypoint.setFocusable(false);
-        BT_EditWaypoint.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        BT_EditWaypoint.setPreferredSize(new java.awt.Dimension(32, 32));
-        BT_EditWaypoint.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        jToolBar4.add(BT_EditWaypoint);
-
-        BT_DeleteWaypoint.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
-        BT_DeleteWaypoint.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/remove.png"))); // NOI18N
-        BT_DeleteWaypoint.setToolTipText("Delete route");
-        BT_DeleteWaypoint.setActionCommand("deleteWaypoint");
-        BT_DeleteWaypoint.setFocusable(false);
-        BT_DeleteWaypoint.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        BT_DeleteWaypoint.setPreferredSize(new java.awt.Dimension(32, 32));
-        BT_DeleteWaypoint.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        jToolBar4.add(BT_DeleteWaypoint);
-
-        jPanel2.add(jToolBar4, java.awt.BorderLayout.NORTH);
-
         jLabel1.setText("Double click on terrain to create new waypoint");
         jPanel7.add(jLabel1);
 
         jPanel2.add(jPanel7, java.awt.BorderLayout.PAGE_END);
 
+        jPanel12.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
+
+        BT_EditWaypoint.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
+        BT_EditWaypoint.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/edit.png"))); // NOI18N
+        BT_EditWaypoint.setToolTipText("rename gpx");
+        BT_EditWaypoint.setActionCommand("editWaypoint");
+        BT_EditWaypoint.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        BT_EditWaypoint.setPreferredSize(new java.awt.Dimension(32, 32));
+        BT_EditWaypoint.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        jPanel12.add(BT_EditWaypoint);
+
+        BT_DeleteWaypoint.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
+        BT_DeleteWaypoint.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/remove.png"))); // NOI18N
+        BT_DeleteWaypoint.setToolTipText("Delete route");
+        BT_DeleteWaypoint.setActionCommand("deleteWaypoint");
+        BT_DeleteWaypoint.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        BT_DeleteWaypoint.setPreferredSize(new java.awt.Dimension(32, 32));
+        BT_DeleteWaypoint.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        jPanel12.add(BT_DeleteWaypoint);
+
+        jPanel2.add(jPanel12, java.awt.BorderLayout.NORTH);
+
         TAB_Item.addTab("Waypoints", jPanel2);
 
         jPanel5.setLayout(new java.awt.BorderLayout());
-
-        jToolBar2.setRollover(true);
-
-        jToolBar2.add(CMB_Route);
-
-        BT_NewRoute.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
-        BT_NewRoute.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/add.png"))); // NOI18N
-        BT_NewRoute.setToolTipText("new route");
-        BT_NewRoute.setActionCommand("newRoute");
-        BT_NewRoute.setFocusable(false);
-        BT_NewRoute.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        BT_NewRoute.setPreferredSize(new java.awt.Dimension(32, 32));
-        BT_NewRoute.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        jToolBar2.add(BT_NewRoute);
-
-        BT_EditRoute.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
-        BT_EditRoute.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/edit.png"))); // NOI18N
-        BT_EditRoute.setToolTipText("rename gpx");
-        BT_EditRoute.setActionCommand("edit");
-        BT_EditRoute.setFocusable(false);
-        BT_EditRoute.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        BT_EditRoute.setPreferredSize(new java.awt.Dimension(32, 32));
-        BT_EditRoute.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        jToolBar2.add(BT_EditRoute);
-        jToolBar2.add(jSeparator10);
-
-        BT_DeleteRoute.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
-        BT_DeleteRoute.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/remove.png"))); // NOI18N
-        BT_DeleteRoute.setToolTipText("Delete route");
-        BT_DeleteRoute.setActionCommand("deleteRoute");
-        BT_DeleteRoute.setFocusable(false);
-        BT_DeleteRoute.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        BT_DeleteRoute.setPreferredSize(new java.awt.Dimension(32, 32));
-        BT_DeleteRoute.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        jToolBar2.add(BT_DeleteRoute);
-
-        jPanel5.add(jToolBar2, java.awt.BorderLayout.NORTH);
 
         jPanel9.setLayout(new java.awt.BorderLayout());
 
@@ -1010,49 +966,45 @@ public class JTrekWWEPlugin extends JPanel implements WWEPlugin, ActionListener,
 
         jPanel9.add(jScrollPane4, java.awt.BorderLayout.CENTER);
 
-        jToolBar5.setRollover(true);
+        jPanel13.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
 
         BT_EditRoutePoint.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
         BT_EditRoutePoint.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/edit.png"))); // NOI18N
         BT_EditRoutePoint.setToolTipText("rename point");
         BT_EditRoutePoint.setActionCommand("editRoutePoint");
-        BT_EditRoutePoint.setFocusable(false);
         BT_EditRoutePoint.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         BT_EditRoutePoint.setPreferredSize(new java.awt.Dimension(32, 32));
         BT_EditRoutePoint.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        jToolBar5.add(BT_EditRoutePoint);
+        jPanel13.add(BT_EditRoutePoint);
 
         BT_CopyRoutePoints.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
         BT_CopyRoutePoints.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/remove.png"))); // NOI18N
         BT_CopyRoutePoints.setToolTipText("Copy route points");
         BT_CopyRoutePoints.setActionCommand("copyRoutePoints");
-        BT_CopyRoutePoints.setFocusable(false);
         BT_CopyRoutePoints.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         BT_CopyRoutePoints.setPreferredSize(new java.awt.Dimension(32, 32));
         BT_CopyRoutePoints.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        jToolBar5.add(BT_CopyRoutePoints);
+        jPanel13.add(BT_CopyRoutePoints);
 
         BT_PasteRoutePoints.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
         BT_PasteRoutePoints.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/remove.png"))); // NOI18N
         BT_PasteRoutePoints.setToolTipText("Paste route points");
         BT_PasteRoutePoints.setActionCommand("pasteRoutePoints");
-        BT_PasteRoutePoints.setFocusable(false);
         BT_PasteRoutePoints.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         BT_PasteRoutePoints.setPreferredSize(new java.awt.Dimension(32, 32));
         BT_PasteRoutePoints.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        jToolBar5.add(BT_PasteRoutePoints);
+        jPanel13.add(BT_PasteRoutePoints);
 
         BT_DeleteRoutePoint.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
         BT_DeleteRoutePoint.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/remove.png"))); // NOI18N
         BT_DeleteRoutePoint.setToolTipText("Delete route point");
         BT_DeleteRoutePoint.setActionCommand("deleteRoutePoint");
-        BT_DeleteRoutePoint.setFocusable(false);
         BT_DeleteRoutePoint.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         BT_DeleteRoutePoint.setPreferredSize(new java.awt.Dimension(32, 32));
         BT_DeleteRoutePoint.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        jToolBar5.add(BT_DeleteRoutePoint);
+        jPanel13.add(BT_DeleteRoutePoint);
 
-        jPanel9.add(jToolBar5, java.awt.BorderLayout.NORTH);
+        jPanel9.add(jPanel13, java.awt.BorderLayout.NORTH);
 
         jPanel5.add(jPanel9, java.awt.BorderLayout.CENTER);
 
@@ -1061,29 +1013,43 @@ public class JTrekWWEPlugin extends JPanel implements WWEPlugin, ActionListener,
 
         jPanel5.add(jPanel8, java.awt.BorderLayout.PAGE_END);
 
+        jPanel14.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
+
+        jPanel14.add(CMB_Route);
+
+        BT_NewRoute.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
+        BT_NewRoute.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/add.png"))); // NOI18N
+        BT_NewRoute.setToolTipText("new route");
+        BT_NewRoute.setActionCommand("newRoute");
+        BT_NewRoute.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        BT_NewRoute.setPreferredSize(new java.awt.Dimension(32, 32));
+        BT_NewRoute.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        jPanel14.add(BT_NewRoute);
+
+        BT_EditRoute.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
+        BT_EditRoute.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/edit.png"))); // NOI18N
+        BT_EditRoute.setToolTipText("rename gpx");
+        BT_EditRoute.setActionCommand("edit");
+        BT_EditRoute.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        BT_EditRoute.setPreferredSize(new java.awt.Dimension(32, 32));
+        BT_EditRoute.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        jPanel14.add(BT_EditRoute);
+        jPanel14.add(jSeparator10);
+
+        BT_DeleteRoute.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
+        BT_DeleteRoute.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/remove.png"))); // NOI18N
+        BT_DeleteRoute.setToolTipText("Delete route");
+        BT_DeleteRoute.setActionCommand("deleteRoute");
+        BT_DeleteRoute.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        BT_DeleteRoute.setPreferredSize(new java.awt.Dimension(32, 32));
+        BT_DeleteRoute.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        jPanel14.add(BT_DeleteRoute);
+
+        jPanel5.add(jPanel14, java.awt.BorderLayout.NORTH);
+
         TAB_Item.addTab("Routes", jPanel5);
 
         jPanel6.setLayout(new java.awt.BorderLayout());
-
-        jToolBar3.setRollover(true);
-
-        jToolBar3.add(CMB_Tracks);
-
-        BT_EditTrack.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
-        BT_EditTrack.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/edit.png"))); // NOI18N
-        BT_EditTrack.setToolTipText("rename gpx");
-        BT_EditTrack.setActionCommand("editTrack");
-        BT_EditTrack.setFocusable(false);
-        BT_EditTrack.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        BT_EditTrack.setPreferredSize(new java.awt.Dimension(32, 32));
-        BT_EditTrack.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        jToolBar3.add(BT_EditTrack);
-
-        CB_Extrude.setText("Extrude");
-        CB_Extrude.setActionCommand("extrudeTrack");
-        jToolBar3.add(CB_Extrude);
-
-        jPanel6.add(jToolBar3, java.awt.BorderLayout.NORTH);
 
         TB_Track.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -1122,12 +1088,30 @@ public class JTrekWWEPlugin extends JPanel implements WWEPlugin, ActionListener,
 
         PN_TrackDetails.add(jPanel4, java.awt.BorderLayout.PAGE_END);
 
-        PN_Elevations.setBackground(java.awt.Color.white);
         PN_Elevations.setBorder(javax.swing.BorderFactory.createEmptyBorder(5, 5, 5, 5));
         PN_Elevations.setLayout(new java.awt.BorderLayout());
         PN_TrackDetails.add(PN_Elevations, java.awt.BorderLayout.CENTER);
 
         jPanel6.add(PN_TrackDetails, java.awt.BorderLayout.SOUTH);
+
+        jPanel15.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
+
+        jPanel15.add(CMB_Tracks);
+
+        BT_EditTrack.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
+        BT_EditTrack.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/worldwindearth/Resources/Icons/edit.png"))); // NOI18N
+        BT_EditTrack.setToolTipText("rename gpx");
+        BT_EditTrack.setActionCommand("editTrack");
+        BT_EditTrack.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        BT_EditTrack.setPreferredSize(new java.awt.Dimension(32, 32));
+        BT_EditTrack.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        jPanel15.add(BT_EditTrack);
+
+        CB_Extrude.setText("Extrude");
+        CB_Extrude.setActionCommand("extrudeTrack");
+        jPanel15.add(CB_Extrude);
+
+        jPanel6.add(jPanel15, java.awt.BorderLayout.NORTH);
 
         TAB_Item.addTab("Tracks", jPanel6);
 
@@ -1181,7 +1165,12 @@ public class JTrekWWEPlugin extends JPanel implements WWEPlugin, ActionListener,
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel10;
     private javax.swing.JPanel jPanel11;
+    private javax.swing.JPanel jPanel12;
+    private javax.swing.JPanel jPanel13;
+    private javax.swing.JPanel jPanel14;
+    private javax.swing.JPanel jPanel15;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
@@ -1196,11 +1185,6 @@ public class JTrekWWEPlugin extends JPanel implements WWEPlugin, ActionListener,
     private javax.swing.JScrollPane jScrollPane5;
     private javax.swing.JToolBar.Separator jSeparator10;
     private javax.swing.JToolBar.Separator jSeparator9;
-    private javax.swing.JToolBar jToolBar1;
-    private javax.swing.JToolBar jToolBar2;
-    private javax.swing.JToolBar jToolBar3;
-    private javax.swing.JToolBar jToolBar4;
-    private javax.swing.JToolBar jToolBar5;
     // End of variables declaration//GEN-END:variables
 
     /**

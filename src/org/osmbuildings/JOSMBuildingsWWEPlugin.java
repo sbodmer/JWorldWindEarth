@@ -27,6 +27,7 @@ import gov.nasa.worldwind.render.Polygon;
 import gov.nasa.worldwind.terrain.Tessellator;
 import gov.nasa.worldwind.util.BasicDragger;
 import gov.nasa.worldwind.view.orbit.BasicOrbitView;
+import java.awt.Desktop;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
@@ -44,6 +45,8 @@ import javax.swing.JFileChooser;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileFilter;
 import org.tinyrcp.App;
 import org.w3c.dom.Element;
@@ -55,7 +58,7 @@ import org.worldwindearth.WWEPlugin;
  *
  * @author sbodmer
  */
-public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlugin, ChangeListener, ActionListener, SelectListener, OSMBuildingsLayer.PreBuildingsRenderer, OSMBuildingsTileListener, MouseListener {
+public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlugin, ChangeListener, ActionListener, SelectListener, OSMBuildingsLayer.PreBuildingsRenderer, OSMBuildingsTileListener, MouseListener, ListSelectionListener {
 
     WWEFactory factory = null;
     App app = null;
@@ -86,6 +89,11 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
     // protected Vec4 defaultSunDirection = null;
     // protected Material defaultSunMat = null;
     protected BasicDragger dragger = null;
+
+    /**
+     * Last selected tile (from gui list)
+     */
+    protected OSMBuildingsTile lastSelectedTile = null;
 
     /**
      * Creates new form OSMBuildingsWWELayerPlugin
@@ -221,9 +229,13 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
         BT_Apply.addActionListener(this);
 
         LI_Entries.addMouseListener(this);
+        MN_DeleteTitle.addActionListener(this);
+        MN_OpenTileFolder.addActionListener(this);
+        MN_OpenTile.addActionListener(this);
 
         LI_Tiles.setCellRenderer(new JOSMBuildingsTileRenderer());
         LI_Tiles.addMouseListener(this);
+        LI_Tiles.addListSelectionListener(this);
     }
 
     @Override
@@ -419,6 +431,48 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
                 layer.removeGeoJSONEntry(entry);
             }
 
+        } else if (e.getActionCommand().equals("deleteTile")) {
+            if (lastSelectedTile != null) {
+                try {
+                    File f = new File(lastSelectedTile.getFetchedURL().toURI());
+                    System.out.println("F:" + f.getPath());
+                    layer.removeTile(lastSelectedTile);
+                    tiles.removeElement(lastSelectedTile);
+                    lastSelectedTile = null;
+                    f.delete();
+                    
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+            
+        } else if (e.getActionCommand().equals("openTileFolder")) {
+            if (lastSelectedTile != null) {
+                try {
+                    Desktop desktop = Desktop.getDesktop();
+                    
+                    File f = new File(lastSelectedTile.getFetchedURL().toURI());
+                    System.out.println("F:" + f.getPath());
+                    desktop.open(f.getParentFile());
+                    
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+            
+        } else if (e.getActionCommand().equals("openTile")) {
+            if (lastSelectedTile != null) {
+                try {
+                    Desktop desktop = Desktop.getDesktop();
+                    
+                    File f = new File(lastSelectedTile.getFetchedURL().toURI());
+                    desktop.open(f);
+                    
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+            
         }
         ww.redraw();
     }
@@ -601,12 +655,10 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
             }
 
         } else if (e.getSource() == LI_Tiles) {
-            OSMBuildingsTile tile = LI_Tiles.getSelectedValue();
-            if (tile == null) return;
             if (e.getClickCount() >= 2) {
                 try {
                     //--- Could be another renderable...
-                    OSMBuildingsRenderable renderable = tile.getRenderable();
+                    OSMBuildingsRenderable renderable = lastSelectedTile.getRenderable();
                     Position ref = renderable.getReferencePosition();
                     View v = ww.getView();
                     if (v instanceof BasicOrbitView) {
@@ -628,7 +680,13 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
     @Override
     public void mousePressed(MouseEvent e) {
         if (e.isPopupTrigger()) {
-            PU_Logs.show(TA_Logs, e.getX(), e.getY());
+            if (e.getSource() == TA_Logs) {
+                PU_Logs.show(TA_Logs, e.getX(), e.getY());
+
+            } else if (e.getSource() == LI_Tiles) {
+                PU_Tiles.show(LI_Tiles, e.getX(), e.getY());
+
+            }
         }
     }
 
@@ -647,6 +705,22 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
         //---
     }
 
+    //**************************************************************************
+    //*** ListSelectionListener
+    //**************************************************************************
+    @Override
+    public void valueChanged(ListSelectionEvent e) {
+        if (e.getValueIsAdjusting()) return;
+        
+        if (e.getSource() == LI_Tiles) {
+            if (lastSelectedTile != null) layer.removeRenderable(lastSelectedTile.getTileSurfaceRenderable());
+            lastSelectedTile = LI_Tiles.getSelectedValue();
+            if (lastSelectedTile == null) return;
+            
+            layer.addRenderable(lastSelectedTile.getTileSurfaceRenderable());
+            ww.redrawNow();
+        }
+    }
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -658,6 +732,10 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
 
         PU_Logs = new javax.swing.JPopupMenu();
         MN_ClearLogs = new javax.swing.JMenuItem();
+        PU_Tiles = new javax.swing.JPopupMenu();
+        MN_DeleteTitle = new javax.swing.JMenuItem();
+        MN_OpenTileFolder = new javax.swing.JMenuItem();
+        MN_OpenTile = new javax.swing.JMenuItem();
         jPanel1 = new javax.swing.JPanel();
         BT_Clear = new javax.swing.JButton();
         jLabel7 = new javax.swing.JLabel();
@@ -703,13 +781,25 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
         MN_ClearLogs.setActionCommand("clearLogs");
         PU_Logs.add(MN_ClearLogs);
 
+        MN_DeleteTitle.setText("Delete cached tile");
+        MN_DeleteTitle.setActionCommand("deleteTile");
+        PU_Tiles.add(MN_DeleteTitle);
+
+        MN_OpenTileFolder.setText("Open cached folder");
+        MN_OpenTileFolder.setActionCommand("openTileFolder");
+        PU_Tiles.add(MN_OpenTileFolder);
+
+        MN_OpenTile.setText("Open cached tile");
+        MN_OpenTile.setActionCommand("openTile");
+        PU_Tiles.add(MN_OpenTile);
+
         setLayout(new java.awt.BorderLayout());
 
         BT_Clear.setText("Clear");
         BT_Clear.setActionCommand("clear");
 
         jLabel7.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel7.setText("Double Click on a polygon to see details");
+        jLabel7.setText("Double Click on a polygon to see details (seelect layer first)");
         jLabel7.setPreferredSize(new java.awt.Dimension(150, 26));
 
         LI_Tiles.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
@@ -947,10 +1037,6 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
         BT_Apply.setText("Apply");
         BT_Apply.setActionCommand("apply");
 
-        LB_Provider.setBackground(new java.awt.Color(144, 202, 249));
-        LB_Provider.setFont(new java.awt.Font("DejaVu Sans", 1, 12)); // NOI18N
-        LB_Provider.setForeground(java.awt.Color.black);
-        LB_Provider.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         LB_Provider.setText("...");
         LB_Provider.setOpaque(true);
         LB_Provider.setPreferredSize(new java.awt.Dimension(15, 26));
@@ -1004,7 +1090,11 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
     protected javax.swing.JList<GeoJSONEntry> LI_Entries;
     protected javax.swing.JList<OSMBuildingsTile> LI_Tiles;
     protected javax.swing.JMenuItem MN_ClearLogs;
+    protected javax.swing.JMenuItem MN_DeleteTitle;
+    protected javax.swing.JMenuItem MN_OpenTile;
+    protected javax.swing.JMenuItem MN_OpenTileFolder;
     protected javax.swing.JPopupMenu PU_Logs;
+    protected javax.swing.JPopupMenu PU_Tiles;
     protected javax.swing.JSpinner SP_DefaultHeight;
     protected javax.swing.JSpinner SP_MaxTiles;
     protected javax.swing.JSlider SP_Opacity;
@@ -1032,5 +1122,7 @@ public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlu
     protected javax.swing.JToolBar.Separator jSeparator9;
     protected javax.swing.JTabbedPane jTabbedPane1;
     // End of variables declaration//GEN-END:variables
+
+    
 
 }

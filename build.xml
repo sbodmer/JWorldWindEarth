@@ -140,6 +140,10 @@
         <jar destfile="${dist.dir}/lib/ext/layers/Countries.jar" manifest="Manifests/layers/Countries.mf">
             <fileset dir="${build.dir}/classes" includes="gov/nasa/countries/**"/>
         </jar>
+        <echo message="[Layer] Crosshair"/>
+        <jar destfile="${dist.dir}/lib/ext/layers/Crosshair.jar" manifest="Manifests/layers/Crosshair.mf">
+            <fileset dir="${build.dir}/classes" includes="gov/nasa/crosshair/**"/>
+        </jar>
         <echo message="[Layer] Placenames"/>
         <jar destfile="${dist.dir}/lib/ext/layers/Placenames.jar" manifest="Manifests/layers/Placenames.mf">
             <fileset dir="${build.dir}/classes" includes="gov/nasa/placenames/**"/>
