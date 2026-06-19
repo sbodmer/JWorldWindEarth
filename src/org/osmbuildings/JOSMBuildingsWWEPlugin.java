@@ -55,7 +55,8 @@ import org.worldwindearth.WWEFactory;
 import org.worldwindearth.WWEPlugin;
 
 /**
- *
+ * The factory for the OSMBuidlings
+ * 
  * @author sbodmer
  */
 public class JOSMBuildingsWWEPlugin extends javax.swing.JPanel implements WWEPlugin, ChangeListener, ActionListener, SelectListener, OSMBuildingsLayer.PreBuildingsRenderer, OSMBuildingsTileListener, MouseListener, ListSelectionListener {
