@@ -255,7 +255,7 @@
         <Component class="javax.swing.JSpinner" name="SP_ExpireDays">
           <Properties>
             <Property name="model" type="javax.swing.SpinnerModel" editor="org.netbeans.modules.form.editors2.SpinnerModelEditor">
-              <SpinnerModel initial="30" maximum="365" minimum="0" numberType="java.lang.Integer" stepSize="1" type="number"/>
+              <SpinnerModel initial="3650" maximum="7300" minimum="0" numberType="java.lang.Integer" stepSize="1" type="number"/>
             </Property>
             <Property name="toolTipText" type="java.lang.String" value="Set the tile cache expire days, after the delay the buildinga are resolved again"/>
           </Properties>

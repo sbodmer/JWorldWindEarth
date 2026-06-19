@@ -572,7 +572,7 @@ public class JOSMBuildingsWWEFactory extends javax.swing.JPanel implements WWEFa
         jLabel2.setText("Expire date (days)");
         jLabel2.setPreferredSize(new java.awt.Dimension(200, 26));
 
-        SP_ExpireDays.setModel(new javax.swing.SpinnerNumberModel(30, 0, 365, 1));
+        SP_ExpireDays.setModel(new javax.swing.SpinnerNumberModel(3650, 0, 7300, 1));
         SP_ExpireDays.setToolTipText("Set the tile cache expire days, after the delay the buildinga are resolved again");
 
         jLabel3.setText("Cache path is");
